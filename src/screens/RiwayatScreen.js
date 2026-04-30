@@ -1,0 +1,352 @@
+// src/screens/RiwayatScreen.js
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+  TouchableOpacity,
+  RefreshControl,
+} from "react-native";
+import { getRiwayatPresensi } from "../services/api";
+
+export default function RiwayatScreen() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchData = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
+    setError(null);
+
+    try {
+      const result = await getRiwayatPresensi();
+      setData(result.data?.data ?? []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // ── Format tanggal ───────────────────────────────────────────
+  const formatTanggal = (isoString) => {
+    const date = new Date(isoString);
+    return date.toLocaleDateString("id-ID", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
+  const formatJam = (isoString) => {
+    const date = new Date(isoString);
+    return date.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  // ── Render item riwayat ───────────────────────────────────────
+  const renderItem = ({ item }) => (
+    <View style={styles.card}>
+      <View style={styles.cardLeft}>
+        <View style={styles.statusDotBox}>
+          <View
+            style={[
+              styles.dot,
+              item.status === "Hadir" ? styles.dotHadir : styles.dotLain,
+            ]}
+          />
+        </View>
+        <View style={styles.timeLine} />
+      </View>
+      <View style={styles.cardBody}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.agendaName} numberOfLines={2}>
+            {item.agenda?.nama_agenda ?? "–"}
+          </Text>
+          <View
+            style={[
+              styles.badge,
+              item.status === "Hadir" ? styles.badgeHadir : styles.badgeLain,
+            ]}
+          >
+            <Text
+              style={[
+                styles.badgeText,
+                item.status === "Hadir"
+                  ? styles.badgeTextHadir
+                  : styles.badgeTextLain,
+              ]}
+            >
+              {item.status}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.metaRow}>
+          <Text style={styles.metaIcon}>📍</Text>
+          <Text style={styles.metaText}>
+            {item.agenda?.lokasi ?? "Lokasi tidak tersedia"}
+          </Text>
+        </View>
+
+        <View style={styles.metaRow}>
+          <Text style={styles.metaIcon}>🕐</Text>
+          <Text style={styles.metaText}>
+            Hadir pukul {formatJam(item.jam_hadir)}
+          </Text>
+        </View>
+
+        <View style={styles.metaRow}>
+          <Text style={styles.metaIcon}>📅</Text>
+          <Text style={styles.metaText}>{formatTanggal(item.jam_hadir)}</Text>
+        </View>
+      </View>
+    </View>
+  );
+
+  // ── Render: Loading ──────────────────────────────────────────
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#1a56db" />
+        <Text style={styles.loadingText}>Memuat riwayat...</Text>
+      </View>
+    );
+  }
+
+  // ── Render: Error ────────────────────────────────────────────
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorIcon}>😕</Text>
+        <Text style={styles.errorTitle}>Gagal Memuat Data</Text>
+        <Text style={styles.errorDesc}>{error}</Text>
+        <TouchableOpacity style={styles.btnRetry} onPress={() => fetchData()}>
+          <Text style={styles.btnRetryText}>Coba Lagi</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // ── Render: Kosong ───────────────────────────────────────────
+  const ListEmpty = () => (
+    <View style={styles.emptyBox}>
+      <Text style={styles.emptyIcon}>📭</Text>
+      <Text style={styles.emptyTitle}>Belum Ada Riwayat</Text>
+      <Text style={styles.emptyDesc}>
+        Riwayat presensi Anda akan muncul di sini setelah Anda berhasil scan QR
+        Code.
+      </Text>
+    </View>
+  );
+
+  // ── Render: List ─────────────────────────────────────────────
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Riwayat Presensi</Text>
+        <Text style={styles.headerSub}>{data.length} kehadiran tercatat</Text>
+      </View>
+
+      <FlatList
+        data={data}
+        keyExtractor={(item) => String(item.id)}
+        renderItem={renderItem}
+        ListEmptyComponent={ListEmpty}
+        contentContainerStyle={[
+          styles.listContent,
+          data.length === 0 && styles.listContentEmpty,
+        ]}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => fetchData(true)}
+            colors={["#1a56db"]}
+            tintColor="#1a56db"
+          />
+        }
+        showsVerticalScrollIndicator={false}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f0f4ff",
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+    padding: 32,
+    backgroundColor: "#f0f4ff",
+  },
+
+  // Header
+  header: {
+    backgroundColor: "#1a56db",
+    paddingTop: 60,
+    paddingBottom: 24,
+    paddingHorizontal: 24,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  headerSub: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.75)",
+  },
+
+  // List
+  listContent: {
+    padding: 20,
+    gap: 14,
+  },
+  listContentEmpty: {
+    flexGrow: 1,
+    justifyContent: "center",
+  },
+
+  // Card
+  card: {
+    flexDirection: "row",
+    gap: 14,
+  },
+  cardLeft: {
+    alignItems: "center",
+    width: 20,
+    paddingTop: 4,
+  },
+  statusDotBox: {
+    width: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  dot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 2,
+  },
+  dotHadir: { backgroundColor: "#86efac", borderColor: "#22c55e" },
+  dotLain: { backgroundColor: "#fde68a", borderColor: "#f59e0b" },
+  timeLine: {
+    flex: 1,
+    width: 2,
+    backgroundColor: "#e2e8f0",
+    marginTop: 4,
+    borderRadius: 2,
+  },
+
+  cardBody: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 10,
+    gap: 8,
+  },
+  agendaName: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1e293b",
+    lineHeight: 21,
+  },
+
+  // Badge status
+  badge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  badgeHadir: { backgroundColor: "#dcfce7" },
+  badgeLain: { backgroundColor: "#fef9c3" },
+  badgeText: { fontSize: 11, fontWeight: "700" },
+  badgeTextHadir: { color: "#15803d" },
+  badgeTextLain: { color: "#92400e" },
+
+  // Meta info
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 4,
+  },
+  metaIcon: { fontSize: 13 },
+  metaText: { fontSize: 13, color: "#64748b", flex: 1 },
+
+  // Loading
+  loadingText: { fontSize: 14, color: "#94a3b8", marginTop: 8 },
+
+  // Error
+  errorIcon: { fontSize: 48 },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1e293b",
+    textAlign: "center",
+  },
+  errorDesc: {
+    fontSize: 14,
+    color: "#64748b",
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  btnRetry: {
+    backgroundColor: "#1a56db",
+    paddingHorizontal: 28,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginTop: 8,
+  },
+  btnRetryText: { color: "#fff", fontWeight: "600", fontSize: 15 },
+
+  // Empty
+  emptyBox: {
+    alignItems: "center",
+    padding: 32,
+    gap: 12,
+  },
+  emptyIcon: { fontSize: 56 },
+  emptyTitle: { fontSize: 18, fontWeight: "700", color: "#1e293b" },
+  emptyDesc: {
+    fontSize: 14,
+    color: "#94a3b8",
+    textAlign: "center",
+    lineHeight: 22,
+  },
+});
