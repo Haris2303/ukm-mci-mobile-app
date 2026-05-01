@@ -40,6 +40,14 @@
         {
           "cameraPermission": "Aplikasi membutuhkan akses kamera untuk scan QR Code presensi."
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
       ]
     ]
   }

@@ -8,7 +8,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ⚠️ GANTI dengan IP komputer Anda! Cek dengan perintah "ipconfig" di CMD
 // Contoh: 'http://192.168.1.5:8000/api'
-const BASE_URL = "http://10.253.142.57:8000/api";
+// export const BASE_URL = "http://10.253.142.57:8000/api";
+export const BASE_URL = "http://10.10.10.188:8000/api";
 
 // ── Helper: buat headers dengan token ────────────────────────
 const authHeaders = async () => {

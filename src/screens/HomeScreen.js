@@ -9,6 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
+import KasRingkasanCard from "../components/KasRingkasanCard";
 
 export default function HomeScreen({ navigation }) {
   const { user, signOut } = useAuth();
@@ -57,6 +58,17 @@ export default function HomeScreen({ navigation }) {
         </View>
       </View>
 
+      {/* ── 💰 KAS RINGKASAN CARD ──────────────────────── */}
+      <View style={styles.section}>
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionTitle}>Keuangan</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("E-Kas")}>
+            <Text style={styles.seeAll}>Lihat Semua →</Text>
+          </TouchableOpacity>
+        </View>
+        <KasRingkasanCard onPress={() => navigation.navigate("E-Kas")} />
+      </View>
+
       {/* Menu Utama */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Menu Utama</Text>
@@ -67,6 +79,13 @@ export default function HomeScreen({ navigation }) {
             desc="Scan QR Code untuk hadir"
             color="#1a56db"
             onPress={() => navigation.navigate("Scan QR")}
+          />
+          <MenuCard
+            icon="💰"
+            title="E-Kas"
+            desc="Tagihan & saldo"
+            color="#059669"
+            onPress={() => navigation.navigate("E-Kas")}
           />
           <MenuCard
             icon="📋"
