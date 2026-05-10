@@ -3,10 +3,7 @@
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// import { BASE_URL } from "./api";
-
-// const BASE_URL = "http://192.168.1.100:8000/api"; // ⚠️ Samakan dengan IP server Anda
-const BASE_URL = "http://10.10.10.188:8000/api";
+import { BASE_URL } from "../config/apiConfig";
 
 const authHeaders = async () => {
   const token = await AsyncStorage.getItem("auth_token");

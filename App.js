@@ -1,36 +1,38 @@
+// App.js — VERSI FINAL dengan Materi
+// Materi diakses via Stack screen (bukan tab) sesuai pilihan "Card di Beranda"
+
 import React from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StatusBar } from "expo-status-bar";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-// Context
 import { AuthProvider, useAuth } from "./src/context/AuthContext";
 import { KasProvider, useKas } from "./src/context/KasContext";
 
-// Screens
 import LoginScreen from "./src/screens/LoginScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import ScanScreen from "./src/screens/ScanScreen";
 import RiwayatScreen from "./src/screens/RiwayatScreen";
 import KasScreen from "./src/screens/KasScreen";
+import MateriScreen from "./src/screens/MateriScreen";
 import VotingNavigator from "./src/navigation/VotingNavigator";
+import ProkerNavigator from "./src/navigation/ProkerNavigator";
 
-// const RootStack = createStack2();
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function TabIcon({ icon, focused }) {
-  return <Text style={{ fontSize: focused ? 24 : 20 }}>{icon}</Text>;
+  return <Text style={{ fontSize: focused ? 22 : 19 }}>{icon}</Text>;
 }
 
-// ── Tab khusus E-Kas dengan badge tunggakan ───────────────────
 function KasTabIcon({ focused }) {
   const { tunggakanCount } = useKas();
   return (
     <View style={{ position: "relative" }}>
-      <Text style={{ fontSize: focused ? 24 : 20 }}>💰</Text>
+      <Text style={{ fontSize: focused ? 22 : 19 }}>💰</Text>
       {tunggakanCount > 0 && (
         <View
           style={{
@@ -57,22 +59,23 @@ function KasTabIcon({ focused }) {
   );
 }
 
-// ── Tab utama setelah login ────────────────────────────────────
+// ── Bottom Tabs (5 tab utama) ─────────────────────────────────
 function MainTabs() {
+  const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#1a56db",
+        tabBarActiveTintColor: "#1a4ff5",
         tabBarInactiveTintColor: "#94a3b8",
         tabBarStyle: {
           backgroundColor: "#fff",
           borderTopColor: "#e2e8f0",
-          paddingBottom: 6,
+          paddingBottom: Math.max(insets.bottom, 6),
           paddingTop: 6,
-          height: 64,
+          height: 64 + Math.max(insets.bottom - 6, 0),
         },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
+        tabBarLabelStyle: { fontSize: 10, fontWeight: "600" },
       }}
     >
       <Tab.Screen
@@ -91,7 +94,7 @@ function MainTabs() {
       />
       <Tab.Screen
         name="E-Voting"
-        component={VotingNavigator} // ← Stack navigator voting
+        component={VotingNavigator}
         options={{
           tabBarIcon: ({ focused }) => <TabIcon icon="🗳️" focused={focused} />,
         }}
@@ -114,6 +117,38 @@ function MainTabs() {
   );
 }
 
+// ── Stack utama ──────────────────────────────────────────────
+// Materi & Rekrutmen di-register sebagai Stack screen, bukan tab.
+// Cara pakai: navigation.navigate('Materi') dari mana pun.
+function AppStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: "#1a4ff5" },
+        headerTintColor: "#fff",
+        headerTitleStyle: { fontWeight: "700" },
+        headerBackTitle: "",
+      }}
+    >
+      <Stack.Screen
+        name="MainTabs"
+        component={MainTabs}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Materi"
+        component={MateriScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Proker"
+        component={ProkerNavigator}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 function RootNavigator() {
   const { user, loading } = useAuth();
   if (loading) {
@@ -126,14 +161,14 @@ function RootNavigator() {
           backgroundColor: "#f0f4ff",
         }}
       >
-        <ActivityIndicator size="large" color="#1a56db" />
+        <ActivityIndicator size="large" color="#1a4ff5" />
       </View>
     );
   }
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
-        <Stack.Screen name="Main" component={MainTabs} />
+        <Stack.Screen name="App" component={AppStack} />
       ) : (
         <Stack.Screen name="Login" component={LoginScreen} />
       )}

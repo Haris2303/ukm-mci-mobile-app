@@ -166,9 +166,9 @@ export default function ElectionDetailScreen({ route, navigation }) {
               : ""}
           </Text>
 
-          {election.kandidat?.map((kandidat) => (
+          {election.kandidat?.map((kandidat, idx) => (
             <KandidatCard
-              key={kandidat.id}
+              key={kandidat.id ?? `kandidat-${idx}`}
               kandidat={kandidat}
               isSelected={selected === kandidat.id}
               canVote={canVote}

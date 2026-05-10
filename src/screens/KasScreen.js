@@ -192,8 +192,8 @@ function TunggakanTab({ data }) {
 
       {/* Daftar tagihan */}
       <Text style={styles.sectionLabel}>Daftar Tagihan</Text>
-      {data.tagihan.map((item) => (
-        <View key={item.id} style={styles.itemCard}>
+      {data.tagihan.map((item, idx) => (
+        <View key={item.id ?? `tagihan-${idx}`} style={styles.itemCard}>
           <View style={styles.itemAccent} />
           <View style={styles.itemBody}>
             <View style={styles.itemHeader}>
@@ -258,7 +258,7 @@ function RiwayatTab({ data }) {
 
       {/* Timeline-style list */}
       {data.riwayat.map((item, idx) => (
-        <View key={item.id} style={styles.timelineItem}>
+        <View key={item.id ?? `riwayat-${idx}`} style={styles.timelineItem}>
           {/* Timeline indicator */}
           <View style={styles.timelineLeft}>
             <View style={styles.timelineDot}>

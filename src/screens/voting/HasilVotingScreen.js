@@ -105,7 +105,7 @@ export default function HasilVotingScreen({ route, navigation }) {
         <Text style={styles.sectionTitle}>📊 Perolehan Suara</Text>
         {kandidat.map((k, idx) => (
           <BarRow
-            key={k.urut}
+            key={k.id ?? `bar-${idx}`}
             kandidat={k}
             color={COLORS[idx % COLORS.length]}
             isPemenang={isSelesai && idx === 0}

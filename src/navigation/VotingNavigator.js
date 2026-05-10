@@ -1,10 +1,10 @@
 import React from "react";
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import ElectionListScreen from "../screens/voting/ElectionListScreen";
 import ElectionDetailScreen from "../screens/voting/ElectionDetailScreen";
 import HasilVotingScreen from "../screens/voting/HasilVotingScreen";
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 export default function VotingNavigator() {
   return (
@@ -13,12 +13,11 @@ export default function VotingNavigator() {
         headerShown: true,
         headerStyle: {
           backgroundColor: "#1a56db",
-          elevation: 0,
-          shadowOpacity: 0,
         },
+        headerShadowVisible: false,
         headerTintColor: "#fff",
         headerTitleStyle: { fontWeight: "700", fontSize: 17 },
-        headerBackTitleVisible: false,
+        headerBackTitle: "",
       }}
     >
       <Stack.Screen

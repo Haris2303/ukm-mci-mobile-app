@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import KasRingkasanCard from "../components/KasRingkasanCard";
+import MateriRingkasanCard from "../components/MateriRingkaksanCard";
+import ProkerRingkasanCard from "../components/ProkerRingkasanCard";
 
 export default function HomeScreen({ navigation }) {
   const { user, signOut } = useAuth();
@@ -69,6 +71,30 @@ export default function HomeScreen({ navigation }) {
         <KasRingkasanCard onPress={() => navigation.navigate("E-Kas")} />
       </View>
 
+      {/* ── 📊 PROKER RINGKASAN ──────────────────────── */}
+      <View style={styles.section}>
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionTitle}>Program Kerja</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Proker")}>
+            <Text style={[styles.seeAll, { color: "#7c3aed" }]}>
+              Lihat Semua →
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <ProkerRingkasanCard onPress={() => navigation.navigate("Proker")} />
+      </View>
+
+      {/* ── 📚 MATERI RINGKASAN ──────────────────────── */}
+      <View style={styles.section}>
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionTitle}>Pembelajaran</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Materi")}>
+            <Text style={styles.seeAll}>Lihat Semua →</Text>
+          </TouchableOpacity>
+        </View>
+        <MateriRingkasanCard onPress={() => navigation.navigate("Materi")} />
+      </View>
+
       {/* Menu Utama */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Menu Utama</Text>
@@ -86,6 +112,13 @@ export default function HomeScreen({ navigation }) {
             desc="Tagihan & saldo"
             color="#059669"
             onPress={() => navigation.navigate("E-Kas")}
+          />
+          <MenuCard
+            icon="📚"
+            title="Materi"
+            desc="Distribusi materi"
+            color="#059669"
+            onPress={() => navigation.navigate("Materi")}
           />
           <MenuCard
             icon="📋"
