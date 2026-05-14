@@ -46,7 +46,10 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.userName}>{user?.name ?? "Anggota"}</Text>
             <Text style={styles.userEmail}>{user?.email}</Text>
           </View>
-          <TouchableOpacity style={styles.avatarBox}>
+          <TouchableOpacity
+            style={styles.avatarBox}
+            onPress={() => navigation.navigate("Profile")}
+          >
             <Text style={styles.avatarText}>
               {(user?.name ?? "A")[0].toUpperCase()}
             </Text>
@@ -259,10 +262,12 @@ const styles = StyleSheet.create({
   // Menu Grid
   menuGrid: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 14,
   },
   menuCard: {
-    flex: 1,
+    width: "47%",
+    flexGrow: 1,
     backgroundColor: "#fff",
     borderRadius: 20,
     padding: 20,

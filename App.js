@@ -18,6 +18,8 @@ import ScanScreen from "./src/screens/ScanScreen";
 import RiwayatScreen from "./src/screens/RiwayatScreen";
 import KasScreen from "./src/screens/KasScreen";
 import MateriScreen from "./src/screens/MateriScreen";
+import IdCardScreen from "./src/screens/IdCardScreen";
+import ProfileScreen from "./src/screens/ProfileScreen";
 import VotingNavigator from "./src/navigation/VotingNavigator";
 import ProkerNavigator from "./src/navigation/ProkerNavigator";
 
@@ -143,6 +145,16 @@ function AppStack() {
       <Stack.Screen
         name="Proker"
         component={ProkerNavigator}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="IdCard"
+        component={IdCardScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
