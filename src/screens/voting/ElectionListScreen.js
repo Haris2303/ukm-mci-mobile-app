@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { getElections } from "../../services/votingApi";
 
 const STATUS_CONFIG = {
@@ -79,17 +80,19 @@ export default function ElectionListScreen({ navigation }) {
 
           <View style={styles.metaRow}>
             <MetaChip
-              icon="👥"
+              iconName="users"
               label={`${item.kandidat?.length ?? 0} Kandidat`}
             />
-            <MetaChip icon="🗳️" label={`${item.total_suara} Suara`} />
+            <MetaChip iconName="vote-yea" label={`${item.total_suara} Suara`} />
           </View>
 
           <View style={styles.cardFooter}>
-            <Text style={styles.waktu}>
-              {isAktif ? "⏰ Berakhir: " : "📅 "}
-              {isAktif ? item.waktu_selesai : item.waktu_mulai}
-            </Text>
+            <View style={styles.waktuRow}>
+              <FontAwesome5 name={isAktif ? "clock" : "calendar-alt"} size={11} color="#94a3b8" solid />
+              <Text style={styles.waktu}>
+                {isAktif ? `Berakhir: ${item.waktu_selesai}` : item.waktu_mulai}
+              </Text>
+            </View>
             <View style={[styles.btnDetail, { backgroundColor: cfg.color }]}>
               <Text style={styles.btnDetailText}>
                 {item.sudah_vote
@@ -131,7 +134,7 @@ export default function ElectionListScreen({ navigation }) {
         ]}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>🗳️</Text>
+            <FontAwesome5 name="vote-yea" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
             <Text style={styles.emptyTitle}>Belum Ada Pemilihan</Text>
             <Text style={styles.emptySub}>
               Pemilihan yang aktif akan muncul di sini.
@@ -151,10 +154,10 @@ export default function ElectionListScreen({ navigation }) {
   );
 }
 
-function MetaChip({ icon, label }) {
+function MetaChip({ iconName, label }) {
   return (
     <View style={styles.chip}>
-      <Text style={styles.chipIcon}>{icon}</Text>
+      <FontAwesome5 name={iconName} size={11} color="#64748b" solid />
       <Text style={styles.chipLabel}>{label}</Text>
     </View>
   );
@@ -250,7 +253,6 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
   },
-  chipIcon: { fontSize: 12 },
   chipLabel: { fontSize: 12, color: "#64748b", fontWeight: "600" },
 
   cardFooter: {
@@ -259,12 +261,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 4,
   },
+  waktuRow: { flexDirection: "row", alignItems: "center", gap: 5, flex: 1 },
   waktu: { fontSize: 12, color: "#94a3b8", flex: 1 },
   btnDetail: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 10 },
   btnDetailText: { color: "#fff", fontSize: 12, fontWeight: "700" },
 
   empty: { alignItems: "center", gap: 12, padding: 32 },
-  emptyIcon: { fontSize: 56 },
   emptyTitle: { fontSize: 18, fontWeight: "700", color: "#1e293b" },
   emptySub: { fontSize: 14, color: "#94a3b8", textAlign: "center" },
 });

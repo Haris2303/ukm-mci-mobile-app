@@ -8,6 +8,7 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
 import KasRingkasanCard from "../components/KasRingkasanCard";
 import MateriRingkasanCard from "../components/MateriRingkaksanCard";
@@ -19,15 +20,10 @@ export default function HomeScreen({ navigation }) {
   const handleLogout = () => {
     Alert.alert("Keluar", "Anda yakin ingin keluar dari akun?", [
       { text: "Batal", style: "cancel" },
-      {
-        text: "Keluar",
-        style: "destructive",
-        onPress: signOut,
-      },
+      { text: "Keluar", style: "destructive", onPress: signOut },
     ]);
   };
 
-  // Sapa berdasarkan jam
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 11) return "Selamat Pagi";
@@ -42,7 +38,7 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View>
-            <Text style={styles.greeting}>{getGreeting()} 👋</Text>
+            <Text style={styles.greeting}>{getGreeting()}</Text>
             <Text style={styles.userName}>{user?.name ?? "Anggota"}</Text>
             <Text style={styles.userEmail}>{user?.email}</Text>
           </View>
@@ -56,14 +52,13 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Badge status */}
         <View style={styles.statusBadge}>
           <View style={styles.statusDot} />
           <Text style={styles.statusText}>Anggota Aktif UKM MCI</Text>
         </View>
       </View>
 
-      {/* ── 💰 KAS RINGKASAN CARD ──────────────────────── */}
+      {/* ── Keuangan ──────────────────────────────────────── */}
       <View style={styles.section}>
         <View style={styles.sectionTitleRow}>
           <Text style={styles.sectionTitle}>Keuangan</Text>
@@ -74,7 +69,7 @@ export default function HomeScreen({ navigation }) {
         <KasRingkasanCard onPress={() => navigation.navigate("E-Kas")} />
       </View>
 
-      {/* ── 📊 PROKER RINGKASAN ──────────────────────── */}
+      {/* ── Program Kerja ────────────────────────────────── */}
       <View style={styles.section}>
         <View style={styles.sectionTitleRow}>
           <Text style={styles.sectionTitle}>Program Kerja</Text>
@@ -87,7 +82,7 @@ export default function HomeScreen({ navigation }) {
         <ProkerRingkasanCard onPress={() => navigation.navigate("Proker")} />
       </View>
 
-      {/* ── 📚 MATERI RINGKASAN ──────────────────────── */}
+      {/* ── Pembelajaran ─────────────────────────────────── */}
       <View style={styles.section}>
         <View style={styles.sectionTitleRow}>
           <Text style={styles.sectionTitle}>Pembelajaran</Text>
@@ -98,33 +93,33 @@ export default function HomeScreen({ navigation }) {
         <MateriRingkasanCard onPress={() => navigation.navigate("Materi")} />
       </View>
 
-      {/* Menu Utama */}
+      {/* ── Menu Utama ───────────────────────────────────── */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Menu Utama</Text>
         <View style={styles.menuGrid}>
           <MenuCard
-            icon="📷"
+            iconName="camera"
             title="Scan Presensi"
             desc="Scan QR Code untuk hadir"
             color="#1a56db"
             onPress={() => navigation.navigate("Scan QR")}
           />
           <MenuCard
-            icon="💰"
+            iconName="coins"
             title="E-Kas"
             desc="Tagihan & saldo"
             color="#059669"
             onPress={() => navigation.navigate("E-Kas")}
           />
           <MenuCard
-            icon="📚"
+            iconName="book"
             title="Materi"
             desc="Distribusi materi"
             color="#059669"
             onPress={() => navigation.navigate("Materi")}
           />
           <MenuCard
-            icon="📋"
+            iconName="clipboard-list"
             title="Riwayat"
             desc="Lihat kehadiran Anda"
             color="#059669"
@@ -133,10 +128,12 @@ export default function HomeScreen({ navigation }) {
         </View>
       </View>
 
-      {/* Info Card */}
+      {/* ── Info Cara Presensi ───────────────────────────── */}
       <View style={styles.section}>
         <View style={styles.infoCard}>
-          <Text style={styles.infoIcon}>💡</Text>
+          <View style={styles.infoIconBox}>
+            <FontAwesome5 name="lightbulb" size={22} color="#1e40af" solid />
+          </View>
           <View style={styles.infoContent}>
             <Text style={styles.infoTitle}>Cara Presensi</Text>
             <Text style={styles.infoDesc}>
@@ -148,10 +145,11 @@ export default function HomeScreen({ navigation }) {
         </View>
       </View>
 
-      {/* Logout */}
+      {/* ── Logout ───────────────────────────────────────── */}
       <View style={styles.section}>
         <TouchableOpacity style={styles.btnLogout} onPress={handleLogout}>
-          <Text style={styles.btnLogoutText}>🚪 Keluar dari Akun</Text>
+          <FontAwesome5 name="sign-out-alt" size={15} color="#ef4444" />
+          <Text style={styles.btnLogoutText}>Keluar dari Akun</Text>
         </TouchableOpacity>
       </View>
 
@@ -160,7 +158,7 @@ export default function HomeScreen({ navigation }) {
   );
 }
 
-function MenuCard({ icon, title, desc, color, onPress }) {
+function MenuCard({ iconName, title, desc, color, onPress }) {
   return (
     <TouchableOpacity
       style={[styles.menuCard, { borderTopColor: color }]}
@@ -168,7 +166,7 @@ function MenuCard({ icon, title, desc, color, onPress }) {
       activeOpacity={0.85}
     >
       <View style={[styles.menuIconBox, { backgroundColor: color + "18" }]}>
-        <Text style={styles.menuIcon}>{icon}</Text>
+        <FontAwesome5 name={iconName} size={22} color={color} solid />
       </View>
       <Text style={styles.menuTitle}>{title}</Text>
       <Text style={styles.menuDesc}>{desc}</Text>
@@ -182,7 +180,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f4ff",
   },
 
-  // Header
   header: {
     backgroundColor: "#1a56db",
     paddingTop: 60,
@@ -247,19 +244,27 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  // Section
   section: {
     paddingHorizontal: 24,
     marginTop: 24,
+  },
+  sectionTitleRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 14,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "700",
     color: "#1e293b",
-    marginBottom: 14,
+  },
+  seeAll: {
+    fontSize: 13,
+    color: "#1a4ff5",
+    fontWeight: "600",
   },
 
-  // Menu Grid
   menuGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -286,7 +291,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
   },
-  menuIcon: { fontSize: 24 },
   menuTitle: {
     fontSize: 15,
     fontWeight: "700",
@@ -299,7 +303,6 @@ const styles = StyleSheet.create({
     lineHeight: 17,
   },
 
-  // Info Card
   infoCard: {
     backgroundColor: "#eff6ff",
     borderRadius: 16,
@@ -308,8 +311,16 @@ const styles = StyleSheet.create({
     gap: 14,
     borderWidth: 1,
     borderColor: "#bfdbfe",
+    alignItems: "flex-start",
   },
-  infoIcon: { fontSize: 28, marginTop: 2 },
+  infoIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#dbeafe",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   infoContent: { flex: 1 },
   infoTitle: {
     fontSize: 14,
@@ -323,12 +334,14 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
 
-  // Logout
   btnLogout: {
     backgroundColor: "#fff",
     borderRadius: 14,
     padding: 16,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
     borderWidth: 1.5,
     borderColor: "#fecaca",
   },

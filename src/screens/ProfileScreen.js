@@ -13,6 +13,7 @@ import {
   Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
 import { getMyIdCard } from "../services/idCardApi";
 
@@ -57,7 +58,7 @@ export default function ProfileScreen({ navigation }) {
           style={styles.backBtn}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backIcon}>‹</Text>
+          <FontAwesome5 name="chevron-left" size={16} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profil Saya</Text>
         <View style={{ width: 38 }} />
@@ -123,7 +124,7 @@ export default function ProfileScreen({ navigation }) {
           >
             <View style={styles.idCardBtnLeft}>
               <View style={styles.idCardIconBox}>
-                <Text style={styles.idCardIcon}>🪪</Text>
+                <FontAwesome5 name="id-card" size={22} color="#fff" solid />
               </View>
               <View>
                 <Text style={styles.idCardBtnTitle}>ID Card Saya</Text>
@@ -134,7 +135,7 @@ export default function ProfileScreen({ navigation }) {
                 </Text>
               </View>
             </View>
-            <Text style={styles.idCardChevron}>›</Text>
+            <FontAwesome5 name="chevron-right" size={18} color="rgba(255,255,255,0.6)" />
           </LinearGradient>
         </TouchableOpacity>
 
@@ -150,50 +151,29 @@ export default function ProfileScreen({ navigation }) {
           </View>
         ) : error ? (
           <View style={styles.errorBox}>
-            <Text style={styles.errorSmall}>⚠️ {error}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <FontAwesome5 name="exclamation-triangle" size={13} color="#92400e" solid />
+            <Text style={styles.errorSmall}>{error}</Text>
+          </View>
             <TouchableOpacity onPress={fetchIdCard}>
               <Text style={styles.retrySmall}>Coba Lagi</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.bioCard}>
-            <BioRow
-              icon="👤"
-              label="Nama Lengkap"
-              value={profileUser?.name}
-            />
+            <BioRow iconName="user" label="Nama Lengkap" value={profileUser?.name} />
             <View style={styles.bioDivider} />
-            <BioRow
-              icon="📧"
-              label="Email"
-              value={profileUser?.email}
-            />
+            <BioRow iconName="envelope" label="Email" value={profileUser?.email} />
             <View style={styles.bioDivider} />
-            <BioRow
-              icon="📱"
-              label="No. HP"
-              value={profileUser?.no_hp}
-            />
+            <BioRow iconName="mobile-alt" label="No. HP" value={profileUser?.no_hp} />
             <View style={styles.bioDivider} />
-            <BioRow
-              icon="🏆"
-              label="Divisi"
-              value={profileUser?.divisi}
-            />
+            <BioRow iconName="users" label="Divisi" value={profileUser?.divisi} />
             <View style={styles.bioDivider} />
-            <BioRow
-              icon="🏷️"
-              label="Role"
-              value={profileUser?.role_label ?? profileUser?.role}
-            />
+            <BioRow iconName="tag" label="Role" value={profileUser?.role_label ?? profileUser?.role} />
             {idCard?.member_id && (
               <>
                 <View style={styles.bioDivider} />
-                <BioRow
-                  icon="🆔"
-                  label="Member ID"
-                  value={idCard.member_id}
-                />
+                <BioRow iconName="id-badge" label="Member ID" value={idCard.member_id} />
               </>
             )}
           </View>
@@ -201,7 +181,8 @@ export default function ProfileScreen({ navigation }) {
 
         {/* ── Logout ──────────────────────────────────────── */}
         <TouchableOpacity style={styles.btnLogout} onPress={handleLogout}>
-          <Text style={styles.btnLogoutText}>🚪 Keluar dari Akun</Text>
+          <FontAwesome5 name="sign-out-alt" size={15} color="#ef4444" />
+          <Text style={styles.btnLogoutText}>Keluar dari Akun</Text>
         </TouchableOpacity>
 
         <View style={{ height: 40 }} />
@@ -211,10 +192,12 @@ export default function ProfileScreen({ navigation }) {
 }
 
 // ── Sub component ───────────────────────────────────────────────
-function BioRow({ icon, label, value }) {
+function BioRow({ iconName, label, value }) {
   return (
     <View style={styles.bioRow}>
-      <Text style={styles.bioIcon}>{icon}</Text>
+      <View style={styles.bioIconBox}>
+        <FontAwesome5 name={iconName} size={16} color="#94a3b8" solid />
+      </View>
       <View style={styles.bioContent}>
         <Text style={styles.bioLabel}>{label}</Text>
         <Text style={styles.bioValue}>{value ?? "—"}</Text>
@@ -440,7 +423,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 14,
   },
-  bioIcon: { fontSize: 20, width: 28, textAlign: "center" },
+  bioIconBox: { width: 28, alignItems: "center", justifyContent: "center" },
   bioContent: { flex: 1 },
   bioLabel: {
     fontSize: 11,
@@ -466,7 +449,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 14,
     padding: 16,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
     borderWidth: 1.5,
     borderColor: "#fecaca",
   },

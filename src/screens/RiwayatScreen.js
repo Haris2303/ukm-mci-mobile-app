@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { getRiwayatPresensi } from "../services/api";
 
 export default function RiwayatScreen() {
@@ -95,21 +96,21 @@ export default function RiwayatScreen() {
         </View>
 
         <View style={styles.metaRow}>
-          <Text style={styles.metaIcon}>📍</Text>
+          <FontAwesome5 name="map-marker-alt" size={12} color="#94a3b8" solid />
           <Text style={styles.metaText}>
             {item.agenda?.lokasi ?? "Lokasi tidak tersedia"}
           </Text>
         </View>
 
         <View style={styles.metaRow}>
-          <Text style={styles.metaIcon}>🕐</Text>
+          <FontAwesome5 name="clock" size={12} color="#94a3b8" solid />
           <Text style={styles.metaText}>
             Hadir pukul {formatJam(item.jam_hadir)}
           </Text>
         </View>
 
         <View style={styles.metaRow}>
-          <Text style={styles.metaIcon}>📅</Text>
+          <FontAwesome5 name="calendar-alt" size={12} color="#94a3b8" solid />
           <Text style={styles.metaText}>{formatTanggal(item.jam_hadir)}</Text>
         </View>
       </View>
@@ -143,7 +144,7 @@ export default function RiwayatScreen() {
   // ── Render: Kosong ───────────────────────────────────────────
   const ListEmpty = () => (
     <View style={styles.emptyBox}>
-      <Text style={styles.emptyIcon}>📭</Text>
+      <FontAwesome5 name="inbox" size={48} color="#94a3b8" style={styles.emptyIconWrap} />
       <Text style={styles.emptyTitle}>Belum Ada Riwayat</Text>
       <Text style={styles.emptyDesc}>
         Riwayat presensi Anda akan muncul di sini setelah Anda berhasil scan QR
@@ -306,7 +307,7 @@ const styles = StyleSheet.create({
     gap: 6,
     marginTop: 4,
   },
-  metaIcon: { fontSize: 13 },
+  metaIconWrap: { width: 16, alignItems: "center" },
   metaText: { fontSize: 13, color: "#64748b", flex: 1 },
 
   // Loading
@@ -341,7 +342,7 @@ const styles = StyleSheet.create({
     padding: 32,
     gap: 12,
   },
-  emptyIcon: { fontSize: 56 },
+  emptyIconWrap: { marginBottom: 8 },
   emptyTitle: { fontSize: 18, fontWeight: "700", color: "#1e293b" },
   emptyDesc: {
     fontSize: 14,

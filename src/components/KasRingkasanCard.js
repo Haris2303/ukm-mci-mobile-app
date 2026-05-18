@@ -10,7 +10,9 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { useKas } from "../context/KasContext";
+import { colors, fontFamily, radius, spacing } from "../theme/theme";
 
 export default function KasRingkasanCard({ onPress }) {
   const {
@@ -21,7 +23,6 @@ export default function KasRingkasanCard({ onPress }) {
     refreshRingkasan,
   } = useKas();
 
-  // Auto-refresh saat card di-mount
   useEffect(() => {
     refreshRingkasan();
   }, []);
@@ -36,13 +37,12 @@ export default function KasRingkasanCard({ onPress }) {
         activeOpacity={0.92}
         onPress={onPress}
       >
-        {/* Decorative circles */}
         <View style={styles.circle1} />
         <View style={styles.circle2} />
 
         <View style={styles.cardHeader}>
           <View style={styles.iconBox}>
-            <Text style={styles.iconEmoji}>💰</Text>
+            <FontAwesome5 name="coins" size={22} color={colors.textOnPrimary} solid />
           </View>
           <View style={styles.headerText}>
             <Text style={styles.headerLabel}>Saldo Kas Organisasi</Text>
@@ -52,7 +52,7 @@ export default function KasRingkasanCard({ onPress }) {
 
         {loadingKas && !saldoOrganisasi ? (
           <View style={styles.loadingBox}>
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={colors.textOnPrimary} />
           </View>
         ) : (
           <Text style={styles.saldoAngka}>
@@ -61,10 +61,16 @@ export default function KasRingkasanCard({ onPress }) {
         )}
 
         <View style={styles.metaRow}>
-          <Text style={styles.metaText}>
-            🕐 {saldoOrganisasi?.diperbarui_pada ?? "Memuat..."}
-          </Text>
-          <Text style={styles.metaCta}>Lihat detail →</Text>
+          <View style={styles.metaLeft}>
+            <FontAwesome5 name="clock" size={11} color="rgba(255,255,255,0.7)" />
+            <Text style={styles.metaText}>
+              {saldoOrganisasi?.diperbarui_pada ?? "Memuat..."}
+            </Text>
+          </View>
+          <View style={styles.metaRight}>
+            <Text style={styles.metaCta}>Lihat detail</Text>
+            <FontAwesome5 name="chevron-right" size={10} color={colors.mintVivid} />
+          </View>
         </View>
       </TouchableOpacity>
 
@@ -76,7 +82,7 @@ export default function KasRingkasanCard({ onPress }) {
           onPress={onPress}
         >
           <View style={styles.alertIconBox}>
-            <Text style={styles.alertIcon}>⚠️</Text>
+            <FontAwesome5 name="exclamation-triangle" size={20} color="#92400e" solid />
           </View>
           <View style={styles.alertContent}>
             <Text style={styles.alertTitle}>Anda Memiliki Tunggakan</Text>
@@ -88,7 +94,7 @@ export default function KasRingkasanCard({ onPress }) {
             </Text>
           </View>
           <View style={styles.alertChevron}>
-            <Text style={styles.chevronText}>›</Text>
+            <FontAwesome5 name="chevron-right" size={14} color="#92400e" />
           </View>
         </TouchableOpacity>
       )}
@@ -97,7 +103,7 @@ export default function KasRingkasanCard({ onPress }) {
       {!adaTunggakan && saldoOrganisasi && (
         <View style={styles.lunasCard}>
           <View style={styles.lunasIconBox}>
-            <Text style={styles.lunasIcon}>✅</Text>
+            <FontAwesome5 name="check-circle" size={20} color={colors.textOnPrimary} solid />
           </View>
           <View style={styles.alertContent}>
             <Text style={styles.lunasTitle}>Iuran Anda Lunas</Text>
@@ -112,16 +118,16 @@ export default function KasRingkasanCard({ onPress }) {
 }
 
 const styles = StyleSheet.create({
-  wrapper: { gap: 12 },
+  wrapper: { gap: spacing[3] },
 
-  // ── Card Saldo (gradient feel) ──
+  // ── Card Saldo ──
   cardSaldo: {
-    backgroundColor: "#1a4ff5",
+    backgroundColor: colors.primary,
     borderRadius: 24,
     padding: 22,
     overflow: "hidden",
     position: "relative",
-    shadowColor: "#1a4ff5",
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.25,
     shadowRadius: 16,
@@ -148,8 +154,8 @@ const styles = StyleSheet.create({
   cardHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    marginBottom: 16,
+    gap: spacing[3],
+    marginBottom: spacing[4],
   },
   iconBox: {
     width: 44,
@@ -161,15 +167,24 @@ const styles = StyleSheet.create({
   },
   iconEmoji: { fontSize: 22 },
   headerText: { flex: 1 },
-  headerLabel: { color: "#fff", fontSize: 14, fontWeight: "700" },
-  headerSub: { color: "rgba(255,255,255,0.7)", fontSize: 11, marginTop: 1 },
+  headerLabel: {
+    color: colors.textOnPrimary,
+    fontSize: 14,
+    fontFamily: fontFamily.regular,
+  },
+  headerSub: {
+    color: "rgba(255,255,255,0.7)",
+    fontSize: 11,
+    fontFamily: fontFamily.light,
+    marginTop: 1,
+  },
 
   loadingBox: { paddingVertical: 12, alignItems: "flex-start" },
 
   saldoAngka: {
-    color: "#fff",
+    color: colors.textOnPrimary,
     fontSize: 30,
-    fontWeight: "900",
+    fontFamily: fontFamily.regular,
     letterSpacing: -0.5,
     marginBottom: 14,
   },
@@ -178,37 +193,56 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: 12,
+    paddingTop: spacing[3],
     borderTopWidth: 1,
     borderTopColor: "rgba(255,255,255,0.15)",
   },
-  metaText: { color: "rgba(255,255,255,0.7)", fontSize: 11 },
-  metaCta: { color: "#0ff4c6", fontSize: 12, fontWeight: "700" },
+  metaLeft: { flexDirection: "row", alignItems: "center", gap: 5 },
+  metaRight: { flexDirection: "row", alignItems: "center", gap: 4 },
+  metaText: {
+    color: "rgba(255,255,255,0.7)",
+    fontSize: 11,
+    fontFamily: fontFamily.light,
+  },
+  metaCta: {
+    color: colors.mintVivid,
+    fontSize: 12,
+    fontFamily: fontFamily.regular,
+  },
 
   // ── Alert Tunggakan ──
   alertCard: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    backgroundColor: "#fef3c7",
+    gap: spacing[3],
+    backgroundColor: colors.warningLight,
     borderWidth: 1.5,
     borderColor: "#fcd34d",
     borderRadius: 16,
-    padding: 16,
+    padding: spacing[4],
   },
   alertIconBox: {
     width: 44,
     height: 44,
     borderRadius: 13,
-    backgroundColor: "#fbbf24",
+    backgroundColor: colors.warning,
     justifyContent: "center",
     alignItems: "center",
   },
   alertIcon: { fontSize: 22 },
   alertContent: { flex: 1 },
-  alertTitle: { fontSize: 14, fontWeight: "800", color: "#92400e" },
-  alertText: { fontSize: 12, color: "#a16207", marginTop: 2 },
-  alertNominal: { fontWeight: "800", color: "#7c2d12" },
+  alertTitle: {
+    fontSize: 14,
+    fontFamily: fontFamily.regular,
+    color: "#92400e",
+  },
+  alertText: {
+    fontSize: 12,
+    fontFamily: fontFamily.light,
+    color: "#a16207",
+    marginTop: 2,
+  },
+  alertNominal: { fontFamily: fontFamily.regular, color: "#7c2d12" },
   alertChevron: {
     width: 28,
     height: 28,
@@ -220,16 +254,16 @@ const styles = StyleSheet.create({
   chevronText: {
     color: "#92400e",
     fontSize: 18,
-    fontWeight: "700",
+    fontFamily: fontFamily.regular,
     lineHeight: 18,
   },
 
-  // ── Lunas (positive feedback) ──
+  // ── Lunas ──
   lunasCard: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    backgroundColor: "#f0fdf4",
+    gap: spacing[3],
+    backgroundColor: colors.successLight,
     borderWidth: 1.5,
     borderColor: "#86efac",
     borderRadius: 16,
@@ -239,11 +273,11 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "#22c55e",
+    backgroundColor: colors.success,
     justifyContent: "center",
     alignItems: "center",
   },
   lunasIcon: { fontSize: 20 },
-  lunasTitle: { fontSize: 13, fontWeight: "800", color: "#15803d" },
-  lunasText: { fontSize: 11, color: "#16a34a", marginTop: 1 },
+  lunasTitle: { fontSize: 13, fontFamily: fontFamily.regular, color: "#15803d" },
+  lunasText: { fontSize: 11, fontFamily: fontFamily.light, color: "#16a34a", marginTop: 1 },
 });

@@ -12,6 +12,7 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { login } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
@@ -96,7 +97,7 @@ export default function LoginScreen() {
                 style={styles.eyeBtn}
                 onPress={() => setShowPass(!showPass)}
               >
-                <Text style={styles.eyeIcon}>{showPass ? "🙈" : "👁️"}</Text>
+                <FontAwesome5 name={showPass ? "eye-slash" : "eye"} size={16} color="#94a3b8" solid />
               </TouchableOpacity>
             </View>
           </View>
@@ -223,7 +224,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: "#f8fafc",
   },
-  eyeIcon: { fontSize: 18 },
 
   // Button
   btnLogin: {

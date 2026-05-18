@@ -18,12 +18,13 @@ import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import * as IntentLauncher from "expo-intent-launcher";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { getMateri } from "../services/materiApi";
 
 const FILTERS = [
-  { key: "semua", label: "Semua", icon: "📚" },
-  { key: "umum", label: "Umum", icon: "🌐" },
-  { key: "divisi", label: "Divisi Saya", icon: "🏆" },
+  { key: "semua", label: "Semua", iconName: "book" },
+  { key: "umum", label: "Umum", iconName: "globe" },
+  { key: "divisi", label: "Divisi Saya", iconName: "users" },
 ];
 
 export default function MateriScreen() {
@@ -145,7 +146,7 @@ export default function MateriScreen() {
   if (error) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorIcon}>😕</Text>
+        <FontAwesome5 name="frown" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
         <Text style={styles.errorTitle}>Gagal Memuat Materi</Text>
         <Text style={styles.errorMsg}>{error}</Text>
         <TouchableOpacity style={styles.btnRetry} onPress={() => fetchData()}>
@@ -183,7 +184,12 @@ export default function MateriScreen() {
               onPress={() => setActiveFilter(f.key)}
               activeOpacity={0.7}
             >
-              <Text style={styles.filterIcon}>{f.icon}</Text>
+              <FontAwesome5
+                name={f.iconName}
+                size={12}
+                color={isActive ? "#fff" : "#64748b"}
+                solid
+              />
               <Text
                 style={[
                   styles.filterLabel,
@@ -227,7 +233,7 @@ export default function MateriScreen() {
       >
         {filteredMateri.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyEmoji}>📭</Text>
+            <FontAwesome5 name="inbox" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
             <Text style={styles.emptyTitle}>Tidak Ada Materi</Text>
             <Text style={styles.emptyDesc}>
               {activeFilter === "umum"
@@ -283,9 +289,11 @@ function MateriCard({ materi, isDownloading, onDownload, onOpenLink }) {
         )}
 
         <View style={styles.metaRow}>
-          <Text style={styles.metaText}>👤 {materi.uploader}</Text>
+          <FontAwesome5 name="user" size={11} color="#94a3b8" solid />
+          <Text style={styles.metaText}>{materi.uploader}</Text>
           <Text style={styles.metaDot}>·</Text>
-          <Text style={styles.metaText}>📅 {materi.tanggal}</Text>
+          <FontAwesome5 name="calendar-alt" size={11} color="#94a3b8" solid />
+          <Text style={styles.metaText}>{materi.tanggal}</Text>
         </View>
 
         <View style={styles.actionsRow}>
@@ -303,7 +311,7 @@ function MateriCard({ materi, isDownloading, onDownload, onOpenLink }) {
                 </>
               ) : (
                 <>
-                  <Text style={styles.btnIcon}>📥</Text>
+                  <FontAwesome5 name="download" size={13} color="#fff" solid />
                   <Text style={styles.btnPrimaryText}>
                     Buka PDF{materi.file_size ? ` · ${materi.file_size}` : ""}
                   </Text>
@@ -318,7 +326,7 @@ function MateriCard({ materi, isDownloading, onDownload, onOpenLink }) {
               onPress={onOpenLink}
               activeOpacity={0.85}
             >
-              <Text style={styles.btnIcon}>🔗</Text>
+              <FontAwesome5 name="link" size={13} color="#1a4ff5" solid />
               <Text style={styles.btnSecondaryText}>Link</Text>
             </TouchableOpacity>
           )}
@@ -326,9 +334,10 @@ function MateriCard({ materi, isDownloading, onDownload, onOpenLink }) {
 
         {!materi.has_file && !materi.has_link && (
           <View style={styles.noContentBox}>
-            <Text style={styles.noContentText}>
-              ℹ️ Materi ini belum memiliki file atau link
-            </Text>
+            <View style={styles.noContentRow}>
+              <FontAwesome5 name="info-circle" size={12} color="#94a3b8" solid />
+              <Text style={styles.noContentText}>Materi ini belum memiliki file atau link</Text>
+            </View>
           </View>
         )}
       </View>
@@ -348,7 +357,6 @@ const styles = StyleSheet.create({
   },
   loadingText: { color: "#94a3b8", fontSize: 14 },
 
-  errorIcon: { fontSize: 48 },
   errorTitle: { fontSize: 18, fontWeight: "800", color: "#1e293b" },
   errorMsg: { fontSize: 14, color: "#64748b", textAlign: "center" },
   btnRetry: {
@@ -484,8 +492,6 @@ const styles = StyleSheet.create({
   },
   btnSecondaryText: { color: "#1a4ff5", fontWeight: "700", fontSize: 12 },
 
-  btnIcon: { fontSize: 13 },
-
   noContentBox: {
     backgroundColor: "#f8fafc",
     borderRadius: 10,
@@ -493,7 +499,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     marginTop: 4,
   },
-  noContentText: { fontSize: 11, color: "#94a3b8", textAlign: "center" },
+  noContentRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  noContentText: { fontSize: 11, color: "#94a3b8" },
 
   emptyState: {
     alignItems: "center",

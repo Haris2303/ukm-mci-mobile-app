@@ -20,6 +20,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import QRCode from "react-native-qrcode-svg";
 import ViewShot from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { getMyIdCard } from "../services/idCardApi";
 
 export default function IdCardScreen({ navigation }) {
@@ -117,7 +118,7 @@ export default function IdCardScreen({ navigation }) {
           style={styles.backBtn}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backIcon}>‹</Text>
+          <FontAwesome5 name="chevron-left" size={16} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>ID Card Saya</Text>
         <TouchableOpacity
@@ -125,7 +126,7 @@ export default function IdCardScreen({ navigation }) {
           onPress={handleShare}
           disabled={sharing}
         >
-          <Text style={styles.shareHeaderIcon}>{sharing ? "⏳" : "📤"}</Text>
+          <FontAwesome5 name={sharing ? "spinner" : "share-alt"} size={18} color="#fff" solid />
         </TouchableOpacity>
       </View>
 
@@ -422,7 +423,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  backIcon: { color: "#fff", fontSize: 26, fontWeight: "700", marginTop: -3 },
   headerTitle: {
     flex: 1,
     fontSize: 19,
@@ -437,7 +437,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  shareHeaderIcon: { fontSize: 18 },
 
   scrollContent: {
     alignItems: "center",

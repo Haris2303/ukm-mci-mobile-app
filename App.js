@@ -3,6 +3,8 @@
 
 import React from "react";
 import { ActivityIndicator, Text, View } from "react-native";
+import { useFonts, Inter_300Light, Inter_400Regular } from "@expo-google-fonts/inter";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -26,15 +28,15 @@ import ProkerNavigator from "./src/navigation/ProkerNavigator";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function TabIcon({ icon, focused }) {
-  return <Text style={{ fontSize: focused ? 22 : 19 }}>{icon}</Text>;
+function TabIcon({ name, color, focused }) {
+  return <FontAwesome5 name={name} size={focused ? 22 : 19} color={color} solid />;
 }
 
-function KasTabIcon({ focused }) {
+function KasTabIcon({ focused, color }) {
   const { tunggakanCount } = useKas();
   return (
     <View style={{ position: "relative" }}>
-      <Text style={{ fontSize: focused ? 22 : 19 }}>💰</Text>
+      <FontAwesome5 name="coins" size={focused ? 22 : 19} color={color} solid />
       {tunggakanCount > 0 && (
         <View
           style={{
@@ -84,35 +86,35 @@ function MainTabs() {
         name="Beranda"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon icon="🏠" focused={focused} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="home" focused={focused} color={color} />,
         }}
       />
       <Tab.Screen
         name="Scan QR"
         component={ScanScreen}
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon icon="📷" focused={focused} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="camera" focused={focused} color={color} />,
         }}
       />
       <Tab.Screen
         name="E-Voting"
         component={VotingNavigator}
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon icon="🗳️" focused={focused} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="vote-yea" focused={focused} color={color} />,
         }}
       />
       <Tab.Screen
         name="E-Kas"
         component={KasScreen}
         options={{
-          tabBarIcon: ({ focused }) => <KasTabIcon focused={focused} />,
+          tabBarIcon: ({ focused, color }) => <KasTabIcon focused={focused} color={color} />,
         }}
       />
       <Tab.Screen
         name="Riwayat"
         component={RiwayatScreen}
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon icon="📋" focused={focused} />,
+          tabBarIcon: ({ focused, color }) => <TabIcon name="clipboard-list" focused={focused} color={color} />,
         }}
       />
     </Tab.Navigator>
@@ -189,6 +191,16 @@ function RootNavigator() {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({ Inter_300Light, Inter_400Regular });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f8faff" }}>
+        <ActivityIndicator size="large" color="#1a4ff5" />
+      </View>
+    );
+  }
+
   return (
     <AuthProvider>
       <KasProvider>

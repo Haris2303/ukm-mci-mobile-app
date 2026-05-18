@@ -11,6 +11,7 @@ import {
   Modal,
   Animated,
 } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { getElectionDetail, kirimSuara } from "../../services/votingApi";
 
 export default function ElectionDetailScreen({ route, navigation }) {
@@ -68,7 +69,7 @@ export default function ElectionDetailScreen({ route, navigation }) {
       await kirimSuara(id, selected);
       setShowConfirm(false);
       Alert.alert(
-        "✅ Suara Berhasil Dicatat",
+        "Suara Berhasil Dicatat",
         "Terima kasih! Suara Anda telah diterima dan dirahasiakan.",
         [
           {
@@ -80,7 +81,7 @@ export default function ElectionDetailScreen({ route, navigation }) {
       fetchDetail(); // Refresh data
     } catch (e) {
       setShowConfirm(false);
-      Alert.alert("❌ Gagal", e.message);
+      Alert.alert("Gagal", e.message);
     } finally {
       setSubmitting(false);
     }
@@ -99,7 +100,7 @@ export default function ElectionDetailScreen({ route, navigation }) {
   if (error || !election) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorIcon}>😕</Text>
+        <FontAwesome5 name="frown" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
         <Text style={styles.errorMsg}>{error ?? "Data tidak ditemukan."}</Text>
         <TouchableOpacity style={styles.btnRetry} onPress={fetchDetail}>
           <Text style={styles.btnRetryText}>Coba Lagi</Text>
@@ -123,15 +124,15 @@ export default function ElectionDetailScreen({ route, navigation }) {
             <Text style={styles.deskripsi}>{election.deskripsi}</Text>
           ) : null}
           <View style={styles.headerMeta}>
-            <MetaItem icon="⏰" label={`Berakhir ${election.waktu_selesai}`} />
-            <MetaItem icon="🗳️" label={`${election.total_suara} suara masuk`} />
+            <MetaItem iconName="clock" label={`Berakhir ${election.waktu_selesai}`} />
+            <MetaItem iconName="vote-yea" label={`${election.total_suara} suara masuk`} />
           </View>
         </View>
 
         {/* Banner Status */}
         {sudahVote && (
           <View style={styles.bannerSudahVote}>
-            <Text style={styles.bannerIcon}>✅</Text>
+            <FontAwesome5 name="check-circle" size={24} color="#15803d" solid />
             <View>
               <Text style={styles.bannerTitle}>Anda Sudah Memilih</Text>
               <Text style={styles.bannerSub}>
@@ -150,16 +151,24 @@ export default function ElectionDetailScreen({ route, navigation }) {
               { borderColor: "#93c5fd", backgroundColor: "#eff6ff" },
             ]}
           >
-            <Text style={styles.bannerIcon}>🏁</Text>
-            <Text style={styles.bannerTitle}>Voting Telah Ditutup</Text>
+            <FontAwesome5 name="flag-checkered" size={24} color="#1d4ed8" solid />
+            <Text style={[styles.bannerTitle, { color: "#1d4ed8" }]}>Voting Telah Ditutup</Text>
           </View>
         )}
 
         {/* Daftar Kandidat */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            {canVote ? "🗳️  Pilih Kandidat Anda" : "👥  Daftar Kandidat"}
-          </Text>
+          <View style={styles.sectionTitleRow}>
+            <FontAwesome5
+              name={canVote ? "vote-yea" : "users"}
+              size={15}
+              color="#1e293b"
+              solid
+            />
+            <Text style={styles.sectionTitle}>
+              {canVote ? "Pilih Kandidat Anda" : "Daftar Kandidat"}
+            </Text>
+          </View>
           <Text style={styles.sectionSub}>
             {canVote
               ? "Tap pada kartu kandidat untuk memilih. Satu suara tidak dapat diubah."
@@ -186,9 +195,8 @@ export default function ElectionDetailScreen({ route, navigation }) {
               style={styles.btnHasil}
               onPress={() => navigation.navigate("HasilVoting", { id })}
             >
-              <Text style={styles.btnHasilText}>
-                📊 Lihat Rekap Hasil Lengkap
-              </Text>
+              <FontAwesome5 name="chart-bar" size={14} color="#1d4ed8" solid />
+              <Text style={styles.btnHasilText}>Lihat Rekap Hasil Lengkap</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -205,11 +213,14 @@ export default function ElectionDetailScreen({ route, navigation }) {
             disabled={!selected}
             activeOpacity={0.9}
           >
-            <Text style={styles.btnVoteText}>
-              {selected
-                ? "✓  Konfirmasi Pilihan Saya"
-                : "Pilih Kandidat Terlebih Dahulu"}
-            </Text>
+            {selected ? (
+              <View style={styles.btnVoteRow}>
+                <FontAwesome5 name="check" size={16} color="#fff" solid />
+                <Text style={styles.btnVoteText}>Konfirmasi Pilihan Saya</Text>
+              </View>
+            ) : (
+              <Text style={styles.btnVoteText}>Pilih Kandidat Terlebih Dahulu</Text>
+            )}
           </TouchableOpacity>
         </View>
       )}
@@ -220,7 +231,7 @@ export default function ElectionDetailScreen({ route, navigation }) {
           <Animated.View
             style={[styles.modalCard, { transform: [{ scale: scaleAnim }] }]}
           >
-            <Text style={styles.modalIcon}>🗳️</Text>
+            <FontAwesome5 name="vote-yea" size={44} color="#1a56db" solid style={{ marginBottom: 4 }} />
             <Text style={styles.modalTitle}>Konfirmasi Pilihan</Text>
             <Text style={styles.modalSub}>
               Anda akan memberikan suara kepada:
@@ -233,9 +244,12 @@ export default function ElectionDetailScreen({ route, navigation }) {
                 Kandidat No. {selectedCandidate?.urut}
               </Text>
             </View>
-            <Text style={styles.modalWarning}>
-              ⚠️ Pilihan tidak dapat diubah setelah dikonfirmasi.
-            </Text>
+            <View style={styles.modalWarningRow}>
+              <FontAwesome5 name="exclamation-triangle" size={12} color="#f59e0b" solid />
+              <Text style={styles.modalWarning}>
+                Pilihan tidak dapat diubah setelah dikonfirmasi.
+              </Text>
+            </View>
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={styles.btnBatal}
@@ -306,13 +320,16 @@ function KandidatCard({
       <View style={styles.kandidatBody}>
         <View style={styles.kandidatHeader}>
           <Text style={styles.kandidatNama}>{kandidat.nama}</Text>
-          {isSelected && <Text style={styles.checkMark}>✓</Text>}
+          {isSelected && (
+            <FontAwesome5 name="check-circle" size={20} color="#1a56db" solid />
+          )}
         </View>
 
         {kandidat.visi ? (
-          <Text style={styles.visi} numberOfLines={2}>
-            💡 {kandidat.visi}
-          </Text>
+          <View style={styles.visiRow}>
+            <FontAwesome5 name="lightbulb" size={11} color="#f59e0b" solid />
+            <Text style={styles.visi} numberOfLines={2}>{kandidat.visi}</Text>
+          </View>
         ) : null}
 
         {/* Progress bar hasil */}
@@ -341,10 +358,10 @@ function KandidatCard({
   );
 }
 
-function MetaItem({ icon, label }) {
+function MetaItem({ iconName, label }) {
   return (
     <View style={styles.metaItem}>
-      <Text>{icon}</Text>
+      <FontAwesome5 name={iconName} size={12} color="rgba(255,255,255,0.8)" solid />
       <Text style={styles.metaLabel}>{label}</Text>
     </View>
   );
@@ -359,7 +376,6 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 32,
   },
-  errorIcon: { fontSize: 48 },
   errorMsg: { fontSize: 14, color: "#64748b", textAlign: "center" },
   btnRetry: {
     backgroundColor: "#1a56db",
@@ -406,17 +422,21 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "#86efac",
   },
-  bannerIcon: { fontSize: 28 },
   bannerTitle: { fontSize: 15, fontWeight: "700", color: "#15803d" },
   bannerSub: { fontSize: 12, color: "#16a34a", marginTop: 2 },
 
   // Section
   section: { padding: 20, paddingBottom: 0 },
+  sectionTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 4,
+  },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "800",
     color: "#1e293b",
-    marginBottom: 4,
   },
   sectionSub: { fontSize: 12, color: "#94a3b8", marginBottom: 16 },
 
@@ -461,8 +481,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   kandidatNama: { fontSize: 17, fontWeight: "700", color: "#1e293b", flex: 1 },
-  checkMark: { fontSize: 20, color: "#1a56db" },
-  visi: { fontSize: 13, color: "#64748b", lineHeight: 19 },
+  visiRow: { flexDirection: "row", alignItems: "flex-start", gap: 6 },
+  visi: { flex: 1, fontSize: 13, color: "#64748b", lineHeight: 19 },
 
   // Progress
   hasilBox: { marginTop: 8, gap: 5 },
@@ -481,6 +501,9 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 16,
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
     borderWidth: 1.5,
     borderColor: "#bfdbfe",
   },
@@ -513,6 +536,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   btnVoteDisabled: { backgroundColor: "#94a3b8", shadowOpacity: 0 },
+  btnVoteRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   btnVoteText: { color: "#fff", fontWeight: "800", fontSize: 16 },
 
   // Modal
@@ -533,7 +557,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     elevation: 20,
   },
-  modalIcon: { fontSize: 48, marginBottom: 4 },
   modalTitle: { fontSize: 22, fontWeight: "800", color: "#1e293b" },
   modalSub: { fontSize: 14, color: "#64748b" },
   modalCandidateBox: {
@@ -548,10 +571,16 @@ const styles = StyleSheet.create({
   },
   modalCandidateName: { fontSize: 20, fontWeight: "800", color: "#1a56db" },
   modalCandidateUrut: { fontSize: 13, color: "#64748b" },
+  modalWarningRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 6,
+    paddingHorizontal: 4,
+  },
   modalWarning: {
+    flex: 1,
     fontSize: 12,
     color: "#f59e0b",
-    textAlign: "center",
     lineHeight: 18,
   },
   modalButtons: { flexDirection: "row", gap: 12, width: "100%", marginTop: 8 },

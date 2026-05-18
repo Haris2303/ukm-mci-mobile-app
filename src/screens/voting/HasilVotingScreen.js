@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Animated,
 } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { getHasil } from "../../services/votingApi";
 
 const COLORS = ["#1a56db", "#059669", "#d97706", "#7c3aed", "#dc2626"];
@@ -44,14 +45,17 @@ export default function HasilVotingScreen({ route, navigation }) {
   if (error) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorIcon}>🔒</Text>
+        <FontAwesome5 name="lock" size={44} color="#94a3b8" solid style={{ marginBottom: 8 }} />
         <Text style={styles.errorTitle}>Hasil Belum Tersedia</Text>
         <Text style={styles.errorMsg}>{error}</Text>
         <TouchableOpacity
           style={styles.btnBack}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.btnBackText}>← Kembali</Text>
+          <View style={styles.btnBackRow}>
+            <FontAwesome5 name="arrow-left" size={13} color="#fff" solid />
+            <Text style={styles.btnBackText}>Kembali</Text>
+          </View>
         </TouchableOpacity>
       </View>
     );
@@ -73,9 +77,16 @@ export default function HasilVotingScreen({ route, navigation }) {
             isSelesai ? styles.badgeSelesai : styles.badgeAktif,
           ]}
         >
-          <Text style={styles.statusText}>
-            {isSelesai ? "🏁 Pemilihan Selesai" : "🟢 Sedang Berlangsung"}
-          </Text>
+          <View style={styles.statusBadgeRow}>
+            {isSelesai ? (
+              <FontAwesome5 name="flag-checkered" size={11} color="#fff" solid />
+            ) : (
+              <FontAwesome5 name="circle" size={10} color="#4ade80" solid />
+            )}
+            <Text style={styles.statusText}>
+              {isSelesai ? "Pemilihan Selesai" : "Sedang Berlangsung"}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -85,7 +96,7 @@ export default function HasilVotingScreen({ route, navigation }) {
         <Text style={styles.totalLabel}>Total Suara Sah</Text>
       </View>
 
-      {/* Pemenang (jika selesai) */}
+      {/* Pemenang (jika selesai) — 👑 intentionally kept as emoji */}
       {isSelesai && pemenang && (
         <View style={styles.pemenangCard}>
           <Text style={styles.pemenangMahkota}>👑</Text>
@@ -102,7 +113,10 @@ export default function HasilVotingScreen({ route, navigation }) {
 
       {/* Bar Chart Semua Kandidat */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>📊 Perolehan Suara</Text>
+        <View style={styles.sectionTitleRow}>
+          <FontAwesome5 name="chart-bar" size={15} color="#1e293b" solid />
+          <Text style={styles.sectionTitle}>Perolehan Suara</Text>
+        </View>
         {kandidat.map((k, idx) => (
           <BarRow
             key={k.id ?? `bar-${idx}`}
@@ -115,7 +129,7 @@ export default function HasilVotingScreen({ route, navigation }) {
 
       {/* Keterangan Anonimitas */}
       <View style={styles.anonBox}>
-        <Text style={styles.anonIcon}>🔒</Text>
+        <FontAwesome5 name="lock" size={18} color="#64748b" solid />
         <Text style={styles.anonText}>
           Identitas pemilih dirahasiakan. Hasil ini hanya menampilkan jumlah
           suara tanpa informasi siapa yang memilih siapa.
@@ -126,7 +140,10 @@ export default function HasilVotingScreen({ route, navigation }) {
         style={styles.btnBack2}
         onPress={() => navigation.goBack()}
       >
-        <Text style={styles.btnBack2Text}>← Kembali ke Daftar Pemilihan</Text>
+        <View style={styles.btnBack2Row}>
+          <FontAwesome5 name="arrow-left" size={13} color="#475569" solid />
+          <Text style={styles.btnBack2Text}>Kembali ke Daftar Pemilihan</Text>
+        </View>
       </TouchableOpacity>
 
       <View style={{ height: 40 }} />
@@ -134,7 +151,7 @@ export default function HasilVotingScreen({ route, navigation }) {
   );
 }
 
-// Bar animasi per kandidat
+// Bar animasi per kandidat — 🏆 intentionally kept as emoji for winner
 function BarRow({ kandidat, color, isPemenang }) {
   const widthAnim = useRef(new Animated.Value(0)).current;
   const persen = kandidat.persentase ?? 0;
@@ -198,7 +215,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f4ff",
   },
   loadingText: { color: "#94a3b8", fontSize: 14 },
-  errorIcon: { fontSize: 48 },
   errorTitle: { fontSize: 18, fontWeight: "700", color: "#1e293b" },
   errorMsg: { fontSize: 14, color: "#64748b", textAlign: "center" },
   btnBack: {
@@ -208,6 +224,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginTop: 8,
   },
+  btnBackRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   btnBackText: { color: "#fff", fontWeight: "600" },
 
   header: {
@@ -236,6 +253,7 @@ const styles = StyleSheet.create({
   },
   badgeSelesai: { backgroundColor: "rgba(255,255,255,0.2)" },
   badgeAktif: { backgroundColor: "rgba(74,222,128,0.25)" },
+  statusBadgeRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   statusText: { fontSize: 12, fontWeight: "700", color: "#fff" },
 
   totalBox: {
@@ -300,11 +318,16 @@ const styles = StyleSheet.create({
 
   // Chart
   section: { paddingHorizontal: 20, paddingBottom: 0 },
+  sectionTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 16,
+  },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "800",
     color: "#1e293b",
-    marginBottom: 16,
   },
 
   barRow: {
@@ -354,8 +377,8 @@ const styles = StyleSheet.create({
     gap: 12,
     borderWidth: 1,
     borderColor: "#e2e8f0",
+    alignItems: "flex-start",
   },
-  anonIcon: { fontSize: 22 },
   anonText: { flex: 1, fontSize: 12, color: "#64748b", lineHeight: 18 },
 
   btnBack2: {
@@ -367,5 +390,6 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "#e2e8f0",
   },
+  btnBack2Row: { flexDirection: "row", alignItems: "center", gap: 8 },
   btnBack2Text: { color: "#475569", fontWeight: "600", fontSize: 14 },
 });

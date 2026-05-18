@@ -11,13 +11,14 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { getProker } from "../services/prokerApi";
 
 const FILTERS = [
-  { key: "semua", label: "Semua", icon: "📊" },
-  { key: "planning", label: "Planning", icon: "📋" },
-  { key: "active", label: "Berjalan", icon: "🚀" },
-  { key: "completed", label: "Selesai", icon: "✅" },
+  { key: "semua", label: "Semua", iconName: "chart-bar" },
+  { key: "planning", label: "Planning", iconName: "clipboard-list" },
+  { key: "active", label: "Berjalan", iconName: "rocket" },
+  { key: "completed", label: "Selesai", iconName: "check-circle" },
 ];
 
 export default function ProkerListScreen({ navigation }) {
@@ -65,7 +66,7 @@ export default function ProkerListScreen({ navigation }) {
   if (error) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorIcon}>😕</Text>
+        <FontAwesome5 name="frown" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
         <Text style={styles.errorTitle}>Gagal Memuat Data</Text>
         <Text style={styles.errorMsg}>{error}</Text>
         <TouchableOpacity style={styles.btnRetry} onPress={() => fetchData()}>
@@ -87,8 +88,9 @@ export default function ProkerListScreen({ navigation }) {
 
         {data.statistik.terlambat > 0 && (
           <View style={styles.terlambatHeader}>
+            <FontAwesome5 name="exclamation-triangle" size={11} color="#fff" solid />
             <Text style={styles.terlambatHeaderText}>
-              ⚠️ {data.statistik.terlambat} proker terlambat
+              {data.statistik.terlambat} proker terlambat
             </Text>
           </View>
         )}
@@ -107,7 +109,7 @@ export default function ProkerListScreen({ navigation }) {
               onPress={() => setActiveFilter(f.key)}
               activeOpacity={0.7}
             >
-              <Text style={styles.filterIcon}>{f.icon}</Text>
+              <FontAwesome5 name={f.iconName} size={12} color={isActive ? "#fff" : "#64748b"} solid />
               <Text
                 style={[
                   styles.filterLabel,
@@ -151,7 +153,7 @@ export default function ProkerListScreen({ navigation }) {
       >
         {filteredProker.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyEmoji}>📭</Text>
+            <FontAwesome5 name="inbox" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
             <Text style={styles.emptyTitle}>Tidak Ada Proker</Text>
             <Text style={styles.emptyDesc}>
               {activeFilter === "semua"
@@ -213,7 +215,8 @@ function ProkerCard({ proker, onPress }) {
           </View>
           {proker.is_terlambat && (
             <View style={styles.lateBadge}>
-              <Text style={styles.lateBadgeText}>⚠️ Terlambat</Text>
+              <FontAwesome5 name="exclamation-triangle" size={9} color="#dc2626" solid />
+              <Text style={styles.lateBadgeText}>Terlambat</Text>
             </View>
           )}
         </View>
@@ -227,7 +230,10 @@ function ProkerCard({ proker, onPress }) {
             <Text style={styles.divisiBadgeText}>{proker.jenis_label}</Text>
           </View>
           {proker.pic && (
-            <Text style={styles.picText}>👤 {proker.pic.name}</Text>
+            <View style={styles.picRow}>
+              <FontAwesome5 name="user" size={10} color="#94a3b8" solid />
+              <Text style={styles.picText}>{proker.pic.name}</Text>
+            </View>
           )}
         </View>
 
@@ -252,17 +258,17 @@ function ProkerCard({ proker, onPress }) {
         {/* Footer info */}
         <View style={styles.cardFooter}>
           <View style={styles.footerItem}>
-            <Text style={styles.footerIcon}>📋</Text>
+            <FontAwesome5 name="clipboard-list" size={10} color="#94a3b8" solid />
             <Text style={styles.footerText}>
               {proker.tugas_selesai}/{proker.total_tugas} tugas
             </Text>
           </View>
           <View style={styles.footerItem}>
-            <Text style={styles.footerIcon}>📅</Text>
+            <FontAwesome5 name="calendar-alt" size={10} color="#94a3b8" solid />
             <Text style={styles.footerText}>{proker.tanggal_selesai}</Text>
           </View>
           <View style={styles.footerItem}>
-            <Text style={styles.footerIcon}>🕐</Text>
+            <FontAwesome5 name="clock" size={10} color="#94a3b8" solid />
             <Text
               style={[
                 styles.footerText,
@@ -290,7 +296,6 @@ const styles = StyleSheet.create({
   },
   loadingText: { color: "#94a3b8", fontSize: 14 },
 
-  errorIcon: { fontSize: 48 },
   errorTitle: { fontSize: 18, fontWeight: "800", color: "#1e293b" },
   errorMsg: { fontSize: 14, color: "#64748b", textAlign: "center" },
   btnRetry: {
@@ -321,6 +326,9 @@ const styles = StyleSheet.create({
   headerSub: { fontSize: 13, color: "rgba(255,255,255,0.75)" },
 
   terlambatHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     backgroundColor: "rgba(239,68,68,0.25)",
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -355,7 +363,6 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   filterTabActive: { backgroundColor: "#7c3aed" },
-  filterIcon: { fontSize: 14 },
   filterLabel: { fontSize: 10, fontWeight: "700", color: "#64748b" },
   filterLabelActive: { color: "#fff" },
   filterBadge: {
@@ -403,6 +410,9 @@ const styles = StyleSheet.create({
   statusBadgeText: { fontSize: 10, fontWeight: "800" },
 
   lateBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
     backgroundColor: "#fee2e2",
     paddingHorizontal: 8,
     paddingVertical: 3,
@@ -430,6 +440,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   divisiBadgeText: { fontSize: 11, color: "#7c3aed", fontWeight: "700" },
+  picRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   picText: { fontSize: 11, color: "#94a3b8" },
 
   progressContainer: {
@@ -461,7 +472,6 @@ const styles = StyleSheet.create({
     borderTopColor: "#f1f5f9",
   },
   footerItem: { flexDirection: "row", alignItems: "center", gap: 4 },
-  footerIcon: { fontSize: 11 },
   footerText: { fontSize: 11, color: "#64748b" },
 
   // Empty
@@ -472,7 +482,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 20,
   },
-  emptyEmoji: { fontSize: 56 },
   emptyTitle: { fontSize: 17, fontWeight: "800", color: "#1e293b" },
   emptyDesc: {
     fontSize: 13,

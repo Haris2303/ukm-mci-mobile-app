@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { useKas } from "../context/KasContext";
 import {
   getTunggakan,
@@ -23,9 +24,9 @@ import {
 } from "../services/kasApi";
 
 const TABS = [
-  { key: "tunggakan", label: "Tunggakan", icon: "⚠️" },
-  { key: "riwayat", label: "Riwayat", icon: "📋" },
-  { key: "transparansi", label: "Transparansi", icon: "🔍" },
+  { key: "tunggakan", label: "Tunggakan", iconName: "exclamation-triangle" },
+  { key: "riwayat", label: "Riwayat", iconName: "clipboard-list" },
+  { key: "transparansi", label: "Transparansi", iconName: "search" },
 ];
 
 export default function KasScreen() {
@@ -110,7 +111,12 @@ export default function KasScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.tabContent}>
-                <Text style={styles.tabIcon}>{tab.icon}</Text>
+                <FontAwesome5
+                  name={tab.iconName}
+                  size={14}
+                  color={isActive ? "#fff" : "#64748b"}
+                  solid
+                />
                 <Text
                   style={[styles.tabLabel, isActive && styles.tabLabelActive]}
                 >
@@ -155,7 +161,7 @@ function TunggakanTab({ data }) {
   if (!data || data.jumlah_tunggakan === 0) {
     return (
       <EmptyState
-        icon="🎉"
+        iconName="check-circle"
         title="Tidak Ada Tunggakan!"
         desc="Selamat! Semua iuran Anda telah lunas. Terima kasih atas ketertiban Anda dalam membayar iuran."
         bgColor="#f0fdf4"
@@ -169,7 +175,7 @@ function TunggakanTab({ data }) {
       {/* Total summary card */}
       <View style={styles.summaryCard}>
         <View style={styles.summaryIconBox}>
-          <Text style={styles.summaryIcon}>📊</Text>
+          <FontAwesome5 name="chart-bar" size={24} color="#92400e" solid />
         </View>
         <View style={styles.summaryContent}>
           <Text style={styles.summaryLabel}>Total Tunggakan Anda</Text>
@@ -182,7 +188,7 @@ function TunggakanTab({ data }) {
 
       {/* Info instruksi */}
       <View style={styles.infoBox}>
-        <Text style={styles.infoIcon}>💡</Text>
+        <FontAwesome5 name="lightbulb" size={16} color="#1e40af" solid />
         <Text style={styles.infoText}>
           Hubungi <Text style={{ fontWeight: "700" }}>Bendahara UKM</Text> untuk
           melakukan pembayaran tunai. Status akan otomatis update setelah
@@ -206,13 +212,17 @@ function TunggakanTab({ data }) {
             </View>
             <Text style={styles.itemNominal}>{item.nominal_format}</Text>
             {item.catatan && (
-              <Text style={styles.itemCatatan} numberOfLines={2}>
-                💬 {item.catatan}
-              </Text>
+              <View style={styles.catatanRow}>
+                <FontAwesome5 name="comment-alt" size={11} color="#64748b" solid />
+                <Text style={styles.itemCatatan} numberOfLines={2}>
+                  {item.catatan}
+                </Text>
+              </View>
             )}
-            <Text style={styles.itemMeta}>
-              📅 Ditagihkan: {item.dibuat_pada}
-            </Text>
+            <View style={styles.metaRow}>
+              <FontAwesome5 name="calendar-alt" size={11} color="#94a3b8" solid />
+              <Text style={styles.itemMeta}>Ditagihkan: {item.dibuat_pada}</Text>
+            </View>
           </View>
         </View>
       ))}
@@ -227,7 +237,7 @@ function RiwayatTab({ data }) {
   if (!data || data.jumlah_pembayaran === 0) {
     return (
       <EmptyState
-        icon="📭"
+        iconName="inbox"
         title="Belum Ada Riwayat"
         desc="Riwayat pembayaran Anda akan muncul di sini setelah Bendahara mencatat pembayaran iuran."
         bgColor="#f8fafc"
@@ -241,7 +251,7 @@ function RiwayatTab({ data }) {
       {/* Total summary card */}
       <View style={[styles.summaryCard, styles.summaryCardSuccess]}>
         <View style={[styles.summaryIconBox, styles.summaryIconBoxSuccess]}>
-          <Text style={styles.summaryIcon}>✅</Text>
+          <FontAwesome5 name="check-circle" size={24} color="#fff" solid />
         </View>
         <View style={styles.summaryContent}>
           <Text style={styles.summaryLabel}>Total Sudah Dibayar</Text>
@@ -282,13 +292,17 @@ function RiwayatTab({ data }) {
             <Text style={[styles.itemNominal, { color: "#15803d" }]}>
               {item.nominal_format}
             </Text>
-            <Text style={styles.itemMeta}>
-              🕐 Dibayar: {item.tanggal_bayar_format} WIT
-            </Text>
+            <View style={styles.metaRow}>
+              <FontAwesome5 name="clock" size={11} color="#94a3b8" solid />
+              <Text style={styles.itemMeta}>Dibayar: {item.tanggal_bayar_format} WIT</Text>
+            </View>
             {item.catatan && (
-              <Text style={styles.itemCatatan} numberOfLines={2}>
-                💬 {item.catatan}
-              </Text>
+              <View style={styles.catatanRow}>
+                <FontAwesome5 name="comment-alt" size={11} color="#64748b" solid />
+                <Text style={styles.itemCatatan} numberOfLines={2}>
+                  {item.catatan}
+                </Text>
+              </View>
             )}
           </View>
         </View>
@@ -314,11 +328,15 @@ function TransparansiTab({ data }) {
         <View style={styles.circle1Big} />
         <View style={styles.circle2Big} />
 
-        <Text style={styles.bigSaldoLabel}>💰 Saldo Kas Organisasi</Text>
+        <View style={styles.bigSaldoLabelRow}>
+          <FontAwesome5 name="coins" size={13} color="rgba(255,255,255,0.85)" solid />
+          <Text style={styles.bigSaldoLabel}>Saldo Kas Organisasi</Text>
+        </View>
         <Text style={styles.bigSaldoValue}>{data.total_saldo_format}</Text>
-        <Text style={styles.bigSaldoMeta}>
-          🕐 Diperbarui: {data.diperbarui_pada}
-        </Text>
+        <View style={styles.bigSaldoMetaRow}>
+          <FontAwesome5 name="clock" size={11} color="rgba(255,255,255,0.7)" solid />
+          <Text style={styles.bigSaldoMeta}>Diperbarui: {data.diperbarui_pada}</Text>
+        </View>
       </View>
 
       {/* Rincian breakdown */}
@@ -326,7 +344,7 @@ function TransparansiTab({ data }) {
 
       <View style={styles.breakdownCard}>
         <BreakdownRow
-          icon="👥"
+          iconName="users"
           color="#3b82f6"
           label="Iuran Anggota Lunas"
           value={data.rincian.iuran_lunas.format}
@@ -334,7 +352,7 @@ function TransparansiTab({ data }) {
         />
         <View style={styles.divider} />
         <BreakdownRow
-          icon="🎁"
+          iconName="gift"
           color="#10b981"
           label="Donasi & Bantuan"
           value={data.rincian.kas_masuk.format}
@@ -342,7 +360,7 @@ function TransparansiTab({ data }) {
         />
         <View style={styles.divider} />
         <BreakdownRow
-          icon="🛒"
+          iconName="shopping-cart"
           color="#ef4444"
           label="Pengeluaran"
           value={data.rincian.kas_keluar.format}
@@ -352,7 +370,7 @@ function TransparansiTab({ data }) {
           style={[styles.divider, { backgroundColor: "#1a4ff5", height: 2 }]}
         />
         <BreakdownRow
-          icon="💎"
+          iconName="gem"
           color="#1a4ff5"
           label="Saldo Akhir"
           value={data.total_saldo_format}
@@ -363,7 +381,7 @@ function TransparansiTab({ data }) {
 
       {/* Disclaimer */}
       <View style={styles.disclaimerBox}>
-        <Text style={styles.disclaimerIcon}>🔍</Text>
+        <FontAwesome5 name="info-circle" size={16} color="#64748b" solid />
         <Text style={styles.disclaimerText}>
           Data ini diperbarui secara real-time dari pencatatan Bendahara. Jika
           menemukan ketidaksesuaian, harap hubungi pengurus segera.
@@ -377,7 +395,7 @@ function TransparansiTab({ data }) {
 // SUB-COMPONENTS
 // ═══════════════════════════════════════════════════════════
 
-function EmptyState({ icon, title, desc, bgColor, accentColor }) {
+function EmptyState({ iconName, title, desc, bgColor, accentColor }) {
   return (
     <View
       style={[
@@ -385,7 +403,9 @@ function EmptyState({ icon, title, desc, bgColor, accentColor }) {
         { backgroundColor: bgColor, borderColor: accentColor + "40" },
       ]}
     >
-      <Text style={styles.emptyIcon}>{icon}</Text>
+      <View style={[styles.emptyIconBox, { backgroundColor: accentColor + "20" }]}>
+        <FontAwesome5 name={iconName} size={32} color={accentColor} solid />
+      </View>
       <Text style={[styles.emptyTitle, { color: accentColor }]}>{title}</Text>
       <Text style={styles.emptyDesc}>{desc}</Text>
     </View>
@@ -393,7 +413,7 @@ function EmptyState({ icon, title, desc, bgColor, accentColor }) {
 }
 
 function BreakdownRow({
-  icon,
+  iconName,
   color,
   label,
   value,
@@ -405,7 +425,7 @@ function BreakdownRow({
       <View
         style={[styles.breakdownIconBox, { backgroundColor: color + "15" }]}
       >
-        <Text style={styles.breakdownIcon}>{icon}</Text>
+        <FontAwesome5 name={iconName} size={16} color={color} solid />
       </View>
       <View style={styles.breakdownLabelBox}>
         <Text
@@ -603,7 +623,9 @@ const styles = StyleSheet.create({
   },
   itemPeriode: { fontSize: 14, fontWeight: "800", color: "#1e293b" },
   itemNominal: { fontSize: 18, fontWeight: "900", color: "#92400e" },
-  itemCatatan: { fontSize: 12, color: "#64748b", fontStyle: "italic" },
+  metaRow: { flexDirection: "row", alignItems: "center", gap: 5 },
+  catatanRow: { flexDirection: "row", alignItems: "flex-start", gap: 5 },
+  itemCatatan: { flex: 1, fontSize: 12, color: "#64748b", fontStyle: "italic" },
   itemMeta: { fontSize: 11, color: "#94a3b8" },
 
   statusBadge: {
@@ -688,12 +710,13 @@ const styles = StyleSheet.create({
     borderRadius: 65,
     backgroundColor: "rgba(15,244,198,0.1)",
   },
+  bigSaldoLabelRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 },
   bigSaldoLabel: {
     color: "rgba(255,255,255,0.85)",
     fontSize: 13,
     fontWeight: "700",
-    marginBottom: 6,
   },
+  bigSaldoMetaRow: { flexDirection: "row", alignItems: "center", gap: 5 },
   bigSaldoValue: {
     color: "#fff",
     fontSize: 36,
@@ -756,7 +779,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderStyle: "dashed",
   },
-  emptyIcon: { fontSize: 56 },
+  emptyIconBox: { width: 72, height: 72, borderRadius: 36, justifyContent: "center", alignItems: "center" },
   emptyTitle: { fontSize: 18, fontWeight: "800" },
   emptyDesc: {
     fontSize: 13,

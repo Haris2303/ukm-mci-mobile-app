@@ -9,9 +9,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  ScrollView,
 } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { getMateri } from "../services/materiApi";
+import { colors, fontFamily, spacing } from "../theme/theme";
 
 export default function MateriRingkasanCard({ onPress }) {
   const [data, setData] = useState(null);
@@ -24,26 +25,24 @@ export default function MateriRingkasanCard({ onPress }) {
         const res = await getMateri();
         if (mounted) setData(res.data);
       } catch (e) {
-        // diam saja - error fallback ke empty
+        // silent fail — fallback ke empty state
       } finally {
         if (mounted) setLoading(false);
       }
     })();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
   // ── Loading skeleton ─────────────────────────────────────
   if (loading) {
     return (
       <View style={styles.skeletonCard}>
-        <ActivityIndicator color="#1a4ff5" />
+        <ActivityIndicator color={colors.primary} />
       </View>
     );
   }
 
-  // ── Kosong: tampilkan card "Belum ada materi" ─────────────
+  // ── Kosong ───────────────────────────────────────────────
   if (!data || data.total === 0) {
     return (
       <TouchableOpacity
@@ -62,7 +61,6 @@ export default function MateriRingkasanCard({ onPress }) {
     );
   }
 
-  // Ambil 3 materi teratas untuk preview
   const previewMateris = data.materi.slice(0, 3);
 
   return (
@@ -78,7 +76,7 @@ export default function MateriRingkasanCard({ onPress }) {
 
         <View style={styles.summaryHeader}>
           <View style={styles.summaryIconBox}>
-            <Text style={styles.summaryIconText}>📚</Text>
+            <FontAwesome5 name="book" size={22} color={colors.textOnPrimary} solid />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.summaryLabel}>Materi Pembelajaran</Text>
@@ -93,12 +91,12 @@ export default function MateriRingkasanCard({ onPress }) {
         <View style={styles.statsRow}>
           <View style={styles.statBox}>
             <Text style={styles.statNum}>{data.jumlah_umum}</Text>
-            <Text style={styles.statLabel}>🌐 Umum</Text>
+            <Text style={styles.statLabel}>Umum</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statBox}>
             <Text style={styles.statNum}>{data.jumlah_divisi}</Text>
-            <Text style={styles.statLabel}>🏆 Divisi Saya</Text>
+            <Text style={styles.statLabel}>Divisi Saya</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -114,9 +112,12 @@ export default function MateriRingkasanCard({ onPress }) {
             activeOpacity={0.85}
           >
             <View style={styles.previewIconBox}>
-              <Text style={styles.previewIcon}>
-                {materi.has_file ? "📄" : "🔗"}
-              </Text>
+              <FontAwesome5
+                name={materi.has_file ? "file-alt" : "link"}
+                size={16}
+                color={colors.primary}
+                solid
+              />
             </View>
             <View style={styles.previewBody}>
               <Text style={styles.previewItemTitle} numberOfLines={1}>
@@ -126,12 +127,13 @@ export default function MateriRingkasanCard({ onPress }) {
                 {materi.jenis_label} · {materi.tanggal}
               </Text>
             </View>
-            <Text style={styles.chevron}>›</Text>
+            <FontAwesome5 name="chevron-right" size={14} color={colors.neutral300} />
           </TouchableOpacity>
         ))}
 
         <TouchableOpacity onPress={onPress} style={styles.viewAllBtn}>
-          <Text style={styles.viewAllText}>Lihat semua materi →</Text>
+          <Text style={styles.viewAllText}>Lihat semua materi</Text>
+          <FontAwesome5 name="arrow-right" size={11} color={colors.primary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -139,11 +141,11 @@ export default function MateriRingkasanCard({ onPress }) {
 }
 
 const styles = StyleSheet.create({
-  wrapper: { gap: 10 },
+  wrapper: { gap: spacing[2] + 2 },
 
   // ── Skeleton ──
   skeletonCard: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 30,
     alignItems: "center",
@@ -156,25 +158,34 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
-    backgroundColor: "#f8fafc",
+    backgroundColor: colors.background,
     borderRadius: 20,
     padding: 18,
     borderWidth: 1.5,
     borderStyle: "dashed",
-    borderColor: "#e2e8f0",
+    borderColor: colors.border,
   },
   emptyIcon: { fontSize: 36 },
-  emptyTitle: { fontSize: 14, fontWeight: "800", color: "#475569" },
-  emptyDesc: { fontSize: 11, color: "#94a3b8", marginTop: 2 },
+  emptyTitle: {
+    fontSize: 14,
+    fontFamily: fontFamily.regular,
+    color: colors.neutral600,
+  },
+  emptyDesc: {
+    fontSize: 11,
+    fontFamily: fontFamily.light,
+    color: colors.neutral400,
+    marginTop: 2,
+  },
 
   // ── Summary card ──
   summaryCard: {
-    backgroundColor: "#1a4ff5",
+    backgroundColor: colors.primary,
     borderRadius: 22,
     padding: 18,
     overflow: "hidden",
     position: "relative",
-    shadowColor: "#1a4ff5",
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.22,
     shadowRadius: 14,
@@ -199,7 +210,7 @@ const styles = StyleSheet.create({
     borderRadius: 45,
     backgroundColor: "rgba(15,244,198,0.1)",
   },
-  summaryHeader: { flexDirection: "row", alignItems: "center", gap: 12 },
+  summaryHeader: { flexDirection: "row", alignItems: "center", gap: spacing[3] },
   summaryIconBox: {
     width: 44,
     height: 44,
@@ -209,21 +220,34 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   summaryIconText: { fontSize: 22 },
-  summaryLabel: { color: "#fff", fontSize: 14, fontWeight: "800" },
-  summaryHint: { color: "rgba(255,255,255,0.7)", fontSize: 11, marginTop: 1 },
+  summaryLabel: {
+    color: colors.textOnPrimary,
+    fontSize: 14,
+    fontFamily: fontFamily.regular,
+  },
+  summaryHint: {
+    color: "rgba(255,255,255,0.7)",
+    fontSize: 11,
+    fontFamily: fontFamily.light,
+    marginTop: 1,
+  },
 
   totalBadge: {
     backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing[3],
     paddingVertical: 5,
     borderRadius: 12,
     alignItems: "center",
   },
-  totalBadgeNum: { color: "#fff", fontSize: 18, fontWeight: "900" },
+  totalBadgeNum: {
+    color: colors.textOnPrimary,
+    fontSize: 18,
+    fontFamily: fontFamily.regular,
+  },
   totalBadgeLabel: {
     color: "rgba(255,255,255,0.8)",
     fontSize: 9,
-    fontWeight: "600",
+    fontFamily: fontFamily.regular,
   },
 
   statsRow: {
@@ -234,21 +258,25 @@ const styles = StyleSheet.create({
   },
   statBox: { flex: 1, alignItems: "center", paddingVertical: 8 },
   statDivider: { width: 1, backgroundColor: "rgba(255,255,255,0.2)" },
-  statNum: { color: "#fff", fontSize: 18, fontWeight: "900" },
+  statNum: {
+    color: colors.textOnPrimary,
+    fontSize: 18,
+    fontFamily: fontFamily.regular,
+  },
   statLabel: {
     color: "rgba(255,255,255,0.85)",
     fontSize: 10,
-    fontWeight: "600",
+    fontFamily: fontFamily.regular,
     marginTop: 1,
   },
 
   // ── Preview list ──
   previewWrap: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 18,
     padding: 14,
-    gap: 10,
-    shadowColor: "#000",
+    gap: spacing[2] + 2,
+    shadowColor: colors.textPrimary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -256,8 +284,8 @@ const styles = StyleSheet.create({
   },
   previewTitle: {
     fontSize: 11,
-    fontWeight: "800",
-    color: "#94a3b8",
+    fontFamily: fontFamily.regular,
+    color: colors.neutral400,
     letterSpacing: 0.6,
     textTransform: "uppercase",
     marginBottom: 2,
@@ -272,21 +300,41 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 11,
-    backgroundColor: "#eff6ff",
+    backgroundColor: colors.badgeBg,
     justifyContent: "center",
     alignItems: "center",
   },
   previewIcon: { fontSize: 18 },
   previewBody: { flex: 1 },
-  previewItemTitle: { fontSize: 13, fontWeight: "700", color: "#1e293b" },
-  previewItemMeta: { fontSize: 11, color: "#94a3b8", marginTop: 1 },
-  chevron: { color: "#cbd5e1", fontSize: 22, fontWeight: "300" },
+  previewItemTitle: {
+    fontSize: 13,
+    fontFamily: fontFamily.regular,
+    color: colors.textPrimary,
+  },
+  previewItemMeta: {
+    fontSize: 11,
+    fontFamily: fontFamily.light,
+    color: colors.neutral400,
+    marginTop: 1,
+  },
+  chevron: {
+    color: colors.neutral300,
+    fontSize: 22,
+    fontFamily: fontFamily.light,
+  },
 
   viewAllBtn: {
+    flexDirection: "row",
     alignItems: "center",
-    paddingTop: 10,
+    justifyContent: "center",
+    gap: 6,
+    paddingTop: spacing[2] + 2,
     borderTopWidth: 1,
-    borderTopColor: "#f1f5f9",
+    borderTopColor: colors.neutral100,
   },
-  viewAllText: { color: "#1a4ff5", fontSize: 12, fontWeight: "700" },
+  viewAllText: {
+    color: colors.primary,
+    fontSize: 12,
+    fontFamily: fontFamily.regular,
+  },
 });

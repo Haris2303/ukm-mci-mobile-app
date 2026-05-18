@@ -11,6 +11,7 @@ import {
   RefreshControl,
   TouchableOpacity,
 } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { getProkerDetail } from "../services/prokerApi";
 
 export default function ProkerDetailScreen({ route, navigation }) {
@@ -54,7 +55,7 @@ export default function ProkerDetailScreen({ route, navigation }) {
   if (error || !data) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorIcon}>😕</Text>
+        <FontAwesome5 name="frown" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
         <Text style={styles.errorTitle}>Gagal Memuat Detail</Text>
         <Text style={styles.errorMsg}>{error || "Data tidak ditemukan."}</Text>
         <TouchableOpacity style={styles.btnRetry} onPress={() => fetchData()}>
@@ -98,7 +99,7 @@ export default function ProkerDetailScreen({ route, navigation }) {
           style={styles.backBtn}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backIcon}>‹</Text>
+          <FontAwesome5 name="chevron-left" size={16} color="#fff" />
         </TouchableOpacity>
 
         <View style={styles.headerContent}>
@@ -113,14 +114,12 @@ export default function ProkerDetailScreen({ route, navigation }) {
             </Text>
           </View>
           <Text style={styles.headerTitle}>{data.nama_proker}</Text>
-          {data.divisi && (
+          <View style={styles.headerDivisiRow}>
+            <FontAwesome5 name="globe" size={12} color="rgba(255,255,255,0.85)" solid />
             <Text style={styles.headerDivisi}>
-              {data.divisi.icon} {data.divisi.nama}
+              {data.divisi ? data.divisi.nama : "Proker Umum"}
             </Text>
-          )}
-          {!data.divisi && (
-            <Text style={styles.headerDivisi}>🌐 Proker Umum</Text>
-          )}
+          </View>
         </View>
       </View>
 
@@ -148,18 +147,23 @@ export default function ProkerDetailScreen({ route, navigation }) {
             {data.tugas.filter((t) => t.is_selesai).length} dari{" "}
             {data.tugas.length} tugas selesai
           </Text>
-          <Text
-            style={[
-              styles.progressMetaText,
-              data.is_terlambat && { color: "#ef4444", fontWeight: "700" },
-            ]}
-          >
-            {data.is_terlambat
-              ? `⚠️ Terlambat ${Math.abs(data.sisa_hari)} hari`
-              : data.progress_persen === 100
-                ? "🎉 Selesai!"
-                : `${data.sisa_hari} hari lagi`}
-          </Text>
+          <View style={styles.progressMetaRight}>
+            {data.is_terlambat ? (
+              <>
+                <FontAwesome5 name="exclamation-triangle" size={10} color="#ef4444" solid />
+                <Text style={[styles.progressMetaText, { color: "#ef4444", fontWeight: "700" }]}>
+                  Terlambat {Math.abs(data.sisa_hari)} hari
+                </Text>
+              </>
+            ) : data.progress_persen === 100 ? (
+              <>
+                <FontAwesome5 name="check-circle" size={10} color="#22c55e" solid />
+                <Text style={[styles.progressMetaText, { color: "#22c55e" }]}>Selesai!</Text>
+              </>
+            ) : (
+              <Text style={styles.progressMetaText}>{data.sisa_hari} hari lagi</Text>
+            )}
+          </View>
         </View>
       </View>
 
@@ -167,20 +171,23 @@ export default function ProkerDetailScreen({ route, navigation }) {
       <View style={styles.infoSection}>
         {/* Tanggal */}
         <InfoCard
-          icon="📅"
+          iconName="calendar-alt"
           label="Periode"
           value={`${data.tanggal_mulai} — ${data.tanggal_selesai}`}
         />
 
         {/* PIC */}
         {data.pic && (
-          <InfoCard icon="👤" label="Penanggung Jawab" value={data.pic.name} />
+          <InfoCard iconName="user" label="Penanggung Jawab" value={data.pic.name} />
         )}
 
         {/* Deskripsi */}
         {data.deskripsi && (
           <View style={styles.deskripsiCard}>
-            <Text style={styles.deskripsiLabel}>📝 Deskripsi</Text>
+            <View style={styles.deskripsiLabelRow}>
+              <FontAwesome5 name="file-alt" size={12} color="#64748b" solid />
+              <Text style={styles.deskripsiLabel}>Deskripsi</Text>
+            </View>
             <Text style={styles.deskripsiText}>{data.deskripsi}</Text>
           </View>
         )}
@@ -189,7 +196,10 @@ export default function ProkerDetailScreen({ route, navigation }) {
       {/* ── Daftar Tugas ───────────────────────────────── */}
       <View style={styles.tugasSection}>
         <View style={styles.tugasHeader}>
-          <Text style={styles.tugasSectionTitle}>📋 Daftar Tugas</Text>
+          <View style={styles.tugasTitleRow}>
+            <FontAwesome5 name="clipboard-list" size={13} color="#1e293b" solid />
+            <Text style={styles.tugasSectionTitle}>Daftar Tugas</Text>
+          </View>
           <Text style={styles.tugasSectionCount}>
             {data.tugas.length} tugas
           </Text>
@@ -197,7 +207,7 @@ export default function ProkerDetailScreen({ route, navigation }) {
 
         {data.tugas.length === 0 ? (
           <View style={styles.emptyTugas}>
-            <Text style={styles.emptyTugasIcon}>📭</Text>
+            <FontAwesome5 name="inbox" size={40} color="#94a3b8" style={{ marginBottom: 8 }} />
             <Text style={styles.emptyTugasText}>
               Belum ada tugas yang dibuat
             </Text>
@@ -216,7 +226,7 @@ export default function ProkerDetailScreen({ route, navigation }) {
 
         {/* Read-only notice */}
         <View style={styles.readOnlyBox}>
-          <Text style={styles.readOnlyIcon}>ℹ️</Text>
+          <FontAwesome5 name="info-circle" size={14} color="#1e40af" solid />
           <Text style={styles.readOnlyText}>
             Status tugas hanya dapat diubah oleh admin/PIC melalui panel admin.
           </Text>
@@ -230,11 +240,11 @@ export default function ProkerDetailScreen({ route, navigation }) {
 
 // ── Sub Components ──────────────────────────────────────────
 
-function InfoCard({ icon, label, value }) {
+function InfoCard({ iconName, label, value }) {
   return (
     <View style={styles.infoCard}>
       <View style={styles.infoIconBox}>
-        <Text style={styles.infoIcon}>{icon}</Text>
+        <FontAwesome5 name={iconName} size={18} color="#7c3aed" solid />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={styles.infoLabel}>{label}</Text>
@@ -281,7 +291,6 @@ const styles = StyleSheet.create({
   },
   loadingText: { color: "#94a3b8", fontSize: 14 },
 
-  errorIcon: { fontSize: 48 },
   errorTitle: { fontSize: 18, fontWeight: "800", color: "#1e293b" },
   errorMsg: { fontSize: 14, color: "#64748b", textAlign: "center" },
   btnRetry: {
@@ -314,7 +323,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 2,
   },
-  backIcon: { color: "#fff", fontSize: 26, fontWeight: "700", marginTop: -3 },
 
   headerContent: { flex: 1, gap: 8 },
   statusBadgeHeader: {
@@ -329,6 +337,11 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: "#fff",
     lineHeight: 25,
+  },
+  headerDivisiRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
   headerDivisi: {
     fontSize: 12,
@@ -369,6 +382,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  progressMetaRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
   progressMetaText: { fontSize: 11, color: "#64748b" },
 
   // Info section
@@ -394,7 +412,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  infoIcon: { fontSize: 20 },
   infoLabel: { fontSize: 11, color: "#94a3b8", fontWeight: "600" },
   infoValue: {
     fontSize: 13,
@@ -414,6 +431,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  deskripsiLabelRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   deskripsiLabel: { fontSize: 12, fontWeight: "800", color: "#64748b" },
   deskripsiText: { fontSize: 13, color: "#475569", lineHeight: 20 },
 
@@ -426,6 +444,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 4,
   },
+  tugasTitleRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   tugasSectionTitle: { fontSize: 14, fontWeight: "800", color: "#1e293b" },
   tugasSectionCount: { fontSize: 11, color: "#94a3b8", fontWeight: "600" },
 
@@ -490,7 +509,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  emptyTugasIcon: { fontSize: 40 },
   emptyTugasText: { fontSize: 13, color: "#94a3b8" },
 
   readOnlyBox: {
@@ -502,7 +520,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     borderWidth: 1,
     borderColor: "#bfdbfe",
+    alignItems: "flex-start",
   },
-  readOnlyIcon: { fontSize: 16 },
   readOnlyText: { flex: 1, fontSize: 11, color: "#1e40af", lineHeight: 16 },
 });

@@ -10,6 +10,7 @@ import {
   Animated,
 } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { catatPresensi } from "../services/api";
 
 // Status tampilan layar
@@ -90,7 +91,7 @@ export default function ScanScreen() {
   if (!permission.granted) {
     return (
       <View style={styles.center}>
-        <Text style={styles.permissionIcon}>📷</Text>
+        <FontAwesome5 name="camera" size={56} color="#94a3b8" style={styles.permissionIcon} />
         <Text style={styles.permissionTitle}>Izin Kamera Dibutuhkan</Text>
         <Text style={styles.permissionDesc}>
           Aplikasi perlu mengakses kamera Anda untuk scan QR Code presensi.
@@ -113,7 +114,13 @@ export default function ScanScreen() {
             isSuccess ? styles.cardSuccess : styles.cardError,
           ]}
         >
-          <Text style={styles.resultIcon}>{isSuccess ? "✅" : "❌"}</Text>
+          <FontAwesome5
+            name={isSuccess ? "check-circle" : "times-circle"}
+            size={56}
+            color={isSuccess ? "#22c55e" : "#ef4444"}
+            style={{ marginBottom: 8 }}
+            solid
+          />
           <Text
             style={[
               styles.resultTitle,
@@ -130,9 +137,14 @@ export default function ScanScreen() {
           )}
         </View>
 
-        <TouchableOpacity style={styles.btnPrimary} onPress={resetScanner}>
+        <TouchableOpacity style={[styles.btnPrimary, styles.btnPrimaryRow]} onPress={resetScanner}>
+          <FontAwesome5
+            name={isSuccess ? "check" : "undo"}
+            size={15}
+            color="#fff"
+          />
           <Text style={styles.btnPrimaryText}>
-            {isSuccess ? "✓  Selesai" : "↩  Scan Ulang"}
+            {isSuccess ? "Selesai" : "Scan Ulang"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -196,9 +208,8 @@ export default function ScanScreen() {
           Posisikan QR Code di dalam kotak di atas
         </Text>
         <View style={styles.tipRow}>
-          <Text style={styles.tipText}>
-            💡 Pastikan cahaya cukup & tangan stabil
-          </Text>
+          <FontAwesome5 name="lightbulb" size={12} color="rgba(255,255,255,0.7)" solid />
+          <Text style={styles.tipText}>Pastikan cahaya cukup & tangan stabil</Text>
         </View>
       </View>
     </View>
@@ -327,11 +338,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   tipRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
     backgroundColor: "rgba(255,255,255,0.1)",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
   },
+  btnPrimaryRow: { flexDirection: "row", gap: 10 },
   tipText: {
     color: "rgba(255,255,255,0.7)",
     fontSize: 12,
@@ -404,7 +419,7 @@ const styles = StyleSheet.create({
   },
 
   // Izin kamera
-  permissionIcon: { fontSize: 64, marginBottom: 20 },
+  permissionIcon: { marginBottom: 20 },
   permissionTitle: {
     fontSize: 20,
     fontWeight: "700",
