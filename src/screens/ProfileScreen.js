@@ -18,7 +18,7 @@ import { getProfile } from "../services/profileApi";
 import AvatarDisplay from "../components/AvatarDisplay";
 
 export default function ProfileScreen({ navigation }) {
-  const { user, signOut } = useAuth();
+  const { user, signOut, updateAvatar } = useAuth();
   const [idCard, setIdCard] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -34,12 +34,13 @@ export default function ProfileScreen({ navigation }) {
       ]);
       setIdCard(idCardRes);
       setProfile(profileRes.data);
+      updateAvatar(profileRes.data?.avatar ?? null);
     } catch (e) {
       setError(e.message);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [updateAvatar]);
 
   useFocusEffect(
     useCallback(() => {

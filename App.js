@@ -2,7 +2,9 @@
 // Materi diakses via Stack screen (bukan tab) sesuai pilihan "Card di Beranda"
 
 import React from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Image, StyleSheet, Text, View } from "react-native";
+
+const brandImage = require("./assets/brand.png");
 import { useFonts, Inter_300Light, Inter_400Regular } from "@expo-google-fonts/inter";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { NavigationContainer } from "@react-navigation/native";
@@ -32,6 +34,10 @@ const Tab = createBottomTabNavigator();
 
 function TabIcon({ name, color, focused }) {
   return <FontAwesome5 name={name} size={focused ? 22 : 19} color={color} solid />;
+}
+
+function ProfileTabIcon({ focused, color }) {
+  return <TabIcon name="user" focused={focused} color={color} />;
 }
 
 function KasTabIcon({ focused, color }) {
@@ -113,10 +119,17 @@ function MainTabs() {
         }}
       />
       <Tab.Screen
-        name="Riwayat"
-        component={RiwayatScreen}
+        name="Profile"
+        component={ProfileScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="clipboard-list" focused={focused} color={color} />,
+          headerShown: true,
+          title: "Profil Saya",
+          headerStyle: { backgroundColor: "#1a56db" },
+          headerShadowVisible: false,
+          headerTintColor: "#fff",
+          headerTitleStyle: { fontWeight: "700", fontSize: 17 },
+          tabBarLabel: "Profil",
+          tabBarIcon: ({ focused, color }) => <ProfileTabIcon focused={focused} color={color} />,
         }}
       />
     </Tab.Navigator>
@@ -153,14 +166,14 @@ function AppStack() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="Riwayat"
+        component={RiwayatScreen}
+        options={{ title: "Riwayat Presensi" }}
+      />
+      <Stack.Screen
         name="IdCard"
         component={IdCardScreen}
         options={{ title: "ID Card Saya" }}
-      />
-      <Stack.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{ title: "Profil Saya" }}
       />
       <Stack.Screen
         name="EditAvatar"
@@ -179,18 +192,7 @@ function AppStack() {
 function RootNavigator() {
   const { user, loading } = useAuth();
   if (loading) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "#f0f4ff",
-        }}
-      >
-        <ActivityIndicator size="large" color="#1a4ff5" />
-      </View>
-    );
+    return <SplashView />;
   }
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -203,15 +205,33 @@ function RootNavigator() {
   );
 }
 
+function SplashView() {
+  return (
+    <View style={splashStyles.container}>
+      <Image source={brandImage} style={splashStyles.logo} resizeMode="contain" />
+      <ActivityIndicator size="small" color="#1a4ff5" style={{ marginTop: 32 }} />
+    </View>
+  );
+}
+
+const splashStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f0f4ff",
+  },
+  logo: {
+    width: 200,
+    height: 100,
+  },
+});
+
 export default function App() {
   const [fontsLoaded] = useFonts({ Inter_300Light, Inter_400Regular });
 
   if (!fontsLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f8faff" }}>
-        <ActivityIndicator size="large" color="#1a4ff5" />
-      </View>
-    );
+    return <SplashView />;
   }
 
   return (

@@ -218,6 +218,14 @@ export default function ProkerListScreen({ navigation }) {
   );
 }
 
+function parseFaIconName(faClass, fallback = "tag") {
+  if (!faClass) return fallback;
+  const m = faClass.match(/fa-(?:solid|regular|brands)\s+fa-([^\s]+)/);
+  if (m) return m[1];
+  const s = faClass.match(/^fa-([^\s]+)/);
+  return s ? s[1] : fallback;
+}
+
 // ═══════════════════════════════════════════════════════════
 // PROKER CARD
 // ═══════════════════════════════════════════════════════════
@@ -266,7 +274,15 @@ function ProkerCard({ proker, onPress }) {
         {/* Jenis (divisi) */}
         <View style={styles.cardMetaRow}>
           <View style={styles.divisiBadge}>
-            <Text style={styles.divisiBadgeText}>{proker.jenis_label}</Text>
+            <FontAwesome5
+              name={proker.is_umum ? "globe" : parseFaIconName(proker.divisi?.icon)}
+              size={10}
+              color="#7c3aed"
+              solid
+            />
+            <Text style={styles.divisiBadgeText}>
+              {proker.is_umum ? "Proker Umum" : (proker.divisi?.nama ?? "Divisi")}
+            </Text>
           </View>
           {proker.pic && (
             <View style={styles.picRow}>
@@ -485,6 +501,9 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   divisiBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
     backgroundColor: "#f5f3ff",
     paddingHorizontal: 8,
     paddingVertical: 3,

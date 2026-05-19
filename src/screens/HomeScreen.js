@@ -1,5 +1,5 @@
 // src/screens/HomeScreen.js
-import React, { useCallback, useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -9,25 +9,14 @@ import {
   Alert,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
-import { getProfile } from "../services/profileApi";
 import AvatarDisplay from "../components/AvatarDisplay";
 import KasRingkasanCard from "../components/KasRingkasanCard";
 import MateriRingkasanCard from "../components/MateriRingkaksanCard";
 import ProkerRingkasanCard from "../components/ProkerRingkasanCard";
 
 export default function HomeScreen({ navigation }) {
-  const { user, signOut } = useAuth();
-  const [avatar, setAvatar] = useState(null);
-
-  useFocusEffect(
-    useCallback(() => {
-      getProfile()
-        .then((res) => setAvatar(res.data?.avatar ?? null))
-        .catch(() => {});
-    }, [])
-  );
+  const { user, avatar, signOut } = useAuth();
 
   const handleLogout = () => {
     Alert.alert("Keluar", "Anda yakin ingin keluar dari akun?", [
@@ -57,13 +46,13 @@ export default function HomeScreen({ navigation }) {
           <TouchableOpacity
             onPress={() => navigation.navigate("Profile")}
             activeOpacity={0.85}
+            style={styles.avatarWrap}
           >
             <AvatarDisplay
               avatar={avatar}
               name={user?.name}
               size={48}
-              borderRadius={15}
-              style={styles.avatarBox}
+              borderRadius={14}
             />
           </TouchableOpacity>
         </View>
@@ -183,9 +172,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "rgba(255,255,255,0.7)",
   },
-  avatarBox: {
-    borderWidth: 2.5,
-    borderColor: "rgba(255,255,255,0.6)",
+  avatarWrap: {
+    borderRadius: 14,
+    overflow: "hidden",
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.5)",
   },
   statusBadge: {
     flexDirection: "row",

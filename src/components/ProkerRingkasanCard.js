@@ -169,7 +169,9 @@ function ProkerRow({ proker, onPress, showSep }) {
 
         {/* Meta */}
         <View style={styles.rowMeta}>
-          <Text style={styles.rowJenis}>{proker.jenis_label}</Text>
+          <Text style={styles.rowJenis}>
+            {proker.is_umum ? "Proker Umum" : (proker.divisi?.nama ?? "Divisi")}
+          </Text>
           {proker.is_terlambat ? (
             <View style={styles.lateChip}>
               <FontAwesome5 name="exclamation-triangle" size={8} color="#FF3B30" solid />

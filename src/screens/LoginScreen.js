@@ -11,8 +11,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from "react-native";
+
+const logoImage = require("../../assets/logo.png");
 import { FontAwesome5 } from "@expo/vector-icons";
+import Svg, { Defs, LinearGradient, Stop, Text as SvgText } from "react-native-svg";
 import { login } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
@@ -53,10 +57,29 @@ export default function LoginScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.logoBox}>
-            <Text style={styles.logoEmoji}>🎓</Text>
+            <Image source={logoImage} style={styles.logoImage} resizeMode="contain" />
           </View>
-          <Text style={styles.appName}>UKM MCI</Text>
-          <Text style={styles.appTagline}>Sistem Presensi Digital</Text>
+          <Svg height={38} width={200}>
+            <Defs>
+              <LinearGradient id="titleGrad" x1="0" y1="0" x2="1" y2="0">
+                <Stop offset="0" stopColor="#1a4ff5" />
+                <Stop offset="0.5" stopColor="#0ea5e9" />
+                <Stop offset="1" stopColor="#38bdf8" />
+              </LinearGradient>
+            </Defs>
+            <SvgText
+              fill="url(#titleGrad)"
+              fontSize="30"
+              fontWeight="800"
+              letterSpacing="1"
+              x="100"
+              y="30"
+              textAnchor="middle"
+            >
+              UKM MCI
+            </SvgText>
+          </Svg>
+          <Text style={styles.appTagline}>Sistem Management Administrasi UKM</Text>
         </View>
 
         {/* Form Card */}
@@ -68,7 +91,10 @@ export default function LoginScreen() {
 
           {/* Email */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>📧 Email</Text>
+            <View style={styles.labelRow}>
+              <FontAwesome5 name="envelope" size={13} color="#475569" solid />
+              <Text style={styles.label}>Email</Text>
+            </View>
             <TextInput
               style={styles.input}
               placeholder="contoh@email.com"
@@ -83,7 +109,10 @@ export default function LoginScreen() {
 
           {/* Password */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>🔒 Kata Sandi</Text>
+            <View style={styles.labelRow}>
+              <FontAwesome5 name="lock" size={13} color="#475569" solid />
+              <Text style={styles.label}>Kata Sandi</Text>
+            </View>
             <View style={styles.passwordRow}>
               <TextInput
                 style={[styles.input, { flex: 1, marginBottom: 0 }]}
@@ -145,26 +174,21 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   logoBox: {
-    width: 80,
-    height: 80,
+    width: 90,
+    height: 90,
     borderRadius: 24,
-    backgroundColor: "#1a56db",
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
     shadowColor: "#1a56db",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.15,
     shadowRadius: 10,
     elevation: 6,
+    padding: 10,
   },
-  logoEmoji: { fontSize: 38 },
-  appName: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: "#1e293b",
-    letterSpacing: 1,
-  },
+  logoImage: { width: 70, height: 70 },
   appTagline: {
     fontSize: 14,
     color: "#64748b",
@@ -198,11 +222,16 @@ const styles = StyleSheet.create({
 
   // Input
   inputGroup: { marginBottom: 20 },
+  labelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    marginBottom: 8,
+  },
   label: {
     fontSize: 13,
     fontWeight: "600",
     color: "#475569",
-    marginBottom: 8,
   },
   input: {
     borderWidth: StyleSheet.hairlineWidth,

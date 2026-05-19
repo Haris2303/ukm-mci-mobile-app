@@ -290,6 +290,14 @@ export default function MateriScreen() {
   );
 }
 
+function parseFaIconName(faClass, fallback = "tag") {
+  if (!faClass) return fallback;
+  const m = faClass.match(/fa-(?:solid|regular|brands)\s+fa-([^\s]+)/);
+  if (m) return m[1];
+  const s = faClass.match(/^fa-([^\s]+)/);
+  return s ? s[1] : fallback;
+}
+
 // ═══════════════════════════════════════════════════════════
 // MATERI CARD
 // ═══════════════════════════════════════════════════════════
@@ -301,11 +309,15 @@ function MateriCard({ materi, isDownloading, onDownload, onOpenLink }) {
       <View style={[styles.cardAccent, { backgroundColor: accentColor }]} />
 
       <View style={styles.cardBody}>
-        <View
-          style={[styles.jenisBadge, { backgroundColor: accentColor + "15" }]}
-        >
+        <View style={[styles.jenisBadge, { backgroundColor: accentColor + "15" }]}>
+          <FontAwesome5
+            name={materi.is_umum ? "globe" : parseFaIconName(materi.divisi?.icon)}
+            size={10}
+            color={accentColor}
+            solid
+          />
           <Text style={[styles.jenisBadgeText, { color: accentColor }]}>
-            {materi.jenis_label}
+            {materi.is_umum ? "Umum" : (materi.divisi?.nama ?? "Divisi")}
           </Text>
         </View>
 
@@ -470,6 +482,9 @@ const styles = StyleSheet.create({
 
   jenisBadge: {
     alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
     paddingHorizontal: 9,
     paddingVertical: 3,
     borderRadius: 10,

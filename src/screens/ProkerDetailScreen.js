@@ -14,6 +14,14 @@ import {
 import { FontAwesome5 } from "@expo/vector-icons";
 import { getProkerDetail } from "../services/prokerApi";
 
+function parseFaIconName(faClass, fallback = "tag") {
+  if (!faClass) return fallback;
+  const m = faClass.match(/fa-(?:solid|regular|brands)\s+fa-([^\s]+)/);
+  if (m) return m[1];
+  const s = faClass.match(/^fa-([^\s]+)/);
+  return s ? s[1] : fallback;
+}
+
 export default function ProkerDetailScreen({ route, navigation }) {
   const { id } = route.params;
 
@@ -105,7 +113,12 @@ export default function ProkerDetailScreen({ route, navigation }) {
           <Text style={[styles.metaStatusText, { color: progressColor }]}>{data.label_status}</Text>
         </View>
         <View style={styles.metaDivisiRow}>
-          <FontAwesome5 name="globe" size={11} color="#64748b" solid />
+          <FontAwesome5
+            name={data.divisi ? parseFaIconName(data.divisi.icon) : "globe"}
+            size={11}
+            color="#64748b"
+            solid
+          />
           <Text style={styles.metaDivisiText}>
             {data.divisi ? data.divisi.nama : "Proker Umum"}
           </Text>

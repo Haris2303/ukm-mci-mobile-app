@@ -17,6 +17,7 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [avatar, setAvatar] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,16 +26,25 @@ export function AuthProvider({ children }) {
       if (loggedIn) {
         const storedUser = await getStoredUser();
         setUser(storedUser);
+        if (storedUser?.avatar) setAvatar(storedUser.avatar);
       }
       setLoading(false);
     })();
   }, []);
 
-  const signIn = (userData) => setUser(userData);
+  const signIn = (userData) => {
+    setUser(userData);
+    if (userData?.avatar) setAvatar(userData.avatar);
+  };
+
+  const updateAvatar = useCallback((avatarStr) => {
+    setAvatar(avatarStr ?? null);
+  }, []);
 
   const signOut = useCallback(async () => {
     await apiLogout();
     setUser(null);
+    setAvatar(null);
   }, []);
 
   // Daftarkan signOut ke central handler agar 401 bisa auto-redirect ke login
@@ -43,7 +53,7 @@ export function AuthProvider({ children }) {
   }, [signOut]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, avatar, loading, signIn, signOut, updateAvatar }}>
       {children}
     </AuthContext.Provider>
   );

@@ -124,7 +124,7 @@ export default function MateriRingkasanCard({ onPress }) {
                 {materi.judul}
               </Text>
               <Text style={styles.previewItemMeta} numberOfLines={1}>
-                {materi.jenis_label} · {materi.tanggal}
+                {materi.is_umum ? "Umum" : (materi.divisi?.nama ?? "Divisi")} · {materi.tanggal}
               </Text>
             </View>
             <FontAwesome5 name="chevron-right" size={14} color={colors.neutral300} />

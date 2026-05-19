@@ -1,7 +1,4 @@
 // src/screens/IdCardScreen.js
-// Halaman ID Card digital anggota UKM MCI
-// Dual mode: background image (Mode A) atau gradient template (Mode B)
-
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   View,
@@ -14,7 +11,6 @@ import {
   ImageBackground,
   Alert,
   Linking,
-  Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import QRCode from "react-native-qrcode-svg";
@@ -22,6 +18,9 @@ import ViewShot from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { getMyIdCard } from "../services/idCardApi";
+import { parseAvatar } from "../components/AvatarDisplay";
+
+const CARD_WIDTH = 300;
 
 export default function IdCardScreen({ navigation }) {
   const [data, setData] = useState(null);
@@ -66,7 +65,6 @@ export default function IdCardScreen({ navigation }) {
     });
   }, [navigation, sharing, loading]);
 
-  // ── Share: capture card → share ─────────────────────────────
   const handleShare = async () => {
     if (!cardRef.current) return;
     setSharing(true);
@@ -78,16 +76,12 @@ export default function IdCardScreen({ navigation }) {
           mimeType: "image/png",
           dialogTitle: "Bagikan ID Card",
         });
+      } else if (data?.card_url) {
+        await Linking.openURL(data.card_url);
       } else {
-        // Fallback: buka card_url di browser
-        if (data?.card_url) {
-          await Linking.openURL(data.card_url);
-        } else {
-          Alert.alert("Tidak Tersedia", "Sharing tidak tersedia di perangkat ini.");
-        }
+        Alert.alert("Tidak Tersedia", "Sharing tidak tersedia di perangkat ini.");
       }
-    } catch (e) {
-      // Fallback: buka di browser
+    } catch {
       if (data?.card_url) {
         await Linking.openURL(data.card_url);
       } else {
@@ -98,7 +92,6 @@ export default function IdCardScreen({ navigation }) {
     }
   };
 
-  // ── Loading ─────────────────────────────────────────────────
   if (loading) {
     return (
       <View style={styles.center}>
@@ -108,11 +101,10 @@ export default function IdCardScreen({ navigation }) {
     );
   }
 
-  // ── Error ───────────────────────────────────────────────────
   if (error) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorIcon}>😕</Text>
+        <FontAwesome5 name="frown" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
         <Text style={styles.errorTitle}>Gagal Memuat ID Card</Text>
         <Text style={styles.errorMsg}>{error}</Text>
         <TouchableOpacity style={styles.btnRetry} onPress={fetchData}>
@@ -124,10 +116,8 @@ export default function IdCardScreen({ navigation }) {
 
   if (!data) return null;
 
-  const { user, member_id, foto_url, background_image_url, profile_url } = data;
-  const hasBackground = !!background_image_url;
   const tahun = new Date().getFullYear();
-  const inisial = (user?.name ?? "A")[0].toUpperCase();
+  const inisial = (data.user?.name ?? "A")[0].toUpperCase();
 
   return (
     <View style={styles.container}>
@@ -135,35 +125,14 @@ export default function IdCardScreen({ navigation }) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* ── Card ────────────────────────────────────────── */}
-        <ViewShot
-          ref={cardRef}
-          options={{ format: "png", quality: 1 }}
-          style={styles.cardShotWrapper}
-        >
-          {hasBackground ? (
-            <CardWithBackground
-              backgroundUrl={background_image_url}
-              user={user}
-              memberId={member_id}
-              fotoUrl={foto_url}
-              profileUrl={profile_url}
-              inisial={inisial}
-              tahun={tahun}
-            />
-          ) : (
-            <CardWithGradient
-              user={user}
-              memberId={member_id}
-              fotoUrl={foto_url}
-              profileUrl={profile_url}
-              inisial={inisial}
-              tahun={tahun}
-            />
-          )}
-        </ViewShot>
+        {/* Card */}
+        <View style={styles.cardShadow}>
+          <ViewShot ref={cardRef} options={{ format: "png", quality: 1 }}>
+            <IdCard data={data} inisial={inisial} tahun={tahun} />
+          </ViewShot>
+        </View>
 
-        {/* ── Share Button ────────────────────────────────── */}
+        {/* Share */}
         <TouchableOpacity
           style={styles.shareBtn}
           onPress={handleShare}
@@ -174,15 +143,15 @@ export default function IdCardScreen({ navigation }) {
             <ActivityIndicator color="#fff" size="small" />
           ) : (
             <>
-              <Text style={styles.shareBtnIcon}>📤</Text>
+              <FontAwesome5 name="share-alt" size={16} color="#fff" solid />
               <Text style={styles.shareBtnText}>Bagikan ID Card</Text>
             </>
           )}
         </TouchableOpacity>
 
-        {/* ── Info ────────────────────────────────────────── */}
+        {/* Info */}
         <View style={styles.infoBox}>
-          <Text style={styles.infoIcon}>ℹ️</Text>
+          <FontAwesome5 name="info-circle" size={16} color="#1e40af" solid />
           <Text style={styles.infoText}>
             ID Card ini adalah kartu anggota digital resmi UKM MCI. QR Code
             dapat di-scan untuk verifikasi keanggotaan Anda.
@@ -195,192 +164,159 @@ export default function IdCardScreen({ navigation }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
-// MODE A — Card dengan Background Image
-// ═══════════════════════════════════════════════════════════════
-function CardWithBackground({
-  backgroundUrl,
-  user,
-  memberId,
-  fotoUrl,
-  profileUrl,
-  inisial,
-  tahun,
-}) {
-  return (
-    <View style={styles.card}>
-      <ImageBackground
-        source={{ uri: backgroundUrl }}
-        style={styles.cardBg}
-        resizeMode="cover"
-        imageStyle={{ borderRadius: 16 }}
-      >
-        {/* Header overlay */}
-        <View style={styles.cardHeaderOverlay}>
-          <CardHeaderContent />
-        </View>
+// ═══════════════════════════════════════════════════════════
+// ID CARD — layout mengikuti show.blade.php
+// Mode A: background image dari admin panel (transparent content)
+// Mode B: gradient biru (default template)
+// ═══════════════════════════════════════════════════════════
+function IdCard({ data, inisial, tahun }) {
+  const {
+    user,
+    avatar,
+    background_image_url: bgUrl,
+    profile_url: profileUrl,
+  } = data;
+  const hb = !!bgUrl;
+  const parsed = parseAvatar(avatar);
 
-        {/* Body panel */}
-        <View style={styles.cardBodyBg}>
-          <CardBody
-            user={user}
-            memberId={memberId}
-            fotoUrl={fotoUrl}
-            profileUrl={profileUrl}
-            inisial={inisial}
-            tahun={tahun}
-          />
-        </View>
-      </ImageBackground>
-    </View>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// MODE B — Card dengan Gradient Template
-// ═══════════════════════════════════════════════════════════════
-function CardWithGradient({
-  user,
-  memberId,
-  fotoUrl,
-  profileUrl,
-  inisial,
-  tahun,
-}) {
-  return (
-    <View style={styles.card}>
-      {/* Gradient header */}
-      <LinearGradient
-        colors={["#1a4ff5", "#3671ff"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.cardHeaderGradient}
-      >
-        <CardHeaderContent />
-      </LinearGradient>
-
-      {/* Body */}
-      <View style={styles.cardBodyGradient}>
-        <CardBody
-          user={user}
-          memberId={memberId}
-          fotoUrl={fotoUrl}
-          profileUrl={profileUrl}
-          inisial={inisial}
-          tahun={tahun}
-        />
-      </View>
-    </View>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// SHARED COMPONENTS
-// ═══════════════════════════════════════════════════════════════
-
-function CardHeaderContent() {
-  return (
-    <View style={styles.headerRow}>
-      <View style={styles.logoCircle}>
+  // ── Header ────────────────────────────────────────────────
+  const header = (
+    <LinearGradient
+      colors={
+        hb
+          ? ["rgba(0,0,0,0.45)", "rgba(0,0,0,0.08)"]
+          : ["#1a4ff5", "#3671ff"]
+      }
+      start={{ x: 0, y: 0 }}
+      end={hb ? { x: 0, y: 1 } : { x: 1, y: 0 }}
+      style={styles.cardHeader}
+    >
+      <View style={styles.logoBox}>
         <Text style={styles.logoText}>M</Text>
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={styles.orgName}>Unit Kegiatan Mahasiswa</Text>
-        <Text style={styles.orgFull}>MCI — Mahasiswa Creative & Innovation</Text>
+        <Text style={styles.orgLabel}>Unit Kegiatan Mahasiswa</Text>
+        <Text style={styles.orgTitle}>
+          MCI — Mahasiswa Creative & Innovation
+        </Text>
       </View>
-    </View>
+    </LinearGradient>
   );
-}
 
-function CardBody({ user, memberId, fotoUrl, profileUrl, inisial, tahun }) {
-  return (
-    <View style={styles.bodyContent}>
-      {/* ── Foto + Info utama ─────────────────────── */}
-      <View style={styles.profileRow}>
-        {fotoUrl ? (
-          <Image
-            source={{ uri: fotoUrl }}
-            style={styles.profilePhoto}
-            resizeMode="cover"
-          />
-        ) : (
-          <LinearGradient
-            colors={["#1a4ff5", "#3671ff"]}
-            style={styles.profilePlaceholder}
-          >
-            <Text style={styles.profileInisial}>{inisial}</Text>
-          </LinearGradient>
-        )}
+  // ── Photo — supports emoji, photo upload, and initials ────
+  const photoStyle = [styles.photo, hb && styles.photoBg];
+  let photoEl;
+  if (parsed.type === "photo") {
+    photoEl = (
+      <Image source={{ uri: parsed.url }} style={photoStyle} resizeMode="cover" />
+    );
+  } else if (parsed.type === "emoji") {
+    photoEl = (
+      <View style={[photoStyle, { backgroundColor: `#${parsed.bg}` }]}>
+        <Text style={styles.emojiAvatar}>{parsed.emoji}</Text>
+      </View>
+    );
+  } else {
+    photoEl = (
+      <LinearGradient colors={["#1a4ff5", "#3671ff"]} style={photoStyle}>
+        <Text style={styles.inisial}>{inisial}</Text>
+      </LinearGradient>
+    );
+  }
 
-        <View style={styles.profileInfo}>
-          <Text style={styles.profileName} numberOfLines={2}>
-            {user?.name ?? "—"}
+  // ── Body content (shared between both modes) ──────────────
+  const body = (
+    <>
+      {/* Foto — centered */}
+      <View style={styles.photoWrap}>
+        {hb ? <View style={styles.photoShadow}>{photoEl}</View> : photoEl}
+      </View>
+
+      {/* Nama + Role + Divisi — centered */}
+      <View style={styles.infoSection}>
+        <Text
+          style={[styles.cardName, hb && styles.cardNameBg]}
+          numberOfLines={2}
+        >
+          {user?.name ?? "—"}
+        </Text>
+
+        <View style={[styles.rolePill, hb && styles.rolePillBg]}>
+          <Text style={[styles.rolePillText, hb && styles.rolePillTextBg]}>
+            {user?.role_label ?? user?.role ?? "Anggota"}
           </Text>
-          <Text style={styles.memberId}>{memberId}</Text>
-          <View style={styles.roleBadge}>
-            <Text style={styles.roleBadgeText}>
-              {user?.role_label ?? user?.role ?? "Anggota"}
-            </Text>
-          </View>
+        </View>
+
+        <View style={[styles.divisiRow, hb && styles.divisiRowBg]}>
+          <Text style={[styles.divisiLabel, hb && styles.divisiLabelBg]}>
+            Divisi
+          </Text>
+          <Text style={[styles.divisiValue, hb && styles.divisiValueBg]}>
+            {user?.divisi ?? "—"}
+          </Text>
         </View>
       </View>
 
-      {/* ── Data fields ──────────────────────────── */}
-      <View style={styles.fieldsGrid}>
-        <View style={styles.fieldHalf}>
-          <Text style={styles.fieldLabel}>DIVISI</Text>
-          <Text style={styles.fieldValue}>{user?.divisi ?? "—"}</Text>
-        </View>
-        <View style={styles.fieldHalf}>
-          <Text style={styles.fieldLabel}>NO. HP</Text>
-          <Text style={styles.fieldValue}>{user?.no_hp ?? "—"}</Text>
-        </View>
-        <View style={styles.fieldFull}>
-          <Text style={styles.fieldLabel}>EMAIL</Text>
-          <Text style={styles.fieldValue} numberOfLines={1}>
-            {user?.email ?? "—"}
-          </Text>
-        </View>
-      </View>
+      {/* Divider */}
+      <View style={[styles.cardDivider, hb && styles.cardDividerBg]} />
 
-      {/* ── QR Code ──────────────────────────────── */}
-      <View style={styles.qrSection}>
-        <View style={styles.qrBox}>
+      {/* QR Code — centered */}
+      <View style={styles.qrWrap}>
+        <Text style={[styles.scanLabel, hb && styles.scanLabelBg]}>
+          Scan untuk verifikasi
+        </Text>
+        <View style={[styles.qrBox, hb && styles.qrBoxBg]}>
           {profileUrl ? (
             <QRCode
               value={profileUrl}
-              size={90}
+              size={110}
               backgroundColor="white"
-              color="#1a4ff5"
+              color="#1e293b"
             />
           ) : (
-            <View style={styles.qrPlaceholder}>
-              <Text style={styles.qrPlaceholderText}>QR</Text>
+            <View style={styles.qrEmpty}>
+              <Text style={styles.qrEmptyText}>QR</Text>
             </View>
           )}
         </View>
-        <View style={styles.qrInfo}>
-          <Text style={styles.qrScanLabel}>SCAN UNTUK{"\n"}VERIFIKASI</Text>
-          <Text style={styles.qrDesc}>
-            Arahkan kamera ke QR Code ini untuk memverifikasi keanggotaan
-          </Text>
-        </View>
       </View>
 
-      {/* ── Footer ───────────────────────────────── */}
-      <Text style={styles.cardFooter}>
-        UKM MCI · Kartu Anggota Resmi · {tahun}
-      </Text>
+      {/* Footer */}
+      <View style={[styles.cardFooterWrap, hb && styles.cardFooterWrapBg]}>
+        <Text style={[styles.footerText, hb && styles.footerTextBg]}>
+          UKM MCI · Kartu Anggota Resmi · {tahun}
+        </Text>
+      </View>
+    </>
+  );
+
+  // ── Mode A: background image ───────────────────────────────
+  if (hb) {
+    return (
+      <ImageBackground
+        source={{ uri: bgUrl }}
+        style={styles.card}
+        resizeMode="cover"
+        imageStyle={{ borderRadius: 20 }}
+      >
+        {header}
+        {body}
+      </ImageBackground>
+    );
+  }
+
+  // ── Mode B: gradient template ──────────────────────────────
+  return (
+    <View style={styles.card}>
+      {header}
+      {body}
     </View>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // STYLES
-// ═══════════════════════════════════════════════════════════════
-const CARD_WIDTH = 320;
-const CARD_HEIGHT = CARD_WIDTH * (5 / 3); // rasio 3:5
-
+// ═══════════════════════════════════════════════════════════
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f0f4ff" },
   center: {
@@ -392,7 +328,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f4ff",
   },
   loadingText: { color: "#94a3b8", fontSize: 14 },
-  errorIcon: { fontSize: 48 },
   errorTitle: { fontSize: 18, fontWeight: "800", color: "#1e293b" },
   errorMsg: { fontSize: 14, color: "#64748b", textAlign: "center" },
   btnRetry: {
@@ -411,248 +346,192 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
 
-  // ── Card wrapper ──
-  cardShotWrapper: {
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-  card: {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
-    borderRadius: 16,
-    overflow: "hidden",
+  // Shadow wrapper — separate from clip layer so shadow isn't clipped
+  cardShadow: {
+    borderRadius: 20,
     backgroundColor: "#fff",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.11,
-    shadowRadius: 16,
-    elevation: 5,
+    shadowRadius: 20,
+    elevation: 6,
   },
 
-  // ── Mode A: Background ──
-  cardBg: {
-    flex: 1,
-    borderRadius: 16,
-  },
-  cardHeaderOverlay: {
-    backgroundColor: "rgba(0,0,0,0.35)",
-    paddingTop: 20,
-    paddingBottom: 14,
-    paddingHorizontal: 18,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-  },
-  cardBodyBg: {
-    flex: 1,
-    backgroundColor: "rgba(255,255,255,0.94)",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    marginTop: -8,
-    paddingTop: 4,
-  },
-
-  // ── Mode B: Gradient ──
-  cardHeaderGradient: {
-    paddingTop: 20,
-    paddingBottom: 14,
-    paddingHorizontal: 18,
-  },
-  cardBodyGradient: {
-    flex: 1,
+  // Clip container (content clipped to rounded corners)
+  card: {
+    width: CARD_WIDTH,
+    borderRadius: 20,
+    overflow: "hidden",
     backgroundColor: "#fff",
-    paddingTop: 4,
   },
 
-  // ── Card Header content ──
-  headerRow: {
+  // ── Header ──
+  cardHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 14,
   },
-  logoCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.25)",
+  logoBox: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
+    flexShrink: 0,
   },
-  logoText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "900",
-  },
-  orgName: {
-    color: "rgba(255,255,255,0.85)",
+  logoText: { color: "#fff", fontSize: 15, fontWeight: "800" },
+  orgLabel: {
     fontSize: 9,
     fontWeight: "600",
-    letterSpacing: 0.5,
-  },
-  orgFull: {
-    color: "#fff",
-    fontSize: 11,
-    fontWeight: "800",
-    marginTop: 1,
-  },
-
-  // ── Card Body content ──
-  bodyContent: {
-    flex: 1,
-    paddingHorizontal: 18,
-    paddingTop: 14,
-    paddingBottom: 10,
-    justifyContent: "space-between",
-  },
-
-  // Profile row
-  profileRow: {
-    flexDirection: "row",
-    gap: 14,
-    alignItems: "flex-start",
-  },
-  profilePhoto: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#1a4ff5",
-  },
-  profilePlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#1a4ff5",
-  },
-  profileInisial: {
-    color: "#fff",
-    fontSize: 28,
-    fontWeight: "800",
-  },
-  profileInfo: {
-    flex: 1,
-    paddingTop: 2,
-    gap: 4,
-  },
-  profileName: {
-    fontSize: 15,
-    fontWeight: "800",
-    color: "#0f172a",
-    lineHeight: 20,
-  },
-  memberId: {
-    fontSize: 11,
-    fontWeight: "800",
-    color: "#1a4ff5",
-    letterSpacing: 1,
-  },
-  roleBadge: {
-    alignSelf: "flex-start",
-    backgroundColor: "#eef5ff",
-    borderWidth: 1,
-    borderColor: "#bdd8ff",
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 12,
-    marginTop: 2,
-  },
-  roleBadgeText: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: "#1a4ff5",
-  },
-
-  // Fields grid
-  fieldsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    marginTop: 10,
-  },
-  fieldHalf: {
-    width: "47%",
-    backgroundColor: "#f8fafc",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-  },
-  fieldFull: {
-    width: "100%",
-    backgroundColor: "#f8fafc",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-  },
-  fieldLabel: {
-    fontSize: 9,
-    fontWeight: "700",
-    color: "#94a3b8",
-    letterSpacing: 0.5,
+    color: "rgba(255,255,255,0.75)",
     textTransform: "uppercase",
+    letterSpacing: 0.8,
     marginBottom: 2,
   },
-  fieldValue: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#1e293b",
-  },
+  orgTitle: { fontSize: 11, fontWeight: "700", color: "#fff", lineHeight: 15 },
 
-  // QR section
-  qrSection: {
+  // ── Photo ──
+  photoWrap: { paddingTop: 22, paddingBottom: 14, alignItems: "center" },
+  photoShadow: {
+    borderRadius: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  photo: {
+    width: 96,
+    height: 96,
+    borderRadius: 14,
+    borderWidth: 3,
+    borderColor: "#1a4ff5",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+  photoBg: { borderColor: "#fff" },
+  inisial: { color: "#fff", fontSize: 34, fontWeight: "800" },
+  emojiAvatar: { fontSize: 42 },
+
+  // ── Info (centered) ──
+  infoSection: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    alignItems: "center",
+    gap: 8,
+  },
+  cardName: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#0f172a",
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  cardNameBg: { color: "#fff" },
+
+  rolePill: {
+    paddingHorizontal: 12,
+    paddingVertical: 3,
+    borderRadius: 999,
+    backgroundColor: "#eef5ff",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#bdd8ff",
+  },
+  rolePillBg: {
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderColor: "rgba(255,255,255,0.35)",
+  },
+  rolePillText: { fontSize: 10, fontWeight: "600", color: "#1a4ff5" },
+  rolePillTextBg: { color: "#fff" },
+
+  divisiRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 14,
-    marginTop: 10,
-    paddingTop: 10,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "#E5E5EA",
-  },
-  qrBox: {
-    padding: 6,
-    backgroundColor: "#fff",
-    borderRadius: 10,
+    gap: 6,
+    backgroundColor: "#f8fafc",
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(0,0,0,0.08)",
+    borderColor: "#e2e8f0",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
   },
-  qrPlaceholder: {
-    width: 90,
-    height: 90,
+  divisiRowBg: {
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderColor: "rgba(255,255,255,0.3)",
+  },
+  divisiLabel: {
+    fontSize: 9,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    color: "#94a3b8",
+  },
+  divisiLabelBg: { color: "rgba(255,255,255,0.7)" },
+  divisiValue: { fontSize: 12, fontWeight: "600", color: "#334155" },
+  divisiValueBg: { color: "#fff" },
+
+  // ── Divider ──
+  cardDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: "#e2e8f0",
+    marginHorizontal: 20,
+  },
+  cardDividerBg: {
+    backgroundColor: "rgba(255,255,255,0.25)",
+    marginHorizontal: 24,
+  },
+
+  // ── QR (centered) ──
+  qrWrap: { paddingTop: 18, paddingBottom: 20, alignItems: "center", gap: 10 },
+  scanLabel: {
+    fontSize: 8.5,
+    fontWeight: "600",
+    color: "#94a3b8",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  scanLabelBg: { color: "rgba(255,255,255,0.75)" },
+  qrBox: { borderRadius: 8, overflow: "hidden" },
+  qrBoxBg: {
+    backgroundColor: "rgba(255,255,255,0.92)",
+    borderRadius: 12,
+    padding: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  qrEmpty: {
+    width: 110,
+    height: 110,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f1f5f9",
     borderRadius: 8,
   },
-  qrPlaceholderText: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#cbd5e1",
-  },
-  qrInfo: {
-    flex: 1,
-    gap: 4,
-  },
-  qrScanLabel: {
-    fontSize: 11,
-    fontWeight: "800",
-    color: "#1a4ff5",
-    letterSpacing: 0.5,
-    lineHeight: 15,
-  },
-  qrDesc: {
-    fontSize: 10,
-    color: "#94a3b8",
-    lineHeight: 14,
-  },
+  qrEmptyText: { fontSize: 20, fontWeight: "800", color: "#cbd5e1" },
 
-  // Footer
-  cardFooter: {
-    fontSize: 9,
+  // ── Footer ──
+  cardFooterWrap: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "#f1f5f9",
+  },
+  cardFooterWrapBg: { borderTopColor: "rgba(255,255,255,0.2)" },
+  footerText: {
+    fontSize: 8,
     color: "#cbd5e1",
     textAlign: "center",
-    marginTop: 8,
+    letterSpacing: 0.6,
   },
+  footerTextBg: { color: "rgba(255,255,255,0.55)" },
 
   // ── Share button ──
   shareBtn: {
@@ -672,12 +551,12 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-  shareBtnIcon: { fontSize: 18 },
   shareBtnText: { color: "#fff", fontSize: 15, fontWeight: "700" },
 
   // ── Info box ──
   infoBox: {
     flexDirection: "row",
+    alignItems: "flex-start",
     gap: 10,
     backgroundColor: "#eff6ff",
     borderRadius: 14,
@@ -687,6 +566,5 @@ const styles = StyleSheet.create({
     borderColor: "#bfdbfe",
     width: CARD_WIDTH,
   },
-  infoIcon: { fontSize: 18 },
   infoText: { flex: 1, fontSize: 12, color: "#1e40af", lineHeight: 18 },
 });
