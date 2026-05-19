@@ -1,42 +1,45 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, typography, radius, shadow, spacing } from '../../theme/theme';
+import { colors, radius, shadow, spacing } from '../../theme/theme';
 
 /**
- * Card — surface putih, border tipis, shadow ringan.
+ * Card — iOS-style surface dengan squircle corners & shadow minimalis.
  *
  * Props:
- *   onPress     () => void — jika diisi, card menjadi touchable
- *   style       ViewStyle override untuk container
- *   contentStyle ViewStyle override untuk inner content
+ *   onPress      () => void — jika diisi, card menjadi touchable
+ *   style        ViewStyle override
+ *   contentStyle ViewStyle override untuk inner wrapper
+ *   shadow       'none' | 'xs' | 'sm' | 'md' | 'lg'   default: 'sm'
+ *   radius       number                                 default: 12
  *
- * Sub-komponen (gunakan sebagai children terstruktur):
- *   <Card.Header>   — area atas, biasanya title + badge
- *   <Card.Body>     — konten utama
- *   <Card.Footer>   — area bawah, biasanya action button
- *   <Card.Badge>    — pill tag kecil uppercase
- *
- * Contoh penggunaan:
- *   <Card onPress={...}>
- *     <Card.Header>
- *       <Card.Badge>Aktif</Card.Badge>
- *       <Text style={...}>Judul</Text>
- *     </Card.Header>
- *     <Card.Body>
- *       <Text>Isi konten</Text>
- *     </Card.Body>
- *     <Card.Footer>
- *       <Button>Lihat Detail</Button>
- *     </Card.Footer>
- *   </Card>
+ * Sub-komponen:
+ *   <Card.Header>   area atas, title + badge
+ *   <Card.Body>     konten utama
+ *   <Card.Footer>   area bawah dengan separator tipis
+ *   <Card.Badge>    pill tag kecil
  */
-function Card({ onPress, style, contentStyle, children }) {
+function Card({
+  onPress,
+  style,
+  contentStyle,
+  shadowLevel = 'sm',
+  borderRadius = radius.md,
+  children,
+}) {
+  const cardStyle = [
+    styles.card,
+    { borderRadius },
+    shadow[shadowLevel] ?? shadow.sm,
+    style,
+  ];
+
   if (onPress) {
     return (
       <TouchableOpacity
         onPress={onPress}
         activeOpacity={0.92}
-        style={[styles.card, style]}
+        style={cardStyle}
+        experimental_continuousCorners={true}
       >
         <View style={[styles.content, contentStyle]}>{children}</View>
       </TouchableOpacity>
@@ -44,7 +47,10 @@ function Card({ onPress, style, contentStyle, children }) {
   }
 
   return (
-    <View style={[styles.card, style]}>
+    <View
+      style={cardStyle}
+      experimental_continuousCorners={true}
+    >
       <View style={[styles.content, contentStyle]}>{children}</View>
     </View>
   );
@@ -64,21 +70,18 @@ function CardFooter({ style, children }) {
   return <View style={[styles.footer, style]}>{children}</View>;
 }
 
-/**
- * Badge/pill-tag — rounded-full, background #daeaff, text #1340e1, uppercase.
- */
-function CardBadge({ style, textStyle, children }) {
+function CardBadge({ color, bgColor, style, children }) {
   return (
-    <View style={[styles.badge, style]}>
-      <Text style={[styles.badgeText, textStyle]}>{children}</Text>
+    <View style={[styles.badge, bgColor ? { backgroundColor: bgColor } : null, style]}>
+      <Text style={[styles.badgeText, color ? { color } : null]}>{children}</Text>
     </View>
   );
 }
 
 Card.Header = CardHeader;
-Card.Body = CardBody;
+Card.Body   = CardBody;
 Card.Footer = CardFooter;
-Card.Badge = CardBadge;
+Card.Badge  = CardBadge;
 
 export default Card;
 
@@ -87,16 +90,12 @@ export default Card;
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
-    ...shadow.sm,
+    overflow: 'hidden',
   },
-  content: {
-    // padding dihandle per-section agar header/footer bisa punya warna berbeda
-  },
+  content: {},
 
-  // ─── Header ─────────────────────────────────────
   header: {
     paddingHorizontal: spacing[4],
     paddingTop: spacing[4],
@@ -107,34 +106,33 @@ const styles = StyleSheet.create({
     gap: spacing[2],
   },
 
-  // ─── Body ────────────────────────────────────────
   body: {
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
   },
 
-  // ─── Footer ──────────────────────────────────────
   footer: {
     paddingHorizontal: spacing[4],
     paddingBottom: spacing[4],
-    paddingTop: spacing[2],
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
+    paddingTop: spacing[3],
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.separatorOpaque,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[3],
   },
 
-  // ─── Badge ────────────────────────────────────────
   badge: {
     backgroundColor: colors.badgeBg,
-    borderRadius: radius.full,
+    borderRadius: 999,
     paddingHorizontal: spacing[3],
     paddingVertical: 3,
     alignSelf: 'flex-start',
   },
   badgeText: {
-    ...typography.badge,
+    fontSize: 11,
+    fontWeight: '600',
     color: colors.badgeText,
+    letterSpacing: 0.3,
   },
 });

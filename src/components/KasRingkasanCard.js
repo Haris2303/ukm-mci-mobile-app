@@ -67,10 +67,6 @@ export default function KasRingkasanCard({ onPress }) {
               {saldoOrganisasi?.diperbarui_pada ?? "Memuat..."}
             </Text>
           </View>
-          <View style={styles.metaRight}>
-            <Text style={styles.metaCta}>Lihat detail</Text>
-            <FontAwesome5 name="chevron-right" size={10} color={colors.mintVivid} />
-          </View>
         </View>
       </TouchableOpacity>
 
@@ -128,10 +124,10 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     position: "relative",
     shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 5,
   },
   circle1: {
     position: "absolute",
@@ -198,16 +194,10 @@ const styles = StyleSheet.create({
     borderTopColor: "rgba(255,255,255,0.15)",
   },
   metaLeft: { flexDirection: "row", alignItems: "center", gap: 5 },
-  metaRight: { flexDirection: "row", alignItems: "center", gap: 4 },
   metaText: {
     color: "rgba(255,255,255,0.7)",
     fontSize: 11,
     fontFamily: fontFamily.light,
-  },
-  metaCta: {
-    color: colors.mintVivid,
-    fontSize: 12,
-    fontFamily: fontFamily.regular,
   },
 
   // ── Alert Tunggakan ──
@@ -216,7 +206,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing[3],
     backgroundColor: colors.warningLight,
-    borderWidth: 1.5,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#fcd34d",
     borderRadius: 16,
     padding: spacing[4],
@@ -264,7 +254,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing[3],
     backgroundColor: colors.successLight,
-    borderWidth: 1.5,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#86efac",
     borderRadius: 16,
     padding: 14,

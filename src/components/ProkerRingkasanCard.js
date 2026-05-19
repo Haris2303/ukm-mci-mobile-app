@@ -1,7 +1,4 @@
 // src/components/ProkerRingkasanCard.js
-// Card preview program kerja untuk HomeScreen.
-// Tampilkan ringkasan: total + breakdown status + 2 proker terbaru
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -12,10 +9,12 @@ import {
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { getProker } from "../services/prokerApi";
-import { colors, fontFamily, spacing } from "../theme/theme";
+import { shadow } from "../theme/theme";
+
+const PURPLE = "#7c3aed";
 
 export default function ProkerRingkasanCard({ onPress }) {
-  const [data, setData] = useState(null);
+  const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,8 +23,8 @@ export default function ProkerRingkasanCard({ onPress }) {
       try {
         const res = await getProker();
         if (mounted) setData(res.data);
-      } catch (e) {
-        // silent fail — fallback ke empty state
+      } catch {
+        // silent fail
       } finally {
         if (mounted) setLoading(false);
       }
@@ -33,137 +32,133 @@ export default function ProkerRingkasanCard({ onPress }) {
     return () => { mounted = false; };
   }, []);
 
-  // ── Loading skeleton ─────────────────────────────────────
   if (loading) {
     return (
-      <View style={styles.skeleton}>
-        <ActivityIndicator color={colors.primary} />
+      <View style={[styles.card, styles.loadingCard]}>
+        <ActivityIndicator color={PURPLE} />
       </View>
     );
   }
 
-  // ── Empty state ─────────────────────────────────────────
   if (!data || data.statistik.total === 0) {
     return (
       <TouchableOpacity
-        style={styles.emptyCard}
+        style={[styles.card, styles.emptyCard]}
         onPress={onPress}
-        activeOpacity={0.9}
+        activeOpacity={0.88}
+        experimental_continuousCorners={true}
       >
-        <Text style={styles.emptyIcon}>📊</Text>
+        <FontAwesome5 name="clipboard-list" size={24} color={PURPLE} solid />
         <View style={{ flex: 1 }}>
           <Text style={styles.emptyTitle}>Belum Ada Proker</Text>
-          <Text style={styles.emptyDesc}>
-            Program kerja akan muncul di sini.
-          </Text>
+          <Text style={styles.emptyDesc}>Program kerja akan muncul di sini.</Text>
         </View>
+        <FontAwesome5 name="chevron-right" size={13} color="#C6C6C8" />
       </TouchableOpacity>
     );
   }
 
   const { statistik, proker } = data;
-  const previewProker = proker.slice(0, 2);
+  const preview = proker.slice(0, 2);
 
   return (
-    <View style={styles.wrapper}>
-      {/* ── Header summary card ────────────────────── */}
+    <View
+      style={styles.card}
+      experimental_continuousCorners={true}
+    >
+      {/* ── Header ─────────────────────────────────────── */}
       <TouchableOpacity
-        style={styles.summaryCard}
+        style={styles.header}
         onPress={onPress}
-        activeOpacity={0.92}
+        activeOpacity={0.88}
       >
-        <View style={styles.circle1} />
-        <View style={styles.circle2} />
-
-        <View style={styles.summaryHeader}>
-          <View style={styles.summaryIconBox}>
-            <FontAwesome5 name="chart-bar" size={22} color={colors.textOnPrimary} solid />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.summaryLabel}>Program Kerja</Text>
-            <Text style={styles.summaryHint}>Tracking divisi & UKM</Text>
-          </View>
-          <View style={styles.totalBadge}>
-            <Text style={styles.totalBadgeNum}>{statistik.total}</Text>
-            <Text style={styles.totalBadgeLabel}>proker</Text>
-          </View>
+        <View style={styles.headerIconBox}>
+          <FontAwesome5 name="tasks" size={16} color="#fff" solid />
         </View>
-
-        <View style={styles.statsRow}>
-          <StatBox iconName="clipboard-list" label="Planning" value={statistik.planning} />
-          <View style={styles.statDivider} />
-          <StatBox iconName="rocket" label="Berjalan" value={statistik.active} />
-          <View style={styles.statDivider} />
-          <StatBox iconName="check-circle" label="Selesai" value={statistik.completed} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.headerTitle}>Program Kerja</Text>
+          <Text style={styles.headerSub}>Tracking divisi & UKM</Text>
         </View>
-
-        {statistik.terlambat > 0 && (
-          <View style={styles.terlambatBox}>
-            <FontAwesome5 name="exclamation-triangle" size={11} color={colors.textOnPrimary} solid />
-            <Text style={styles.terlambatText}>
-              {statistik.terlambat} proker terlambat
-            </Text>
-          </View>
-        )}
+        <View style={styles.totalBadge}>
+          <Text style={styles.totalNum}>{statistik.total}</Text>
+          <Text style={styles.totalLabel}>proker</Text>
+        </View>
       </TouchableOpacity>
 
-      {/* ── Preview 2 proker terbaru ───────────────── */}
-      <View style={styles.previewWrap}>
-        <Text style={styles.previewTitle}>Terbaru</Text>
-        {previewProker.map((p, idx) => (
-          <ProkerPreviewItem
-            key={p.id ?? `proker-preview-${idx}`}
+      {/* ── Stat row ───────────────────────────────────── */}
+      <View style={styles.statRow}>
+        <StatPill iconName="clipboard-list" label="Planning"  value={statistik.planning}  />
+        <View style={styles.statSep} />
+        <StatPill iconName="rocket"         label="Berjalan"  value={statistik.active}    />
+        <View style={styles.statSep} />
+        <StatPill iconName="check-circle"   label="Selesai"   value={statistik.completed} />
+      </View>
+
+      {statistik.terlambat > 0 && (
+        <View style={styles.lateBar}>
+          <FontAwesome5 name="exclamation-triangle" size={10} color="#FF3B30" solid />
+          <Text style={styles.lateText}>{statistik.terlambat} proker terlambat</Text>
+        </View>
+      )}
+
+      {/* ── Separator ──────────────────────────────────── */}
+      <View style={styles.divider} />
+
+      {/* ── Preview items ──────────────────────────────── */}
+      <View style={styles.listWrap}>
+        {preview.map((p, i) => (
+          <ProkerRow
+            key={p.id ?? i}
             proker={p}
             onPress={onPress}
+            showSep={i < preview.length - 1}
           />
         ))}
-        <TouchableOpacity onPress={onPress} style={styles.viewAllBtn}>
-          <Text style={styles.viewAllText}>Lihat semua proker</Text>
-          <FontAwesome5 name="arrow-right" size={11} color={colors.violet} />
-        </TouchableOpacity>
       </View>
+
     </View>
   );
 }
 
-// ── StatBox ──────────────────────────────────────────────
-function StatBox({ iconName, label, value }) {
+// ─── StatPill ─────────────────────────────────────────────────────────────────
+function StatPill({ iconName, label, value }) {
   return (
-    <View style={styles.statBox}>
-      <FontAwesome5 name={iconName} size={14} color="rgba(255,255,255,0.8)" solid />
+    <View style={styles.statPill}>
+      <FontAwesome5 name={iconName} size={11} color="rgba(255,255,255,0.75)" solid />
       <Text style={styles.statNum}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
 }
 
-// ── Preview Item ─────────────────────────────────────────
-function ProkerPreviewItem({ proker, onPress }) {
+// ─── ProkerRow ────────────────────────────────────────────────────────────────
+function ProkerRow({ proker, onPress, showSep }) {
   const progressColor =
-    proker.warna_progress === "success"
-      ? colors.success
-      : proker.warna_progress === "danger"
-        ? colors.error
-        : proker.warna_progress === "warning"
-          ? colors.warning
-          : colors.primary;
+    proker.warna_progress === "success" ? "#34C759" :
+    proker.warna_progress === "danger"  ? "#FF3B30" :
+    proker.warna_progress === "warning" ? "#FF9500" :
+    PURPLE;
 
   return (
     <TouchableOpacity
-      style={styles.previewItem}
+      style={[styles.row, showSep && styles.rowSep]}
       onPress={onPress}
-      activeOpacity={0.85}
+      activeOpacity={0.75}
     >
-      <View style={[styles.previewAccent, { backgroundColor: progressColor }]} />
-      <View style={styles.previewBody}>
-        <Text style={styles.previewName} numberOfLines={1}>
-          {proker.nama_proker}
-        </Text>
-        <Text style={styles.previewMeta} numberOfLines={1}>
-          {proker.jenis_label}
-        </Text>
+      {/* Color accent */}
+      <View style={[styles.rowAccent, { backgroundColor: progressColor }]} />
 
-        <View style={styles.progressBar}>
+      <View style={styles.rowBody}>
+        {/* Name + % */}
+        <View style={styles.rowTop}>
+          <Text style={styles.rowName} numberOfLines={1}>{proker.nama_proker}</Text>
+          <Text style={[styles.rowPct, { color: progressColor }]}>
+            {proker.progress_persen}%
+          </Text>
+        </View>
+
+        {/* Progress bar */}
+        <View style={styles.progressBg}>
           <View
             style={[
               styles.progressFill,
@@ -172,17 +167,16 @@ function ProkerPreviewItem({ proker, onPress }) {
           />
         </View>
 
-        <View style={styles.progressMeta}>
-          <Text style={[styles.progressPercent, { color: progressColor }]}>
-            {proker.progress_persen}%
-          </Text>
+        {/* Meta */}
+        <View style={styles.rowMeta}>
+          <Text style={styles.rowJenis}>{proker.jenis_label}</Text>
           {proker.is_terlambat ? (
-            <View style={styles.terlambatRow}>
-              <FontAwesome5 name="exclamation-triangle" size={10} color="#ef4444" solid />
-              <Text style={[styles.previewSisa, { color: "#ef4444" }]}>Terlambat</Text>
+            <View style={styles.lateChip}>
+              <FontAwesome5 name="exclamation-triangle" size={8} color="#FF3B30" solid />
+              <Text style={styles.lateChipText}>Terlambat</Text>
             </View>
           ) : (
-            <Text style={styles.previewSisa}>{proker.sisa_hari_label}</Text>
+            <Text style={styles.rowSisa}>{proker.sisa_hari_label}</Text>
           )}
         </View>
       </View>
@@ -190,13 +184,18 @@ function ProkerPreviewItem({ proker, onPress }) {
   );
 }
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  wrapper: { gap: spacing[2] + 2 },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(0,0,0,0.08)",
+    overflow: "hidden",
+    ...shadow.sm,
+  },
 
-  skeleton: {
-    backgroundColor: colors.surface,
-    borderRadius: 20,
-    padding: 30,
+  loadingCard: {
     alignItems: "center",
     justifyContent: "center",
     minHeight: 120,
@@ -207,206 +206,123 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
-    backgroundColor: colors.background,
-    borderRadius: 20,
     padding: 18,
-    borderWidth: 1.5,
-    borderStyle: "dashed",
-    borderColor: colors.border,
   },
-  emptyIcon: { fontSize: 36 },
-  emptyTitle: {
-    fontSize: 14,
-    fontFamily: fontFamily.regular,
-    color: colors.neutral600,
-  },
-  emptyDesc: {
-    fontSize: 11,
-    fontFamily: fontFamily.light,
-    color: colors.neutral400,
-    marginTop: 2,
-  },
+  emptyTitle: { fontSize: 14, fontWeight: "600", color: "#000", marginBottom: 2 },
+  emptyDesc:  { fontSize: 12, color: "#8E8E93" },
 
-  // ── Summary card (violet — sesuai token colors.violet) ──
-  summaryCard: {
-    backgroundColor: colors.violet,
-    borderRadius: 22,
-    padding: 18,
-    overflow: "hidden",
-    position: "relative",
-    shadowColor: colors.violet,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.22,
-    shadowRadius: 14,
-    elevation: 6,
-    gap: 14,
+  // ── Header ──
+  header: {
+    backgroundColor: PURPLE,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 16,
   },
-  circle1: {
-    position: "absolute",
-    top: -30,
-    right: -30,
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: "rgba(255,255,255,0.08)",
-  },
-  circle2: {
-    position: "absolute",
-    bottom: -25,
-    left: -25,
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: "rgba(15,244,198,0.1)",
-  },
-  summaryHeader: { flexDirection: "row", alignItems: "center", gap: spacing[3] },
-  summaryIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: "rgba(255,255,255,0.18)",
+  headerIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
   },
-  summaryIconText: { fontSize: 22 },
-  summaryLabel: {
-    color: colors.textOnPrimary,
-    fontSize: 14,
-    fontFamily: fontFamily.regular,
-  },
-  summaryHint: {
-    color: "rgba(255,255,255,0.7)",
-    fontSize: 11,
-    fontFamily: fontFamily.light,
-    marginTop: 1,
-  },
-
+  headerTitle: { fontSize: 15, fontWeight: "700", color: "#fff" },
+  headerSub:   { fontSize: 11, color: "rgba(255,255,255,0.7)", marginTop: 1 },
   totalBadge: {
     backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: spacing[3],
-    paddingVertical: 5,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  totalBadgeNum: {
-    color: colors.textOnPrimary,
-    fontSize: 18,
-    fontFamily: fontFamily.regular,
-  },
-  totalBadgeLabel: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 9,
-    fontFamily: fontFamily.regular,
-  },
-
-  statsRow: {
-    flexDirection: "row",
-    backgroundColor: "rgba(255,255,255,0.12)",
-    borderRadius: 12,
-    padding: 6,
-  },
-  statBox: { flex: 1, alignItems: "center", paddingVertical: 6, gap: 2 },
-  statDivider: { width: 1, backgroundColor: "rgba(255,255,255,0.2)" },
-  statEmoji: { fontSize: 16 },
-  statNum: {
-    color: colors.textOnPrimary,
-    fontSize: 16,
-    fontFamily: fontFamily.regular,
-  },
-  statLabel: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 9,
-    fontFamily: fontFamily.regular,
-  },
-
-  terlambatBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    backgroundColor: "rgba(239,68,68,0.25)",
-    paddingHorizontal: spacing[3],
-    paddingVertical: 8,
     borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    alignItems: "center",
   },
-  terlambatText: {
-    color: colors.textOnPrimary,
-    fontSize: 11,
-    fontFamily: fontFamily.regular,
-  },
+  totalNum:   { fontSize: 17, fontWeight: "700", color: "#fff" },
+  totalLabel: { fontSize: 9, color: "rgba(255,255,255,0.75)", marginTop: 1 },
 
-  // ── Preview list ──
-  previewWrap: {
-    backgroundColor: colors.surface,
-    borderRadius: 18,
-    padding: 14,
-    gap: spacing[2] + 2,
-    shadowColor: colors.textPrimary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  previewTitle: {
-    fontSize: 11,
-    fontFamily: fontFamily.regular,
-    color: colors.neutral400,
-    letterSpacing: 0.6,
-    textTransform: "uppercase",
-    marginBottom: 2,
-  },
-  previewItem: {
+  // ── Stat row ──
+  statRow: {
     flexDirection: "row",
-    gap: spacing[3],
-    paddingVertical: 6,
+    backgroundColor: "#6d28d9",
+    paddingHorizontal: 16,
+    paddingBottom: 14,
+    paddingTop: 2,
+    gap: 0,
   },
-  previewAccent: { width: 4, borderRadius: 2 },
-  previewBody: { flex: 1, gap: 4 },
-  previewName: {
-    fontSize: 13,
-    fontFamily: fontFamily.regular,
-    color: colors.textPrimary,
+  statPill: { flex: 1, alignItems: "center", gap: 2, paddingVertical: 6 },
+  statSep:  { width: StyleSheet.hairlineWidth, backgroundColor: "rgba(255,255,255,0.2)", marginVertical: 6 },
+  statNum:  { fontSize: 16, fontWeight: "700", color: "#fff" },
+  statLabel:{ fontSize: 9, color: "rgba(255,255,255,0.75)" },
+
+  // ── Late bar ──
+  lateBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(255,59,48,0.1)",
+    marginHorizontal: 12,
+    marginBottom: 2,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
   },
-  previewMeta: {
-    fontSize: 11,
-    fontFamily: fontFamily.light,
-    color: colors.neutral400,
+  lateText: { fontSize: 12, color: "#FF3B30", fontWeight: "600" },
+
+  // ── Divider ──
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: "#E5E5EA",
+    marginTop: 8,
   },
 
-  progressBar: {
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: colors.neutral100,
-    overflow: "hidden",
-    marginTop: 4,
-  },
-  progressFill: { height: "100%", borderRadius: 3 },
+  // ── List ──
+  listWrap: { paddingHorizontal: 14, paddingTop: 4 },
 
-  progressMeta: {
+  row: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    paddingVertical: 12,
+    gap: 12,
+  },
+  rowSep: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#E5E5EA",
+  },
+  rowAccent: { width: 3, borderRadius: 2 },
+  rowBody: { flex: 1, gap: 5 },
+
+  rowTop: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  progressPercent: { fontSize: 11, fontFamily: fontFamily.regular },
-  previewSisa: {
-    fontSize: 10,
-    fontFamily: fontFamily.light,
-    color: colors.neutral400,
-  },
-  terlambatRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  rowName: { fontSize: 14, fontWeight: "600", color: "#000", flex: 1 },
+  rowPct:  { fontSize: 13, fontWeight: "700", marginLeft: 8 },
 
-  viewAllBtn: {
+  progressBg: {
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: "#F2F2F7",
+    overflow: "hidden",
+  },
+  progressFill: { height: "100%", borderRadius: 3 },
+
+  rowMeta: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  rowJenis: { fontSize: 11, color: "#8E8E93" },
+  rowSisa:  { fontSize: 11, color: "#8E8E93" },
+
+  lateChip: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingTop: spacing[2] + 2,
-    borderTopWidth: 1,
-    borderTopColor: colors.neutral100,
+    gap: 3,
+    backgroundColor: "rgba(255,59,48,0.1)",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
-  viewAllText: {
-    color: colors.violet,
-    fontSize: 12,
-    fontFamily: fontFamily.regular,
-  },
+  lateChipText: { fontSize: 10, color: "#FF3B30", fontWeight: "600" },
+
 });

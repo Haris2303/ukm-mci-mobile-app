@@ -76,12 +76,7 @@ export default function HomeScreen({ navigation }) {
 
       {/* ── Keuangan ──────────────────────────────────────── */}
       <View style={styles.section}>
-        <View style={styles.sectionTitleRow}>
-          <Text style={styles.sectionTitle}>Keuangan</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("E-Kas")}>
-            <Text style={styles.seeAll}>Lihat Semua →</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.sectionTitle}>Keuangan</Text>
         <KasRingkasanCard onPress={() => navigation.navigate("E-Kas")} />
       </View>
 
@@ -102,25 +97,13 @@ export default function HomeScreen({ navigation }) {
 
       {/* ── Pembelajaran ─────────────────────────────────── */}
       <View style={styles.section}>
-        <View style={styles.sectionTitleRow}>
-          <Text style={styles.sectionTitle}>Pembelajaran</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Materi")}>
-            <Text style={styles.seeAll}>Lihat Semua →</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.sectionTitle}>Pembelajaran</Text>
         <MateriRingkasanCard onPress={() => navigation.navigate("Materi")} />
       </View>
 
       {/* ── Program Kerja ────────────────────────────────── */}
       <View style={styles.section}>
-        <View style={styles.sectionTitleRow}>
-          <Text style={styles.sectionTitle}>Program Kerja</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Proker")}>
-            <Text style={[styles.seeAll, { color: "#7c3aed" }]}>
-              Lihat Semua →
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.sectionTitle}>Program Kerja</Text>
         <ProkerRingkasanCard onPress={() => navigation.navigate("Proker")} />
       </View>
 
@@ -230,21 +213,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     marginTop: 24,
   },
-  sectionTitleRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 14,
-  },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "700",
     color: "#1e293b",
-  },
-  seeAll: {
-    fontSize: 13,
-    color: "#1a4ff5",
-    fontWeight: "600",
+    marginBottom: 14,
   },
 
   menuGrid: {

@@ -131,10 +131,6 @@ export default function MateriRingkasanCard({ onPress }) {
           </TouchableOpacity>
         ))}
 
-        <TouchableOpacity onPress={onPress} style={styles.viewAllBtn}>
-          <Text style={styles.viewAllText}>Lihat semua materi</Text>
-          <FontAwesome5 name="arrow-right" size={11} color={colors.primary} />
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -161,7 +157,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     borderRadius: 20,
     padding: 18,
-    borderWidth: 1.5,
+    borderWidth: StyleSheet.hairlineWidth,
     borderStyle: "dashed",
     borderColor: colors.border,
   },
@@ -186,10 +182,10 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     position: "relative",
     shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.22,
-    shadowRadius: 14,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 5,
     gap: 14,
   },
   circle1: {
@@ -274,13 +270,15 @@ const styles = StyleSheet.create({
   previewWrap: {
     backgroundColor: colors.surface,
     borderRadius: 18,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(0,0,0,0.08)",
     padding: 14,
     gap: spacing[2] + 2,
-    shadowColor: colors.textPrimary,
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowRadius: 3,
+    elevation: 1,
   },
   previewTitle: {
     fontSize: 11,
@@ -323,18 +321,4 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.light,
   },
 
-  viewAllBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingTop: spacing[2] + 2,
-    borderTopWidth: 1,
-    borderTopColor: colors.neutral100,
-  },
-  viewAllText: {
-    color: colors.primary,
-    fontSize: 12,
-    fontFamily: fontFamily.regular,
-  },
 });

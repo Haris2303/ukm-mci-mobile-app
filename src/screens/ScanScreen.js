@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
   },
-  btnPrimaryRow: { flexDirection: "row", gap: 10 },
+  btnPrimaryRow: { flexDirection: "row", gap: 10, justifyContent: "center" },
   tipText: {
     color: "rgba(255,255,255,0.7)",
     fontSize: 12,
@@ -368,12 +368,12 @@ const styles = StyleSheet.create({
   },
   cardSuccess: {
     backgroundColor: "#f0fdf4",
-    borderWidth: 2,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#86efac",
   },
   cardError: {
     backgroundColor: "#fef2f2",
-    borderWidth: 2,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#fca5a5",
   },
   resultIcon: { fontSize: 56, marginBottom: 8 },
@@ -407,10 +407,10 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: "center",
     shadowColor: "#1a56db",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
   btnPrimaryText: {
     color: "#fff",

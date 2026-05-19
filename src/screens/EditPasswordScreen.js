@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#eff6ff",
     borderRadius: 14,
     padding: 14,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#bfdbfe",
     alignItems: "flex-start",
   },
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
   },
-  divider: { height: 1, backgroundColor: "#f1f5f9", marginHorizontal: 14 },
+  divider: { height: StyleSheet.hairlineWidth, backgroundColor: "#E5E5EA", marginHorizontal: 14 },
 
   fieldWrapper: { paddingHorizontal: 14, paddingVertical: 14, gap: 8 },
   fieldLabel: {
@@ -272,8 +272,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#f8fafc",
     borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: "#e2e8f0",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(0,0,0,0.1)",
     paddingHorizontal: 14,
     height: 48,
   },

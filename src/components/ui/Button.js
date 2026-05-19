@@ -6,26 +6,28 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { colors, typography, radius, size, spacing } from '../../theme/theme';
+import { colors, radius, spacing, size } from '../../theme/theme';
 
 /**
- * Button — pill shape, dua variant: primary & secondary.
+ * Button — iOS-style dengan squircle corners.
  *
  * Props:
- *   variant   'primary' | 'secondary'          default: 'primary'
- *   sizeVariant 'sm' | 'md' | 'lg'             default: 'md'
- *   onPress   () => void
- *   loading   boolean                           default: false
- *   disabled  boolean                           default: false
- *   fullWidth boolean                           default: false
- *   leftIcon  ReactNode — icon sebelum label
- *   rightIcon ReactNode — icon setelah label
- *   style     ViewStyle override
- *   textStyle TextStyle override
+ *   variant     'filled' | 'tinted' | 'plain' | 'destructive'   default: 'filled'
+ *   color       string — warna brand (default: colors.primary)
+ *   sizeVariant 'sm' | 'md' | 'lg'                              default: 'md'
+ *   onPress     () => void
+ *   loading     boolean
+ *   disabled    boolean
+ *   fullWidth   boolean
+ *   leftIcon    ReactNode
+ *   rightIcon   ReactNode
+ *   style       ViewStyle override
+ *   textStyle   TextStyle override
  */
 export default function Button({
   children,
-  variant = 'primary',
+  variant = 'filled',
+  color,
   sizeVariant = 'md',
   onPress,
   loading = false,
@@ -37,33 +39,39 @@ export default function Button({
   textStyle,
   ...rest
 }) {
-  const isPrimary = variant === 'primary';
+  const baseColor = variant === 'destructive'
+    ? colors.systemRed
+    : (color ?? colors.primary);
+
   const isDisabled = disabled || loading;
 
   const containerStyle = [
     styles.base,
     styles[sizeVariant],
-    isPrimary ? styles.primary : styles.secondary,
+    variantContainer(variant, baseColor),
     fullWidth && styles.fullWidth,
-    isDisabled && (isPrimary ? styles.primaryDisabled : styles.secondaryDisabled),
+    isDisabled && styles.disabled,
     style,
   ];
 
   const labelStyle = [
     styles.label,
     styles[`${sizeVariant}Label`],
-    isPrimary ? styles.primaryLabel : styles.secondaryLabel,
+    variantLabel(variant, baseColor),
     textStyle,
   ];
 
-  const indicatorColor = isPrimary ? colors.textOnPrimary : colors.primary;
+  const indicatorColor = (variant === 'filled' || variant === 'destructive')
+    ? '#fff'
+    : baseColor;
 
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={isDisabled}
-      activeOpacity={0.82}
+      activeOpacity={0.8}
       style={containerStyle}
+      experimental_continuousCorners={true}
       {...rest}
     >
       {loading ? (
@@ -79,81 +87,60 @@ export default function Button({
   );
 }
 
+function variantContainer(variant, color) {
+  switch (variant) {
+    case 'filled':
+    case 'destructive':
+      return { backgroundColor: color };
+    case 'tinted':
+      return { backgroundColor: color + '1A' }; // ~10% opacity
+    case 'plain':
+      return { backgroundColor: 'transparent' };
+    default:
+      return { backgroundColor: color };
+  }
+}
+
+function variantLabel(variant, color) {
+  switch (variant) {
+    case 'filled':
+    case 'destructive':
+      return { color: '#fff' };
+    case 'tinted':
+    case 'plain':
+      return { color };
+    default:
+      return { color: '#fff' };
+  }
+}
+
 const styles = StyleSheet.create({
-  // ─── Base ──────────────────────────────────────────────────────
   base: {
-    borderRadius: radius.full,
+    borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'flex-start',
   },
-  fullWidth: {
-    alignSelf: 'stretch',
-  },
+  fullWidth: { alignSelf: 'stretch' },
+  disabled: { opacity: 0.4 },
+
   inner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  // ─── Size ─────────────────────────────────────────────────────
-  sm: {
-    height: size.buttonHeightSm,
-    paddingHorizontal: spacing[4],
-  },
-  md: {
-    height: size.buttonHeightMd,
-    paddingHorizontal: spacing[6],
-  },
-  lg: {
-    height: size.buttonHeightLg,
-    paddingHorizontal: spacing[8],
-  },
+  // ─── Size ─────────────────────────────────────────────────────────
+  sm: { height: size.buttonHeightSm, paddingHorizontal: spacing[4] },
+  md: { height: size.buttonHeightMd, paddingHorizontal: spacing[5] },
+  lg: { height: size.buttonHeightLg, paddingHorizontal: spacing[6] },
 
-  // ─── Variant: primary ─────────────────────────────────────────
-  primary: {
-    backgroundColor: colors.primary,
-  },
-  primaryDisabled: {
-    backgroundColor: colors.neutral300,
-  },
-  primaryLabel: {
-    color: colors.textOnPrimary,
-  },
+  // ─── Label ────────────────────────────────────────────────────────
+  label:    { fontWeight: '600', letterSpacing: -0.1 },
+  smLabel:  { fontSize: 14 },
+  mdLabel:  { fontSize: 16 },
+  lgLabel:  { fontSize: 17 },
 
-  // ─── Variant: secondary ───────────────────────────────────────
-  secondary: {
-    backgroundColor: colors.surface,
-    borderWidth: 1.5,
-    borderColor: colors.primary,
-  },
-  secondaryDisabled: {
-    borderColor: colors.neutral300,
-    backgroundColor: colors.surface,
-  },
-  secondaryLabel: {
-    color: colors.primary,
-  },
-
-  // ─── Label ────────────────────────────────────────────────────
-  label: {
-    ...typography.label,
-  },
-  smLabel: {
-    fontSize: 13,
-  },
-  mdLabel: {
-    fontSize: 15,
-  },
-  lgLabel: {
-    fontSize: 17,
-  },
-
-  // ─── Icon spacing ─────────────────────────────────────────────
-  iconLeft: {
-    marginRight: spacing[2],
-  },
-  iconRight: {
-    marginLeft: spacing[2],
-  },
+  iconLeft:  { marginRight: spacing[2] },
+  iconRight: { marginLeft: spacing[2] },
 });

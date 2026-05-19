@@ -1,53 +1,74 @@
 /**
- * Design tokens — warna sesuai web (Laravel/Tailwind).
- * Semua warna hardcoded di komponen harus diganti referensi ke sini.
+ * Design tokens — iOS-style color palette.
  */
 
 export const colors = {
-  // ─── Brand primary ──────────────────────────────────────────────
-  primary: '#1a4ff5',
-  primaryHover: '#1340e1',
-  primaryDark: '#18338f',
+  // ─── Brand ──────────────────────────────────────────────────────
+  primary: '#007AFF',        // iOS system blue
+  primaryTint: '#E5F1FF',    // 10% opacity blue fill
 
-  // ─── Accent (dekorasi saja, bukan warna dominan) ─────────────────
-  mintSoft: '#bdf8ec',
-  mintVivid: '#0ff4c6',
-  violet: '#8b5cf6',
+  // ─── iOS System colors ───────────────────────────────────────────
+  systemBlue:   '#007AFF',
+  systemGreen:  '#34C759',
+  systemRed:    '#FF3B30',
+  systemOrange: '#FF9500',
+  systemPurple: '#AF52DE',
+  systemTeal:   '#5AC8FA',
+  systemYellow: '#FFCC00',
+  systemIndigo: '#5856D6',
+  systemPink:   '#FF2D55',
+  systemMint:   '#00C7BE',
 
-  // ─── Background & surface ────────────────────────────────────────
-  background: '#f8faff',
-  surface: '#ffffff',
+  // ─── Background ──────────────────────────────────────────────────
+  background:           '#F2F2F7',   // systemGroupedBackground
+  backgroundSecondary:  '#FFFFFF',   // systemBackground
+  backgroundTertiary:   '#F2F2F7',   // systemTertiaryBackground
+
+  // ─── Surface (card / grouped list) ───────────────────────────────
+  surface:          '#FFFFFF',
+  surfaceSecondary: '#F2F2F7',
+  surfaceElevated:  '#FFFFFF',
+
+  // ─── Label ───────────────────────────────────────────────────────
+  label:          '#000000',
+  labelSecondary: '#8E8E93',
+  labelTertiary:  'rgba(60,60,67,0.3)',
+  labelQuaternary:'rgba(60,60,67,0.18)',
+  labelOnPrimary: '#FFFFFF',
+
+  // ─── Fill (tappable overlay, etc.) ───────────────────────────────
+  fill:          'rgba(120,120,128,0.2)',
+  fillSecondary: 'rgba(120,120,128,0.16)',
+  fillTertiary:  'rgba(120,120,128,0.12)',
+
+  // ─── Separator ───────────────────────────────────────────────────
+  separator:       'rgba(60,60,67,0.29)',
+  separatorOpaque: '#C6C6C8',
 
   // ─── Border ──────────────────────────────────────────────────────
-  border: '#e3e8ee',
+  border: 'rgba(0,0,0,0.08)',
 
-  // ─── Text ────────────────────────────────────────────────────────
-  textPrimary: '#0d253d',
-  textSecondary: '#273951',
-  textMuted: '#64748d',
-  textOnPrimary: '#ffffff',
-
-  // ─── Badge / pill-tag ────────────────────────────────────────────
-  badgeBg: '#daeaff',
-  badgeText: '#1340e1',
-
-  // ─── Semantic ────────────────────────────────────────────────────
-  success: '#22c55e',
-  successLight: '#f0fdf4',
-  warning: '#fbbf24',
-  warningLight: '#fef3c7',
-  error: '#ef4444',
-  errorLight: '#fef2f2',
-
-  // ─── Neutral scale ───────────────────────────────────────────────
-  neutral50: '#f8faff',
-  neutral100: '#f0f4ff',
-  neutral200: '#e2e8f0',
-  neutral300: '#cbd5e1',
-  neutral400: '#94a3b8',
-  neutral500: '#64748b',
-  neutral600: '#475569',
-  neutral700: '#334155',
-  neutral800: '#1e293b',
-  neutral900: '#0f172a',
+  // ─── Legacy (backward compat dengan komponen lama) ───────────────
+  textPrimary:   '#000000',
+  textSecondary: '#8E8E93',
+  textMuted:     'rgba(60,60,67,0.3)',
+  textOnPrimary: '#FFFFFF',
+  badgeBg:       '#E5F1FF',
+  badgeText:     '#007AFF',
+  success:       '#34C759',
+  successLight:  '#F0FFF4',
+  warning:       '#FF9500',
+  warningLight:  '#FFF8E6',
+  error:         '#FF3B30',
+  errorLight:    '#FFF2F1',
+  neutral50:     '#F9FAFB',
+  neutral100:    '#F2F2F7',
+  neutral200:    '#E5E5EA',
+  neutral300:    '#D1D1D6',
+  neutral400:    '#AEAEB2',
+  neutral500:    '#8E8E93',
+  neutral600:    '#636366',
+  neutral700:    '#48484A',
+  neutral800:    '#3A3A3C',
+  neutral900:    '#1C1C1E',
 };
