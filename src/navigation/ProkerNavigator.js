@@ -18,12 +18,14 @@ export default function ProkerNavigator() {
         headerTintColor: "#fff",
         headerTitleStyle: { fontWeight: "700", fontSize: 17 },
         headerBackTitle: "",
+        headerBackTitleVisible: false,
+        headerBackButtonDisplayMode: "minimal",
       }}
     >
       <Stack.Screen
         name="ProkerList"
         component={ProkerListScreen}
-        options={{ headerShown: false }}
+        options={{ title: "Program Kerja" }}
       />
       <Stack.Screen
         name="ProkerDetail"

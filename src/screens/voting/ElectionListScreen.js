@@ -42,7 +42,7 @@ export default function ElectionListScreen({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       fetchData();
-    }, [fetchData])
+    }, [fetchData]),
   );
 
   const renderItem = ({ item }) => {
@@ -91,7 +91,12 @@ export default function ElectionListScreen({ navigation }) {
 
           <View style={styles.cardFooter}>
             <View style={styles.waktuRow}>
-              <FontAwesome5 name={isAktif ? "clock" : "calendar-alt"} size={11} color="#94a3b8" solid />
+              <FontAwesome5
+                name={isAktif ? "clock" : "calendar-alt"}
+                size={11}
+                color="#94a3b8"
+                solid
+              />
               <Text style={styles.waktu}>
                 {isAktif ? `Berakhir: ${item.waktu_selesai}` : item.waktu_mulai}
               </Text>
@@ -123,7 +128,13 @@ export default function ElectionListScreen({ navigation }) {
   if (error) {
     return (
       <View style={styles.center}>
-        <FontAwesome5 name="exclamation-circle" size={44} color="#94a3b8" solid style={{ marginBottom: 12 }} />
+        <FontAwesome5
+          name="exclamation-circle"
+          size={44}
+          color="#94a3b8"
+          solid
+          style={{ marginBottom: 12 }}
+        />
         <Text style={styles.errorTitle}>Gagal Memuat Data</Text>
         <Text style={styles.errorMsg}>{error}</Text>
         <TouchableOpacity style={styles.btnRetry} onPress={() => fetchData()}>
@@ -150,7 +161,12 @@ export default function ElectionListScreen({ navigation }) {
         ]}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <FontAwesome5 name="vote-yea" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
+            <FontAwesome5
+              name="vote-yea"
+              size={48}
+              color="#94a3b8"
+              style={{ marginBottom: 8 }}
+            />
             <Text style={styles.emptyTitle}>Belum Ada Pemilihan</Text>
             <Text style={styles.emptySub}>
               Pemilihan yang aktif akan muncul di sini.
@@ -189,8 +205,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f4ff",
   },
   loadingText: { color: "#94a3b8", fontSize: 14 },
-  errorTitle: { fontSize: 17, fontWeight: "700", color: "#1e293b", marginBottom: 6 },
-  errorMsg: { fontSize: 13, color: "#64748b", textAlign: "center", marginBottom: 16 },
+  errorTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#1e293b",
+    marginBottom: 6,
+  },
+  errorMsg: {
+    fontSize: 13,
+    color: "#64748b",
+    textAlign: "center",
+    marginBottom: 16,
+  },
   btnRetry: {
     backgroundColor: "#1a56db",
     paddingHorizontal: 24,

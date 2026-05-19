@@ -3,6 +3,7 @@ import React, { useCallback, useLayoutEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,15 +23,63 @@ import {
 
 // ── Preset data ───────────────────────────────────────────────
 const EMOJI_LIST = [
-  "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮",
-  "🐸","🐵","🐧","🐦","🦆","🦅","🦉","🦇","🐺","🐗","🐴","🦄",
-  "🐝","🐛","🦋","🐌","🐞","🐜","🦟","🦗","🕷️","🦂","🐢","🐍",
-  "🦎","🦖","🦕","🐙","🦑","🦐",
+  "🐶",
+  "🐱",
+  "🐭",
+  "🐹",
+  "🐰",
+  "🦊",
+  "🐻",
+  "🐼",
+  "🐨",
+  "🐯",
+  "🦁",
+  "🐮",
+  "🐸",
+  "🐵",
+  "🐧",
+  "🐦",
+  "🦆",
+  "🦅",
+  "🦉",
+  "🦇",
+  "🐺",
+  "🐗",
+  "🐴",
+  "🦄",
+  "🐝",
+  "🐛",
+  "🦋",
+  "🐌",
+  "🐞",
+  "🐜",
+  "🦟",
+  "🦗",
+  "🕷️",
+  "🦂",
+  "🐢",
+  "🐍",
+  "🦎",
+  "🦖",
+  "🦕",
+  "🐙",
+  "🦑",
+  "🦐",
 ];
 
 const BG_COLORS = [
-  "ffd5dc","ffdec2","fff3c2","d4f5d4","c2f0ff","d5c2ff",
-  "ffc2e8","e8e8e8","1a56db","059669","d97706","7c3aed",
+  "ffd5dc",
+  "ffdec2",
+  "fff3c2",
+  "d4f5d4",
+  "c2f0ff",
+  "d5c2ff",
+  "ffc2e8",
+  "e8e8e8",
+  "1a56db",
+  "059669",
+  "d97706",
+  "7c3aed",
 ];
 
 export default function EditAvatarScreen({ navigation }) {
@@ -52,8 +101,10 @@ export default function EditAvatarScreen({ navigation }) {
           if (active) setLoading(false);
         }
       })();
-      return () => { active = false; };
-    }, [])
+      return () => {
+        active = false;
+      };
+    }, []),
   );
 
   useLayoutEffect(() => {
@@ -62,20 +113,28 @@ export default function EditAvatarScreen({ navigation }) {
         <TouchableOpacity
           onPress={handleSave}
           disabled={!pendingAvatar || saving}
-          style={{
-            marginRight: 4,
-            paddingHorizontal: 14,
-            paddingVertical: 7,
-            backgroundColor: pendingAvatar && !saving ? "#fff" : "rgba(255,255,255,0.3)",
-            borderRadius: 10,
-          }}
+          style={
+            Platform.OS === "ios" ? { marginLeft: 10 } : { marginRight: 8 }
+          }
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           {saving ? (
-            <ActivityIndicator size="small" color="#1a56db" />
+            <ActivityIndicator size="small" color="#fff" />
           ) : (
-            <Text style={{ color: pendingAvatar ? "#1a56db" : "rgba(255,255,255,0.5)", fontWeight: "800", fontSize: 14 }}>
-              Simpan
-            </Text>
+            <FontAwesome5
+              name="save"
+              size={20}
+              color={
+                pendingAvatar
+                  ? Platform.OS === "ios"
+                    ? "#1e293b"
+                    : "#fff"
+                  : Platform.OS === "ios"
+                    ? "rgba(30,41,59,0.3)"
+                    : "rgba(255,255,255,0.35)"
+              }
+              solid
+            />
           )}
         </TouchableOpacity>
       ),
@@ -86,8 +145,10 @@ export default function EditAvatarScreen({ navigation }) {
   const previewAvatar = (() => {
     if (!pendingAvatar) return profile?.avatar ?? null;
     if (pendingAvatar.type === "photo") return pendingAvatar.uri;
-    if (pendingAvatar.type === "emoji") return `emoji:${pendingAvatar.emoji}:${pendingAvatar.bg}`;
-    if (pendingAvatar.type === "last_photo") return profile?.last_photo_url ? "__last_photo__" : null;
+    if (pendingAvatar.type === "emoji")
+      return `emoji:${pendingAvatar.emoji}:${pendingAvatar.bg}`;
+    if (pendingAvatar.type === "last_photo")
+      return profile?.last_photo_url ? "__last_photo__" : null;
     return null;
   })();
 
@@ -101,20 +162,27 @@ export default function EditAvatarScreen({ navigation }) {
   const pickFromGallery = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Izin Diperlukan", "Izin galeri diperlukan untuk memilih foto.");
+      Alert.alert(
+        "Izin Diperlukan",
+        "Izin galeri diperlukan untuk memilih foto.",
+      );
       return;
     }
 
     if (!profile?.can_upload_photo) {
       const date = profile?.cooldown_selesai
-        ? new Date(profile.cooldown_selesai).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+        ? new Date(profile.cooldown_selesai).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })
         : "14 hari dari upload terakhir";
       Alert.alert("Cooldown Aktif", `Foto baru dapat diunggah mulai ${date}.`);
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaType.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.85,
@@ -131,13 +199,20 @@ export default function EditAvatarScreen({ navigation }) {
   const pickFromCamera = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Izin Diperlukan", "Izin kamera diperlukan untuk mengambil foto.");
+      Alert.alert(
+        "Izin Diperlukan",
+        "Izin kamera diperlukan untuk mengambil foto.",
+      );
       return;
     }
 
     if (!profile?.can_upload_photo) {
       const date = profile?.cooldown_selesai
-        ? new Date(profile.cooldown_selesai).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+        ? new Date(profile.cooldown_selesai).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })
         : "14 hari dari upload terakhir";
       Alert.alert("Cooldown Aktif", `Foto baru dapat diunggah mulai ${date}.`);
       return;
@@ -172,13 +247,24 @@ export default function EditAvatarScreen({ navigation }) {
     } catch (e) {
       if (e.kode === "COOLDOWN_AKTIF") {
         const date = e.responseData?.data?.cooldown_selesai
-          ? new Date(e.responseData.data.cooldown_selesai).toLocaleDateString("id-ID", {
-              day: "numeric", month: "long", year: "numeric",
-            })
+          ? new Date(e.responseData.data.cooldown_selesai).toLocaleDateString(
+              "id-ID",
+              {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              },
+            )
           : "";
-        Alert.alert("Cooldown Aktif", `Foto baru dapat diunggah mulai ${date}.`);
+        Alert.alert(
+          "Cooldown Aktif",
+          `Foto baru dapat diunggah mulai ${date}.`,
+        );
       } else if (e.kode === "TIDAK_ADA_FOTO_LAMA") {
-        Alert.alert("Tidak Ada Foto Lama", "Belum ada foto yang pernah diunggah.");
+        Alert.alert(
+          "Tidak Ada Foto Lama",
+          "Belum ada foto yang pernah diunggah.",
+        );
       } else {
         Alert.alert("Gagal Menyimpan", e.message);
       }
@@ -196,8 +282,7 @@ export default function EditAvatarScreen({ navigation }) {
   }
 
   const showLastPhoto =
-    profile?.last_photo_url &&
-    profile?.last_photo_url !== profile?.avatar_url;
+    profile?.last_photo_url && profile?.last_photo_url !== profile?.avatar_url;
 
   return (
     <View style={styles.container}>
@@ -252,7 +337,9 @@ export default function EditAvatarScreen({ navigation }) {
             <Text style={styles.cooldownText}>
               Foto baru tersedia mulai{" "}
               {new Date(profile.cooldown_selesai).toLocaleDateString("id-ID", {
-                day: "numeric", month: "long", year: "numeric",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
               })}
             </Text>
           </View>
@@ -265,7 +352,8 @@ export default function EditAvatarScreen({ navigation }) {
             <TouchableOpacity
               style={[
                 styles.lastPhotoBtn,
-                pendingAvatar?.type === "last_photo" && styles.lastPhotoBtnActive,
+                pendingAvatar?.type === "last_photo" &&
+                  styles.lastPhotoBtnActive,
               ]}
               onPress={() => setPendingAvatar({ type: "last_photo" })}
               activeOpacity={0.8}
@@ -277,11 +365,20 @@ export default function EditAvatarScreen({ navigation }) {
                 borderRadius={14}
               />
               <View style={styles.lastPhotoInfo}>
-                <Text style={styles.lastPhotoLabel}>Gunakan foto sebelumnya</Text>
-                <Text style={styles.lastPhotoSub}>Tidak ada cooldown untuk opsi ini</Text>
+                <Text style={styles.lastPhotoLabel}>
+                  Gunakan foto sebelumnya
+                </Text>
+                <Text style={styles.lastPhotoSub}>
+                  Tidak ada cooldown untuk opsi ini
+                </Text>
               </View>
               {pendingAvatar?.type === "last_photo" && (
-                <FontAwesome5 name="check-circle" size={20} color="#1a4ff5" solid />
+                <FontAwesome5
+                  name="check-circle"
+                  size={20}
+                  color="#1a4ff5"
+                  solid
+                />
               )}
             </TouchableOpacity>
           </>
@@ -303,7 +400,9 @@ export default function EditAvatarScreen({ navigation }) {
                 onPress={() => setPendingAvatar({ type: "emoji", emoji, bg })}
                 activeOpacity={0.75}
               >
-                <View style={[styles.emojiBubble, { backgroundColor: `#${bg}` }]}>
+                <View
+                  style={[styles.emojiBubble, { backgroundColor: `#${bg}` }]}
+                >
                   <Text style={styles.emojiChar}>{emoji}</Text>
                 </View>
               </TouchableOpacity>
@@ -342,17 +441,33 @@ function PhotoOptionBtn({ iconName, label, onPress, disabled }) {
       activeOpacity={0.8}
       disabled={disabled}
     >
-      <View style={[styles.photoBtnIcon, disabled && styles.photoBtnIconDisabled]}>
-        <FontAwesome5 name={iconName} size={22} color={disabled ? "#94a3b8" : "#1a4ff5"} solid />
+      <View
+        style={[styles.photoBtnIcon, disabled && styles.photoBtnIconDisabled]}
+      >
+        <FontAwesome5
+          name={iconName}
+          size={22}
+          color={disabled ? "#94a3b8" : "#1a4ff5"}
+          solid
+        />
       </View>
-      <Text style={[styles.photoBtnLabel, disabled && styles.photoBtnLabelDisabled]}>{label}</Text>
+      <Text
+        style={[styles.photoBtnLabel, disabled && styles.photoBtnLabelDisabled]}
+      >
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f0f4ff" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f0f4ff" },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f0f4ff",
+  },
 
   scroll: { flex: 1 },
   scrollContent: { padding: 20, gap: 0 },

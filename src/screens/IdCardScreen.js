@@ -1,5 +1,11 @@
 // src/screens/IdCardScreen.js
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   View,
   Text,
@@ -11,6 +17,7 @@ import {
   ImageBackground,
   Alert,
   Linking,
+  Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import QRCode from "react-native-qrcode-svg";
@@ -52,12 +59,12 @@ export default function IdCardScreen({ navigation }) {
         <TouchableOpacity
           onPress={handleShare}
           disabled={sharing || loading}
-          style={{ marginRight: 4, padding: 6 }}
+          style={{ padding: 6 }}
         >
           <FontAwesome5
             name={sharing ? "spinner" : "share-alt"}
             size={18}
-            color="#fff"
+            color={Platform.OS === "ios" ? "#000" : "#fff"}
             solid
           />
         </TouchableOpacity>
@@ -79,7 +86,10 @@ export default function IdCardScreen({ navigation }) {
       } else if (data?.card_url) {
         await Linking.openURL(data.card_url);
       } else {
-        Alert.alert("Tidak Tersedia", "Sharing tidak tersedia di perangkat ini.");
+        Alert.alert(
+          "Tidak Tersedia",
+          "Sharing tidak tersedia di perangkat ini.",
+        );
       }
     } catch {
       if (data?.card_url) {
@@ -104,7 +114,12 @@ export default function IdCardScreen({ navigation }) {
   if (error) {
     return (
       <View style={styles.center}>
-        <FontAwesome5 name="frown" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
+        <FontAwesome5
+          name="frown"
+          size={48}
+          color="#94a3b8"
+          style={{ marginBottom: 8 }}
+        />
         <Text style={styles.errorTitle}>Gagal Memuat ID Card</Text>
         <Text style={styles.errorMsg}>{error}</Text>
         <TouchableOpacity style={styles.btnRetry} onPress={fetchData}>
@@ -183,9 +198,7 @@ function IdCard({ data, inisial, tahun }) {
   const header = (
     <LinearGradient
       colors={
-        hb
-          ? ["rgba(0,0,0,0.45)", "rgba(0,0,0,0.08)"]
-          : ["#1a4ff5", "#3671ff"]
+        hb ? ["rgba(0,0,0,0.45)", "rgba(0,0,0,0.08)"] : ["#1a4ff5", "#3671ff"]
       }
       start={{ x: 0, y: 0 }}
       end={hb ? { x: 0, y: 1 } : { x: 1, y: 0 }}
@@ -208,7 +221,11 @@ function IdCard({ data, inisial, tahun }) {
   let photoEl;
   if (parsed.type === "photo") {
     photoEl = (
-      <Image source={{ uri: parsed.url }} style={photoStyle} resizeMode="cover" />
+      <Image
+        source={{ uri: parsed.url }}
+        style={photoStyle}
+        resizeMode="cover"
+      />
     );
   } else if (parsed.type === "emoji") {
     photoEl = (

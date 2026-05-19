@@ -148,6 +148,8 @@ function AppStack() {
         headerTintColor: "#fff",
         headerTitleStyle: { fontWeight: "700", fontSize: 17 },
         headerBackTitle: "",
+        headerBackTitleVisible: false,
+        headerBackButtonDisplayMode: "minimal",
       }}
     >
       <Stack.Screen

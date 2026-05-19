@@ -3,6 +3,7 @@ import React, { useLayoutEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -25,13 +26,17 @@ export default function EditPasswordScreen({ navigation }) {
 
   const validate = () => {
     const errors = {};
-    if (!currentPassword) errors.currentPassword = "Password saat ini wajib diisi.";
+    if (!currentPassword)
+      errors.currentPassword = "Password saat ini wajib diisi.";
     if (!newPassword) errors.newPassword = "Password baru wajib diisi.";
     else if (newPassword.length < 8) errors.newPassword = "Minimal 8 karakter.";
-    if (!confirmPassword) errors.confirmPassword = "Konfirmasi password wajib diisi.";
-    else if (newPassword !== confirmPassword) errors.confirmPassword = "Password tidak cocok.";
+    if (!confirmPassword)
+      errors.confirmPassword = "Konfirmasi password wajib diisi.";
+    else if (newPassword !== confirmPassword)
+      errors.confirmPassword = "Password tidak cocok.";
     if (newPassword && currentPassword && newPassword === currentPassword)
-      errors.newPassword = "Password baru harus berbeda dari password saat ini.";
+      errors.newPassword =
+        "Password baru harus berbeda dari password saat ini.";
     return errors;
   };
 
@@ -67,22 +72,28 @@ export default function EditPasswordScreen({ navigation }) {
         <TouchableOpacity
           onPress={handleSave}
           disabled={!canSave}
-          style={{
-            marginRight: 4,
-            paddingHorizontal: 14,
-            paddingVertical: 7,
-            backgroundColor: canSave ? "#fff" : "rgba(255,255,255,0.3)",
-            borderRadius: 10,
-            minWidth: 68,
-            alignItems: "center",
-          }}
+          style={
+            Platform.OS === "ios" ? { marginLeft: 10 } : { marginRight: 8 }
+          }
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           {saving ? (
-            <ActivityIndicator size="small" color="#1a56db" />
+            <ActivityIndicator size="small" color="#fff" />
           ) : (
-            <Text style={{ color: canSave ? "#1a56db" : "rgba(255,255,255,0.5)", fontWeight: "800", fontSize: 14 }}>
-              Simpan
-            </Text>
+            <FontAwesome5
+              name="save"
+              size={20}
+              color={
+                canSave
+                  ? Platform.OS === "ios"
+                    ? "#1e293b"
+                    : "#fff"
+                  : Platform.OS === "ios"
+                    ? "rgba(30,41,59,0.3)"
+                    : "rgba(255,255,255,0.35)"
+              }
+              solid
+            />
           )}
         </TouchableOpacity>
       ),
@@ -101,7 +112,8 @@ export default function EditPasswordScreen({ navigation }) {
         <View style={styles.infoBox}>
           <FontAwesome5 name="info-circle" size={14} color="#1d4ed8" solid />
           <Text style={styles.infoText}>
-            Password baru minimal 8 karakter. Setelah berhasil diubah, gunakan password baru untuk login berikutnya.
+            Password baru minimal 8 karakter. Setelah berhasil diubah, gunakan
+            password baru untuk login berikutnya.
           </Text>
         </View>
 
@@ -152,9 +164,7 @@ export default function EditPasswordScreen({ navigation }) {
         </View>
 
         {/* Strength indicator */}
-        {newPassword.length > 0 && (
-          <PasswordStrength password={newPassword} />
-        )}
+        {newPassword.length > 0 && <PasswordStrength password={newPassword} />}
 
         <View style={{ height: 40 }} />
       </ScrollView>
@@ -162,7 +172,15 @@ export default function EditPasswordScreen({ navigation }) {
   );
 }
 
-function PasswordField({ label, value, onChangeText, show, onToggleShow, error, placeholder }) {
+function PasswordField({
+  label,
+  value,
+  onChangeText,
+  show,
+  onToggleShow,
+  error,
+  placeholder,
+}) {
   return (
     <View style={styles.fieldWrapper}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -188,7 +206,12 @@ function PasswordField({ label, value, onChangeText, show, onToggleShow, error, 
       </View>
       {error && (
         <View style={styles.errorRow}>
-          <FontAwesome5 name="exclamation-circle" size={11} color="#ef4444" solid />
+          <FontAwesome5
+            name="exclamation-circle"
+            size={11}
+            color="#ef4444"
+            solid
+          />
           <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
@@ -224,7 +247,9 @@ function PasswordStrength({ password }) {
           />
         ))}
       </View>
-      <Text style={[styles.strengthLabel, { color: level.color }]}>{level.label}</Text>
+      <Text style={[styles.strengthLabel, { color: level.color }]}>
+        {level.label}
+      </Text>
     </View>
   );
 }
@@ -257,7 +282,11 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
   },
-  divider: { height: StyleSheet.hairlineWidth, backgroundColor: "#E5E5EA", marginHorizontal: 14 },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: "#E5E5EA",
+    marginHorizontal: 14,
+  },
 
   fieldWrapper: { paddingHorizontal: 14, paddingVertical: 14, gap: 8 },
   fieldLabel: {
@@ -304,5 +333,10 @@ const styles = StyleSheet.create({
   },
   strengthBars: { flex: 1, flexDirection: "row", gap: 4 },
   strengthBar: { flex: 1, height: 5, borderRadius: 3 },
-  strengthLabel: { fontSize: 12, fontWeight: "800", minWidth: 72, textAlign: "right" },
+  strengthLabel: {
+    fontSize: 12,
+    fontWeight: "800",
+    minWidth: 72,
+    textAlign: "right",
+  },
 });

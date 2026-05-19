@@ -1,7 +1,13 @@
 // src/screens/ProkerListScreen.js
 // Halaman list semua program kerja dengan filter status
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   View,
   Text,
@@ -15,7 +21,7 @@ import {
 import { FontAwesome5 } from "@expo/vector-icons";
 import { getProker } from "../services/prokerApi";
 
-const screenWidth = Dimensions.get('window').width;
+const screenWidth = Dimensions.get("window").width;
 
 const FILTERS = [
   { key: "semua", label: "Semua", iconName: "chart-bar" },
@@ -32,6 +38,12 @@ export default function ProkerListScreen({ navigation }) {
   const [error, setError] = useState(null);
 
   const pageScrollRef = useRef(null);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: "Program Kerja",
+    });
+  }, [navigation]);
 
   const handleFilterPress = (key) => {
     const idx = FILTERS.findIndex((f) => f.key === key);
@@ -78,7 +90,12 @@ export default function ProkerListScreen({ navigation }) {
   if (error) {
     return (
       <View style={styles.center}>
-        <FontAwesome5 name="frown" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
+        <FontAwesome5
+          name="frown"
+          size={48}
+          color="#94a3b8"
+          style={{ marginBottom: 8 }}
+        />
         <Text style={styles.errorTitle}>Gagal Memuat Data</Text>
         <Text style={styles.errorMsg}>{error}</Text>
         <TouchableOpacity style={styles.btnRetry} onPress={() => fetchData()}>
@@ -90,26 +107,20 @@ export default function ProkerListScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* ── Header ────────────────────────────────────── */}
+      {/* ── Stats Banner ──────────────────────────────── */}
       <View style={styles.header}>
-        <View style={styles.headerTopRow}>
-          <TouchableOpacity
-            style={styles.backBtn}
-            onPress={() => navigation.goBack()}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <FontAwesome5 name="arrow-left" size={18} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Program Kerja</Text>
-        </View>
         <Text style={styles.headerSub}>
           {data.statistik.total} proker · {data.statistik.active} berjalan ·{" "}
           {data.statistik.completed} selesai
         </Text>
-
         {data.statistik.terlambat > 0 && (
           <View style={styles.terlambatHeader}>
-            <FontAwesome5 name="exclamation-triangle" size={11} color="#fff" solid />
+            <FontAwesome5
+              name="exclamation-triangle"
+              size={11}
+              color="#fff"
+              solid
+            />
             <Text style={styles.terlambatHeaderText}>
               {data.statistik.terlambat} proker terlambat
             </Text>
@@ -130,7 +141,12 @@ export default function ProkerListScreen({ navigation }) {
               onPress={() => handleFilterPress(f.key)}
               activeOpacity={0.7}
             >
-              <FontAwesome5 name={f.iconName} size={12} color={isActive ? "#fff" : "#64748b"} solid />
+              <FontAwesome5
+                name={f.iconName}
+                size={12}
+                color={isActive ? "#fff" : "#64748b"}
+                solid
+              />
               <Text
                 style={[
                   styles.filterLabel,
@@ -190,7 +206,12 @@ export default function ProkerListScreen({ navigation }) {
             >
               {pageProker.length === 0 ? (
                 <View style={styles.emptyState}>
-                  <FontAwesome5 name="inbox" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
+                  <FontAwesome5
+                    name="inbox"
+                    size={48}
+                    color="#94a3b8"
+                    style={{ marginBottom: 8 }}
+                  />
                   <Text style={styles.emptyTitle}>Tidak Ada Proker</Text>
                   <Text style={styles.emptyDesc}>
                     {f.key === "semua"
@@ -262,7 +283,12 @@ function ProkerCard({ proker, onPress }) {
           </View>
           {proker.is_terlambat && (
             <View style={styles.lateBadge}>
-              <FontAwesome5 name="exclamation-triangle" size={9} color="#dc2626" solid />
+              <FontAwesome5
+                name="exclamation-triangle"
+                size={9}
+                color="#dc2626"
+                solid
+              />
               <Text style={styles.lateBadgeText}>Terlambat</Text>
             </View>
           )}
@@ -275,13 +301,17 @@ function ProkerCard({ proker, onPress }) {
         <View style={styles.cardMetaRow}>
           <View style={styles.divisiBadge}>
             <FontAwesome5
-              name={proker.is_umum ? "globe" : parseFaIconName(proker.divisi?.icon)}
+              name={
+                proker.is_umum ? "globe" : parseFaIconName(proker.divisi?.icon)
+              }
               size={10}
               color="#7c3aed"
               solid
             />
             <Text style={styles.divisiBadgeText}>
-              {proker.is_umum ? "Proker Umum" : (proker.divisi?.nama ?? "Divisi")}
+              {proker.is_umum
+                ? "Proker Umum"
+                : (proker.divisi?.nama ?? "Divisi")}
             </Text>
           </View>
           {proker.pic && (
@@ -313,7 +343,12 @@ function ProkerCard({ proker, onPress }) {
         {/* Footer info */}
         <View style={styles.cardFooter}>
           <View style={styles.footerItem}>
-            <FontAwesome5 name="clipboard-list" size={10} color="#94a3b8" solid />
+            <FontAwesome5
+              name="clipboard-list"
+              size={10}
+              color="#94a3b8"
+              solid
+            />
             <Text style={styles.footerText}>
               {proker.tugas_selesai}/{proker.total_tugas} tugas
             </Text>
@@ -365,27 +400,12 @@ const styles = StyleSheet.create({
   // Header
   header: {
     backgroundColor: "#7c3aed",
-    paddingTop: 60,
+    paddingTop: 14,
     paddingBottom: 22,
     paddingHorizontal: 24,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
     gap: 8,
-  },
-  headerTopRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  backBtn: {
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 4,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#fff",
   },
   headerSub: { fontSize: 13, color: "rgba(255,255,255,0.75)" },
 
