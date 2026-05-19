@@ -1,5 +1,5 @@
 // src/screens/HomeScreen.js
-import React from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -9,13 +9,25 @@ import {
   Alert,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
+import { getProfile } from "../services/profileApi";
+import AvatarDisplay from "../components/AvatarDisplay";
 import KasRingkasanCard from "../components/KasRingkasanCard";
 import MateriRingkasanCard from "../components/MateriRingkaksanCard";
 import ProkerRingkasanCard from "../components/ProkerRingkasanCard";
 
 export default function HomeScreen({ navigation }) {
   const { user, signOut } = useAuth();
+  const [avatar, setAvatar] = useState(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      getProfile()
+        .then((res) => setAvatar(res.data?.avatar ?? null))
+        .catch(() => {});
+    }, [])
+  );
 
   const handleLogout = () => {
     Alert.alert("Keluar", "Anda yakin ingin keluar dari akun?", [
@@ -43,12 +55,16 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.userEmail}>{user?.email}</Text>
           </View>
           <TouchableOpacity
-            style={styles.avatarBox}
             onPress={() => navigation.navigate("Profile")}
+            activeOpacity={0.85}
           >
-            <Text style={styles.avatarText}>
-              {(user?.name ?? "A")[0].toUpperCase()}
-            </Text>
+            <AvatarDisplay
+              avatar={avatar}
+              name={user?.name}
+              size={48}
+              borderRadius={15}
+              style={styles.avatarBox}
+            />
           </TouchableOpacity>
         </View>
 
@@ -69,17 +85,19 @@ export default function HomeScreen({ navigation }) {
         <KasRingkasanCard onPress={() => navigation.navigate("E-Kas")} />
       </View>
 
-      {/* ── Program Kerja ────────────────────────────────── */}
+      {/* ── Menu Utama ───────────────────────────────────── */}
       <View style={styles.section}>
-        <View style={styles.sectionTitleRow}>
-          <Text style={styles.sectionTitle}>Program Kerja</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Proker")}>
-            <Text style={[styles.seeAll, { color: "#7c3aed" }]}>
-              Lihat Semua →
-            </Text>
-          </TouchableOpacity>
+        <Text style={styles.sectionTitle}>Menu Utama</Text>
+        <View style={styles.menuGrid}>
+          <MenuItem iconName="camera" label="Presensi" color="#1a56db" onPress={() => navigation.navigate("Scan QR")} />
+          <MenuItem iconName="coins" label="E-Kas" color="#059669" onPress={() => navigation.navigate("E-Kas")} />
+          <MenuItem iconName="vote-yea" label="E-Voting" color="#2563eb" onPress={() => navigation.navigate("E-Voting")} />
+          <MenuItem iconName="tasks" label="Proker" color="#7c3aed" onPress={() => navigation.navigate("Proker")} />
+          <MenuItem iconName="book-open" label="Materi" color="#d97706" onPress={() => navigation.navigate("Materi")} />
+          <MenuItem iconName="id-card" label="ID Card" color="#0891b2" onPress={() => navigation.navigate("IdCard")} />
+          <MenuItem iconName="clipboard-list" label="Riwayat" color="#475569" onPress={() => navigation.navigate("Riwayat")} />
+          <MenuItem iconName="user-circle" label="Profil" color="#be185d" onPress={() => navigation.navigate("Profile")} />
         </View>
-        <ProkerRingkasanCard onPress={() => navigation.navigate("Proker")} />
       </View>
 
       {/* ── Pembelajaran ─────────────────────────────────── */}
@@ -93,39 +111,17 @@ export default function HomeScreen({ navigation }) {
         <MateriRingkasanCard onPress={() => navigation.navigate("Materi")} />
       </View>
 
-      {/* ── Menu Utama ───────────────────────────────────── */}
+      {/* ── Program Kerja ────────────────────────────────── */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Menu Utama</Text>
-        <View style={styles.menuGrid}>
-          <MenuCard
-            iconName="camera"
-            title="Scan Presensi"
-            desc="Scan QR Code untuk hadir"
-            color="#1a56db"
-            onPress={() => navigation.navigate("Scan QR")}
-          />
-          <MenuCard
-            iconName="coins"
-            title="E-Kas"
-            desc="Tagihan & saldo"
-            color="#059669"
-            onPress={() => navigation.navigate("E-Kas")}
-          />
-          <MenuCard
-            iconName="book"
-            title="Materi"
-            desc="Distribusi materi"
-            color="#059669"
-            onPress={() => navigation.navigate("Materi")}
-          />
-          <MenuCard
-            iconName="clipboard-list"
-            title="Riwayat"
-            desc="Lihat kehadiran Anda"
-            color="#059669"
-            onPress={() => navigation.navigate("Riwayat")}
-          />
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionTitle}>Program Kerja</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Proker")}>
+            <Text style={[styles.seeAll, { color: "#7c3aed" }]}>
+              Lihat Semua →
+            </Text>
+          </TouchableOpacity>
         </View>
+        <ProkerRingkasanCard onPress={() => navigation.navigate("Proker")} />
       </View>
 
       {/* ── Info Cara Presensi ───────────────────────────── */}
@@ -158,18 +154,13 @@ export default function HomeScreen({ navigation }) {
   );
 }
 
-function MenuCard({ iconName, title, desc, color, onPress }) {
+function MenuItem({ iconName, label, color, onPress }) {
   return (
-    <TouchableOpacity
-      style={[styles.menuCard, { borderTopColor: color }]}
-      onPress={onPress}
-      activeOpacity={0.85}
-    >
-      <View style={[styles.menuIconBox, { backgroundColor: color + "18" }]}>
-        <FontAwesome5 name={iconName} size={22} color={color} solid />
+    <TouchableOpacity style={styles.menuItem} onPress={onPress} activeOpacity={0.75}>
+      <View style={[styles.menuIconCircle, { backgroundColor: color }]}>
+        <FontAwesome5 name={iconName} size={22} color="#fff" solid />
       </View>
-      <Text style={styles.menuTitle}>{title}</Text>
-      <Text style={styles.menuDesc}>{desc}</Text>
+      <Text style={styles.menuItemLabel}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -210,17 +201,8 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.7)",
   },
   avatarBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.25)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  avatarText: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#fff",
+    borderWidth: 2.5,
+    borderColor: "rgba(255,255,255,0.6)",
   },
   statusBadge: {
     flexDirection: "row",
@@ -268,39 +250,25 @@ const styles = StyleSheet.create({
   menuGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 14,
   },
-  menuCard: {
-    width: "47%",
-    flexGrow: 1,
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: 20,
-    borderTopWidth: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 4,
+  menuItem: {
+    width: "25%",
+    alignItems: "center",
+    paddingVertical: 12,
+    gap: 8,
   },
-  menuIconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+  menuIconCircle: {
+    width: 54,
+    height: 54,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
   },
-  menuTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#1e293b",
-    marginBottom: 4,
-  },
-  menuDesc: {
-    fontSize: 12,
-    color: "#94a3b8",
-    lineHeight: 17,
+  menuItemLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#374151",
+    textAlign: "center",
   },
 
   infoCard: {
