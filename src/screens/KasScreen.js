@@ -4,7 +4,7 @@
 //   2. Riwayat (pembayaran lunas)
 //   3. Transparansi (saldo organisasi)
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
   RefreshControl,
   TouchableOpacity,
   FlatList,
+  Dimensions,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useKas } from "../context/KasContext";
@@ -23,6 +24,8 @@ import {
   getSaldoTransparansi,
 } from "../services/kasApi";
 
+const screenWidth = Dimensions.get('window').width;
+
 const TABS = [
   { key: "tunggakan", label: "Tunggakan", iconName: "exclamation-triangle" },
   { key: "riwayat", label: "Riwayat", iconName: "clipboard-list" },
@@ -31,6 +34,21 @@ const TABS = [
 
 export default function KasScreen() {
   const { tunggakanCount, refreshRingkasan } = useKas();
+
+  const pageScrollRef = useRef(null);
+
+  const handleTabPress = (key) => {
+    const idx = TABS.findIndex((t) => t.key === key);
+    setActiveTab(key);
+    pageScrollRef.current?.scrollTo({ x: idx * screenWidth, animated: true });
+  };
+
+  const handlePageChange = (e) => {
+    const idx = Math.round(e.nativeEvent.contentOffset.x / screenWidth);
+    if (idx >= 0 && idx < TABS.length) {
+      setActiveTab(TABS[idx].key);
+    }
+  };
 
   const [activeTab, setActiveTab] = useState("tunggakan");
   const [tunggakan, setTunggakan] = useState(null);
@@ -107,7 +125,7 @@ export default function KasScreen() {
             <TouchableOpacity
               key={tab.key}
               style={[styles.tab, isActive && styles.tabActive]}
-              onPress={() => setActiveTab(tab.key)}
+              onPress={() => handleTabPress(tab.key)}
               activeOpacity={0.7}
             >
               <View style={styles.tabContent}>
@@ -135,20 +153,58 @@ export default function KasScreen() {
 
       {/* ── CONTENT ─────────────────────────────────────── */}
       <ScrollView
+        ref={pageScrollRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handlePageChange}
+        scrollEventThrottle={16}
         style={styles.content}
-        contentContainerStyle={styles.contentInner}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => fetchAll(true)}
-            colors={["#1a4ff5"]}
-          />
-        }
-        showsVerticalScrollIndicator={false}
       >
-        {activeTab === "tunggakan" && <TunggakanTab data={tunggakan} />}
-        {activeTab === "riwayat" && <RiwayatTab data={riwayat} />}
-        {activeTab === "transparansi" && <TransparansiTab data={saldo} />}
+        <ScrollView
+          style={styles.page}
+          contentContainerStyle={styles.contentInner}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => fetchAll(true)}
+              colors={["#1a4ff5"]}
+            />
+          }
+          showsVerticalScrollIndicator={false}
+        >
+          <TunggakanTab data={tunggakan} />
+        </ScrollView>
+
+        <ScrollView
+          style={styles.page}
+          contentContainerStyle={styles.contentInner}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => fetchAll(true)}
+              colors={["#1a4ff5"]}
+            />
+          }
+          showsVerticalScrollIndicator={false}
+        >
+          <RiwayatTab data={riwayat} />
+        </ScrollView>
+
+        <ScrollView
+          style={styles.page}
+          contentContainerStyle={styles.contentInner}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => fetchAll(true)}
+              colors={["#1a4ff5"]}
+            />
+          }
+          showsVerticalScrollIndicator={false}
+        >
+          <TransparansiTab data={saldo} />
+        </ScrollView>
       </ScrollView>
     </View>
   );
@@ -545,6 +601,7 @@ const styles = StyleSheet.create({
 
   // ── Content ──
   content: { flex: 1 },
+  page: { width: screenWidth },
   contentInner: { padding: 20, paddingTop: 22, paddingBottom: 40 },
 
   sectionLabel: {

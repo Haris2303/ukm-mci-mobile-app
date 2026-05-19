@@ -1,7 +1,7 @@
 // src/screens/MateriScreen.js
 // Halaman lengkap distribusi materi dengan filter, download, dan cache offline
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   Alert,
   Linking,
   Platform,
+  Dimensions,
 } from "react-native";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
@@ -20,6 +21,8 @@ import * as IntentLauncher from "expo-intent-launcher";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { getMateri } from "../services/materiApi";
+
+const screenWidth = Dimensions.get('window').width;
 
 const FILTERS = [
   { key: "semua", label: "Semua", iconName: "book" },
@@ -34,6 +37,21 @@ export default function MateriScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [downloadingId, setDownloadingId] = useState(null);
+
+  const pageScrollRef = useRef(null);
+
+  const handleFilterPress = (key) => {
+    const idx = FILTERS.findIndex((f) => f.key === key);
+    setActiveFilter(key);
+    pageScrollRef.current?.scrollTo({ x: idx * screenWidth, animated: true });
+  };
+
+  const handlePageChange = (e) => {
+    const idx = Math.round(e.nativeEvent.contentOffset.x / screenWidth);
+    if (idx >= 0 && idx < FILTERS.length) {
+      setActiveFilter(FILTERS[idx].key);
+    }
+  };
 
   const fetchData = useCallback(async (isRefresh = false) => {
     isRefresh ? setRefreshing(true) : setLoading(true);
@@ -123,15 +141,6 @@ export default function MateriScreen() {
     }
   };
 
-  // ── Filter list ──────────────────────────────────────────
-  const filteredMateri =
-    data?.materi?.filter((m) => {
-      if (activeFilter === "semua") return true;
-      if (activeFilter === "umum") return m.is_umum;
-      if (activeFilter === "divisi") return !m.is_umum;
-      return true;
-    }) ?? [];
-
   // ── Loading state ────────────────────────────────────────
   if (loading) {
     return (
@@ -180,7 +189,7 @@ export default function MateriScreen() {
             <TouchableOpacity
               key={f.key}
               style={[styles.filterTab, isActive && styles.filterTabActive]}
-              onPress={() => setActiveFilter(f.key)}
+              onPress={() => handleFilterPress(f.key)}
               activeOpacity={0.7}
             >
               <FontAwesome5
@@ -219,42 +228,63 @@ export default function MateriScreen() {
 
       {/* ── Content ──────────────────────────────────── */}
       <ScrollView
+        ref={pageScrollRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handlePageChange}
+        scrollEventThrottle={16}
         style={styles.content}
-        contentContainerStyle={styles.contentInner}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => fetchData(true)}
-            colors={["#1a4ff5"]}
-          />
-        }
-        showsVerticalScrollIndicator={false}
       >
-        {filteredMateri.length === 0 ? (
-          <View style={styles.emptyState}>
-            <FontAwesome5 name="inbox" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
-            <Text style={styles.emptyTitle}>Tidak Ada Materi</Text>
-            <Text style={styles.emptyDesc}>
-              {activeFilter === "umum"
-                ? "Belum ada materi umum yang dipublikasikan."
-                : activeFilter === "divisi"
-                  ? "Belum ada materi khusus untuk divisi Anda."
-                  : "Belum ada materi tersedia. Pantau terus halaman ini."}
-            </Text>
-          </View>
-        ) : (
-          filteredMateri.map((materi, idx) => (
-            <MateriCard
-              key={materi.id ?? `materi-${idx}`}
-              materi={materi}
-              isDownloading={downloadingId === materi.id}
-              onDownload={() => handleDownloadDanBuka(materi)}
-              onOpenLink={() => handleBukaLink(materi.link_url)}
-            />
-          ))
-        )}
-
-        <View style={{ height: 30 }} />
+        {FILTERS.map((f) => {
+          const pageMateri =
+            data?.materi?.filter((m) => {
+              if (f.key === "semua") return true;
+              if (f.key === "umum") return m.is_umum;
+              if (f.key === "divisi") return !m.is_umum;
+              return true;
+            }) ?? [];
+          return (
+            <ScrollView
+              key={f.key}
+              style={styles.page}
+              contentContainerStyle={styles.contentInner}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={() => fetchData(true)}
+                  colors={["#1a4ff5"]}
+                />
+              }
+              showsVerticalScrollIndicator={false}
+            >
+              {pageMateri.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <FontAwesome5 name="inbox" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
+                  <Text style={styles.emptyTitle}>Tidak Ada Materi</Text>
+                  <Text style={styles.emptyDesc}>
+                    {f.key === "umum"
+                      ? "Belum ada materi umum yang dipublikasikan."
+                      : f.key === "divisi"
+                        ? "Belum ada materi khusus untuk divisi Anda."
+                        : "Belum ada materi tersedia. Pantau terus halaman ini."}
+                  </Text>
+                </View>
+              ) : (
+                pageMateri.map((materi, mIdx) => (
+                  <MateriCard
+                    key={materi.id ?? `materi-${mIdx}`}
+                    materi={materi}
+                    isDownloading={downloadingId === materi.id}
+                    onDownload={() => handleDownloadDanBuka(materi)}
+                    onOpenLink={() => handleBukaLink(materi.link_url)}
+                  />
+                ))
+              )}
+              <View style={{ height: 30 }} />
+            </ScrollView>
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -419,6 +449,7 @@ const styles = StyleSheet.create({
   filterBadgeTextActive: { color: "#fff" },
 
   content: { flex: 1 },
+  page: { width: screenWidth },
   contentInner: { padding: 16, paddingTop: 18, gap: 12 },
 
   card: {

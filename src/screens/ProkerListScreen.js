@@ -1,7 +1,7 @@
 // src/screens/ProkerListScreen.js
 // Halaman list semua program kerja dengan filter status
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -10,9 +10,12 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Dimensions,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { getProker } from "../services/prokerApi";
+
+const screenWidth = Dimensions.get('window').width;
 
 const FILTERS = [
   { key: "semua", label: "Semua", iconName: "chart-bar" },
@@ -27,6 +30,21 @@ export default function ProkerListScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+
+  const pageScrollRef = useRef(null);
+
+  const handleFilterPress = (key) => {
+    const idx = FILTERS.findIndex((f) => f.key === key);
+    setActiveFilter(key);
+    pageScrollRef.current?.scrollTo({ x: idx * screenWidth, animated: true });
+  };
+
+  const handlePageChange = (e) => {
+    const idx = Math.round(e.nativeEvent.contentOffset.x / screenWidth);
+    if (idx >= 0 && idx < FILTERS.length) {
+      setActiveFilter(FILTERS[idx].key);
+    }
+  };
 
   const fetchData = useCallback(async (isRefresh = false) => {
     isRefresh ? setRefreshing(true) : setLoading(true);
@@ -45,12 +63,6 @@ export default function ProkerListScreen({ navigation }) {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  // Filter list berdasarkan tab aktif
-  const filteredProker =
-    data?.proker?.filter((p) =>
-      activeFilter === "semua" ? true : p.status === activeFilter,
-    ) ?? [];
 
   // ── Loading ─────────────────────────────────────────────
   if (loading) {
@@ -115,7 +127,7 @@ export default function ProkerListScreen({ navigation }) {
             <TouchableOpacity
               key={f.key}
               style={[styles.filterTab, isActive && styles.filterTabActive]}
-              onPress={() => setActiveFilter(f.key)}
+              onPress={() => handleFilterPress(f.key)}
               activeOpacity={0.7}
             >
               <FontAwesome5 name={f.iconName} size={12} color={isActive ? "#fff" : "#64748b"} solid />
@@ -149,40 +161,58 @@ export default function ProkerListScreen({ navigation }) {
 
       {/* ── List ───────────────────────────────────────── */}
       <ScrollView
+        ref={pageScrollRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handlePageChange}
+        scrollEventThrottle={16}
         style={styles.content}
-        contentContainerStyle={styles.contentInner}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => fetchData(true)}
-            colors={["#7c3aed"]}
-          />
-        }
-        showsVerticalScrollIndicator={false}
       >
-        {filteredProker.length === 0 ? (
-          <View style={styles.emptyState}>
-            <FontAwesome5 name="inbox" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
-            <Text style={styles.emptyTitle}>Tidak Ada Proker</Text>
-            <Text style={styles.emptyDesc}>
-              {activeFilter === "semua"
-                ? "Belum ada program kerja yang dapat ditampilkan."
-                : `Belum ada proker dengan status "${FILTERS.find((f) => f.key === activeFilter)?.label}".`}
-            </Text>
-          </View>
-        ) : (
-          filteredProker.map((proker, idx) => (
-            <ProkerCard
-              key={proker.id ?? `proker-${idx}`}
-              proker={proker}
-              onPress={() =>
-                navigation.navigate("ProkerDetail", { id: proker.id })
+        {FILTERS.map((f) => {
+          const pageProker =
+            data?.proker?.filter((p) =>
+              f.key === "semua" ? true : p.status === f.key,
+            ) ?? [];
+          return (
+            <ScrollView
+              key={f.key}
+              style={styles.page}
+              contentContainerStyle={styles.contentInner}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={() => fetchData(true)}
+                  colors={["#7c3aed"]}
+                />
               }
-            />
-          ))
-        )}
-
-        <View style={{ height: 30 }} />
+              showsVerticalScrollIndicator={false}
+            >
+              {pageProker.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <FontAwesome5 name="inbox" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
+                  <Text style={styles.emptyTitle}>Tidak Ada Proker</Text>
+                  <Text style={styles.emptyDesc}>
+                    {f.key === "semua"
+                      ? "Belum ada program kerja yang dapat ditampilkan."
+                      : `Belum ada proker dengan status "${f.label}".`}
+                  </Text>
+                </View>
+              ) : (
+                pageProker.map((proker, pIdx) => (
+                  <ProkerCard
+                    key={proker.id ?? `proker-${pIdx}`}
+                    proker={proker}
+                    onPress={() =>
+                      navigation.navigate("ProkerDetail", { id: proker.id })
+                    }
+                  />
+                ))
+              )}
+              <View style={{ height: 30 }} />
+            </ScrollView>
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -398,6 +428,7 @@ const styles = StyleSheet.create({
 
   // Content
   content: { flex: 1 },
+  page: { width: screenWidth },
   contentInner: { padding: 16, paddingTop: 18, gap: 12 },
 
   // Card
