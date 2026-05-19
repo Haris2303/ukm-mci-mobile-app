@@ -1,5 +1,5 @@
 // src/screens/voting/ElectionListScreen.js
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { getElections } from "../../services/votingApi";
 
 const STATUS_CONFIG = {
@@ -38,9 +39,11 @@ export default function ElectionListScreen({ navigation }) {
     }
   }, []);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [fetchData])
+  );
 
   const renderItem = ({ item }) => {
     const cfg = STATUS_CONFIG[item.status] ?? STATUS_CONFIG.draft;
@@ -117,6 +120,19 @@ export default function ElectionListScreen({ navigation }) {
     );
   }
 
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <FontAwesome5 name="exclamation-circle" size={44} color="#94a3b8" solid style={{ marginBottom: 12 }} />
+        <Text style={styles.errorTitle}>Gagal Memuat Data</Text>
+        <Text style={styles.errorMsg}>{error}</Text>
+        <TouchableOpacity style={styles.btnRetry} onPress={() => fetchData()}>
+          <Text style={styles.btnRetryText}>Coba Lagi</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -173,6 +189,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f4ff",
   },
   loadingText: { color: "#94a3b8", fontSize: 14 },
+  errorTitle: { fontSize: 17, fontWeight: "700", color: "#1e293b", marginBottom: 6 },
+  errorMsg: { fontSize: 13, color: "#64748b", textAlign: "center", marginBottom: 16 },
+  btnRetry: {
+    backgroundColor: "#1a56db",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  btnRetryText: { color: "#fff", fontWeight: "700", fontSize: 14 },
 
   header: {
     backgroundColor: "#1a56db",

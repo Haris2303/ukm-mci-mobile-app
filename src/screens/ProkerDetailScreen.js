@@ -1,7 +1,7 @@
 // src/screens/ProkerDetailScreen.js
 // Detail program kerja + daftar tugas (read-only)
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import {
   View,
   Text,
@@ -42,6 +42,12 @@ export default function ProkerDetailScreen({ route, navigation }) {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useLayoutEffect(() => {
+    if (data?.nama_proker) {
+      navigation.setOptions({ title: data.nama_proker });
+    }
+  }, [navigation, data?.nama_proker]);
 
   if (loading) {
     return (
@@ -93,33 +99,16 @@ export default function ProkerDetailScreen({ route, navigation }) {
       }
       showsVerticalScrollIndicator={false}
     >
-      {/* ── Header dengan back button ──────────────────── */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => navigation.goBack()}
-        >
-          <FontAwesome5 name="chevron-left" size={16} color="#fff" />
-        </TouchableOpacity>
-
-        <View style={styles.headerContent}>
-          <View
-            style={[
-              styles.statusBadgeHeader,
-              { backgroundColor: "rgba(255,255,255,0.2)" },
-            ]}
-          >
-            <Text style={styles.statusBadgeHeaderText}>
-              {data.label_status}
-            </Text>
-          </View>
-          <Text style={styles.headerTitle}>{data.nama_proker}</Text>
-          <View style={styles.headerDivisiRow}>
-            <FontAwesome5 name="globe" size={12} color="rgba(255,255,255,0.85)" solid />
-            <Text style={styles.headerDivisi}>
-              {data.divisi ? data.divisi.nama : "Proker Umum"}
-            </Text>
-          </View>
+      {/* ── Status + Divisi ──────────────────────────────── */}
+      <View style={styles.prokerMeta}>
+        <View style={[styles.metaStatusBadge, { backgroundColor: progressColor + "20" }]}>
+          <Text style={[styles.metaStatusText, { color: progressColor }]}>{data.label_status}</Text>
+        </View>
+        <View style={styles.metaDivisiRow}>
+          <FontAwesome5 name="globe" size={11} color="#64748b" solid />
+          <Text style={styles.metaDivisiText}>
+            {data.divisi ? data.divisi.nama : "Proker Umum"}
+          </Text>
         </View>
       </View>
 
@@ -302,59 +291,30 @@ const styles = StyleSheet.create({
   },
   btnRetryText: { color: "#fff", fontWeight: "700" },
 
-  // Header
-  header: {
-    backgroundColor: "#7c3aed",
-    paddingTop: 60,
-    paddingBottom: 28,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
+  // Meta row (status + divisi)
+  prokerMeta: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 14,
-  },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    justifyContent: "center",
     alignItems: "center",
-    marginTop: 2,
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    flexWrap: "wrap",
   },
-
-  headerContent: { flex: 1, gap: 8 },
-  statusBadgeHeader: {
-    alignSelf: "flex-start",
+  metaStatusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 10,
   },
-  statusBadgeHeaderText: { color: "#fff", fontSize: 11, fontWeight: "800" },
-  headerTitle: {
-    fontSize: 19,
-    fontWeight: "800",
-    color: "#fff",
-    lineHeight: 25,
-  },
-  headerDivisiRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  headerDivisi: {
-    fontSize: 12,
-    color: "rgba(255,255,255,0.85)",
-    fontWeight: "600",
-  },
+  metaStatusText: { fontSize: 11, fontWeight: "800" },
+  metaDivisiRow: { flexDirection: "row", alignItems: "center", gap: 5 },
+  metaDivisiText: { fontSize: 12, color: "#64748b", fontWeight: "600" },
 
   // Progress Card
   progressCard: {
     backgroundColor: "#fff",
     borderRadius: 18,
     margin: 16,
-    marginTop: -14,
+    marginTop: 8,
     padding: 18,
     gap: 12,
     shadowColor: "#000",

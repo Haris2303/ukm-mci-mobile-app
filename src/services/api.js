@@ -7,8 +7,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { BASE_URL } from "../config/apiConfig";
+import { handleResponse } from "./apiClient";
 
-// ── Helper: buat headers dengan token ────────────────────────
 const authHeaders = async () => {
   const token = await AsyncStorage.getItem("auth_token");
   return {
@@ -16,21 +16,6 @@ const authHeaders = async () => {
     Accept: "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
-};
-
-// ── Helper: handle response dari server ──────────────────────
-const handleResponse = async (response) => {
-  const json = await response.json();
-  if (!response.ok) {
-    // Ambil pesan error dari server (sudah Bahasa Indonesia)
-    const pesan =
-      json.pesan ||
-      json.message ||
-      (json.errors ? Object.values(json.errors).flat().join("\n") : null) ||
-      "Terjadi kesalahan. Coba lagi.";
-    throw new Error(pesan);
-  }
-  return json;
 };
 
 // ═══════════════════════════════════════════════════════════════

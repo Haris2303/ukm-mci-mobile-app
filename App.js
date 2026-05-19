@@ -22,6 +22,8 @@ import KasScreen from "./src/screens/KasScreen";
 import MateriScreen from "./src/screens/MateriScreen";
 import IdCardScreen from "./src/screens/IdCardScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
+import EditAvatarScreen from "./src/screens/EditAvatarScreen";
+import EditPasswordScreen from "./src/screens/EditPasswordScreen";
 import VotingNavigator from "./src/navigation/VotingNavigator";
 import ProkerNavigator from "./src/navigation/ProkerNavigator";
 
@@ -128,9 +130,10 @@ function AppStack() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: "#1a4ff5" },
+        headerStyle: { backgroundColor: "#1a56db" },
+        headerShadowVisible: false,
         headerTintColor: "#fff",
-        headerTitleStyle: { fontWeight: "700" },
+        headerTitleStyle: { fontWeight: "700", fontSize: 17 },
         headerBackTitle: "",
       }}
     >
@@ -142,7 +145,7 @@ function AppStack() {
       <Stack.Screen
         name="Materi"
         component={MateriScreen}
-        options={{ headerShown: false }}
+        options={{ title: "Materi Pembelajaran" }}
       />
       <Stack.Screen
         name="Proker"
@@ -152,12 +155,22 @@ function AppStack() {
       <Stack.Screen
         name="IdCard"
         component={IdCardScreen}
-        options={{ headerShown: false }}
+        options={{ title: "ID Card Saya" }}
       />
       <Stack.Screen
         name="Profile"
         component={ProfileScreen}
-        options={{ headerShown: false }}
+        options={{ title: "Profil Saya" }}
+      />
+      <Stack.Screen
+        name="EditAvatar"
+        component={EditAvatarScreen}
+        options={{ title: "Edit Foto Profil" }}
+      />
+      <Stack.Screen
+        name="EditPassword"
+        component={EditPasswordScreen}
+        options={{ title: "Ubah Password" }}
       />
     </Stack.Navigator>
   );

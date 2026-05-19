@@ -158,10 +158,9 @@ export default function MateriScreen() {
 
   return (
     <View style={styles.container}>
-      {/* ── Header ───────────────────────────────────── */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Materi Pembelajaran</Text>
-        <Text style={styles.headerSub}>
+      {/* ── Stats Strip ──────────────────────────────── */}
+      <View style={styles.statsStrip}>
+        <Text style={styles.statsText}>
           {data.total} materi tersedia · {data.jumlah_umum} umum +{" "}
           {data.jumlah_divisi} divisi
         </Text>
@@ -368,21 +367,15 @@ const styles = StyleSheet.create({
   },
   btnRetryText: { color: "#fff", fontWeight: "700" },
 
-  header: {
-    backgroundColor: "#1a4ff5",
-    paddingTop: 60,
-    paddingBottom: 22,
+  statsStrip: {
+    backgroundColor: "#1a56db",
     paddingHorizontal: 24,
+    paddingTop: 6,
+    paddingBottom: 20,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
   },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#fff",
-    marginBottom: 4,
-  },
-  headerSub: { fontSize: 13, color: "rgba(255,255,255,0.75)" },
+  statsText: { fontSize: 13, color: "rgba(255,255,255,0.8)" },
 
   filterBar: {
     flexDirection: "row",

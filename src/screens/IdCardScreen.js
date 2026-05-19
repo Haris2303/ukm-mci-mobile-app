@@ -2,7 +2,7 @@
 // Halaman ID Card digital anggota UKM MCI
 // Dual mode: background image (Mode A) atau gradient template (Mode B)
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -46,6 +46,25 @@ export default function IdCardScreen({ navigation }) {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={handleShare}
+          disabled={sharing || loading}
+          style={{ marginRight: 4, padding: 6 }}
+        >
+          <FontAwesome5
+            name={sharing ? "spinner" : "share-alt"}
+            size={18}
+            color="#fff"
+            solid
+          />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, sharing, loading]);
 
   // ── Share: capture card → share ─────────────────────────────
   const handleShare = async () => {
@@ -112,24 +131,6 @@ export default function IdCardScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* ── Header ──────────────────────────────────────── */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => navigation.goBack()}
-        >
-          <FontAwesome5 name="chevron-left" size={16} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>ID Card Saya</Text>
-        <TouchableOpacity
-          style={styles.shareHeaderBtn}
-          onPress={handleShare}
-          disabled={sharing}
-        >
-          <FontAwesome5 name={sharing ? "spinner" : "share-alt"} size={18} color="#fff" solid />
-        </TouchableOpacity>
-      </View>
-
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -402,41 +403,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   btnRetryText: { color: "#fff", fontWeight: "700" },
-
-  // ── Screen Header ──
-  header: {
-    backgroundColor: "#1a4ff5",
-    paddingTop: 60,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-  },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerTitle: {
-    flex: 1,
-    fontSize: 19,
-    fontWeight: "800",
-    color: "#fff",
-  },
-  shareHeaderBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
 
   scrollContent: {
     alignItems: "center",

@@ -100,7 +100,12 @@ export default function ElectionDetailScreen({ route, navigation }) {
   if (error || !election) {
     return (
       <View style={styles.center}>
-        <FontAwesome5 name="frown" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
+        <FontAwesome5
+          name="frown"
+          size={48}
+          color="#94a3b8"
+          style={{ marginBottom: 8 }}
+        />
         <Text style={styles.errorMsg}>{error ?? "Data tidak ditemukan."}</Text>
         <TouchableOpacity style={styles.btnRetry} onPress={fetchDetail}>
           <Text style={styles.btnRetryText}>Coba Lagi</Text>
@@ -124,8 +129,14 @@ export default function ElectionDetailScreen({ route, navigation }) {
             <Text style={styles.deskripsi}>{election.deskripsi}</Text>
           ) : null}
           <View style={styles.headerMeta}>
-            <MetaItem iconName="clock" label={`Berakhir ${election.waktu_selesai}`} />
-            <MetaItem iconName="vote-yea" label={`${election.total_suara} suara masuk`} />
+            <MetaItem
+              iconName="clock"
+              label={`Berakhir ${election.waktu_selesai}`}
+            />
+            <MetaItem
+              iconName="vote-yea"
+              label={`${election.total_suara} suara masuk`}
+            />
           </View>
         </View>
 
@@ -151,8 +162,15 @@ export default function ElectionDetailScreen({ route, navigation }) {
               { borderColor: "#93c5fd", backgroundColor: "#eff6ff" },
             ]}
           >
-            <FontAwesome5 name="flag-checkered" size={24} color="#1d4ed8" solid />
-            <Text style={[styles.bannerTitle, { color: "#1d4ed8" }]}>Voting Telah Ditutup</Text>
+            <FontAwesome5
+              name="flag-checkered"
+              size={24}
+              color="#1d4ed8"
+              solid
+            />
+            <Text style={[styles.bannerTitle, { color: "#1d4ed8" }]}>
+              Voting Telah Ditutup
+            </Text>
           </View>
         )}
 
@@ -219,7 +237,9 @@ export default function ElectionDetailScreen({ route, navigation }) {
                 <Text style={styles.btnVoteText}>Konfirmasi Pilihan Saya</Text>
               </View>
             ) : (
-              <Text style={styles.btnVoteText}>Pilih Kandidat Terlebih Dahulu</Text>
+              <Text style={styles.btnVoteText}>
+                Pilih Kandidat Terlebih Dahulu
+              </Text>
             )}
           </TouchableOpacity>
         </View>
@@ -231,7 +251,13 @@ export default function ElectionDetailScreen({ route, navigation }) {
           <Animated.View
             style={[styles.modalCard, { transform: [{ scale: scaleAnim }] }]}
           >
-            <FontAwesome5 name="vote-yea" size={44} color="#1a56db" solid style={{ marginBottom: 4 }} />
+            <FontAwesome5
+              name="vote-yea"
+              size={44}
+              color="#1a56db"
+              solid
+              style={{ marginBottom: 4 }}
+            />
             <Text style={styles.modalTitle}>Konfirmasi Pilihan</Text>
             <Text style={styles.modalSub}>
               Anda akan memberikan suara kepada:
@@ -245,7 +271,12 @@ export default function ElectionDetailScreen({ route, navigation }) {
               </Text>
             </View>
             <View style={styles.modalWarningRow}>
-              <FontAwesome5 name="exclamation-triangle" size={12} color="#f59e0b" solid />
+              <FontAwesome5
+                name="exclamation-triangle"
+                size={12}
+                color="#f59e0b"
+                solid
+              />
               <Text style={styles.modalWarning}>
                 Pilihan tidak dapat diubah setelah dikonfirmasi.
               </Text>
@@ -328,7 +359,18 @@ function KandidatCard({
         {kandidat.visi ? (
           <View style={styles.visiRow}>
             <FontAwesome5 name="lightbulb" size={11} color="#f59e0b" solid />
-            <Text style={styles.visi} numberOfLines={2}>{kandidat.visi}</Text>
+            <Text style={styles.visiMisiText} numberOfLines={2}>
+              {kandidat.visi}
+            </Text>
+          </View>
+        ) : null}
+
+        {kandidat.misi ? (
+          <View style={styles.misiRow}>
+            <FontAwesome5 name="flag" size={11} color="#1a56db" solid />
+            <Text style={styles.visiMisiText} numberOfLines={3}>
+              {kandidat.misi}
+            </Text>
           </View>
         ) : null}
 
@@ -361,7 +403,12 @@ function KandidatCard({
 function MetaItem({ iconName, label }) {
   return (
     <View style={styles.metaItem}>
-      <FontAwesome5 name={iconName} size={12} color="rgba(255,255,255,0.8)" solid />
+      <FontAwesome5
+        name={iconName}
+        size={12}
+        color="rgba(255,255,255,0.8)"
+        solid
+      />
       <Text style={styles.metaLabel}>{label}</Text>
     </View>
   );
@@ -482,7 +529,8 @@ const styles = StyleSheet.create({
   },
   kandidatNama: { fontSize: 17, fontWeight: "700", color: "#1e293b", flex: 1 },
   visiRow: { flexDirection: "row", alignItems: "flex-start", gap: 6 },
-  visi: { flex: 1, fontSize: 13, color: "#64748b", lineHeight: 19 },
+  misiRow: { flexDirection: "row", alignItems: "flex-start", gap: 6 },
+  visiMisiText: { flex: 1, fontSize: 13, color: "#64748b", lineHeight: 19 },
 
   // Progress
   hasilBox: { marginTop: 8, gap: 5 },

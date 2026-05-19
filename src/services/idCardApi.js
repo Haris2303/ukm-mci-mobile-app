@@ -4,6 +4,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { BASE_URL } from "../config/apiConfig";
+import { handleResponse } from "./apiClient";
 
 const authHeaders = async () => {
   const token = await AsyncStorage.getItem("auth_token");
@@ -12,19 +13,6 @@ const authHeaders = async () => {
     Accept: "application/json",
     Authorization: `Bearer ${token}`,
   };
-};
-
-const handleResponse = async (response) => {
-  const json = await response.json();
-  if (!response.ok) {
-    const pesan =
-      json.pesan ||
-      json.message ||
-      (json.errors ? Object.values(json.errors).flat().join("\n") : null) ||
-      "Terjadi kesalahan. Coba lagi.";
-    throw new Error(pesan);
-  }
-  return json;
 };
 
 /**

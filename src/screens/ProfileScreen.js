@@ -1,7 +1,5 @@
 // src/screens/ProfileScreen.js
-// Halaman profil user — menampilkan biodata + tombol ID Card
-
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -10,25 +8,32 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
 import { getMyIdCard } from "../services/idCardApi";
+import { getProfile } from "../services/profileApi";
+import AvatarDisplay from "../components/AvatarDisplay";
 
 export default function ProfileScreen({ navigation }) {
   const { user, signOut } = useAuth();
   const [idCard, setIdCard] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchIdCard = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await getMyIdCard();
-      setIdCard(res);
+      const [idCardRes, profileRes] = await Promise.all([
+        getMyIdCard(),
+        getProfile(),
+      ]);
+      setIdCard(idCardRes);
+      setProfile(profileRes.data);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -36,9 +41,11 @@ export default function ProfileScreen({ navigation }) {
     }
   }, []);
 
-  useEffect(() => {
-    fetchIdCard();
-  }, [fetchIdCard]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [fetchData])
+  );
 
   const handleLogout = () => {
     Alert.alert("Keluar", "Anda yakin ingin keluar dari akun?", [
@@ -47,50 +54,37 @@ export default function ProfileScreen({ navigation }) {
     ]);
   };
 
-  const profileUser = idCard?.user ?? user;
+  const profileUser = profile ?? idCard?.user ?? user;
   const inisial = (profileUser?.name ?? "A")[0].toUpperCase();
 
   return (
     <View style={styles.container}>
-      {/* ── Header ──────────────────────────────────────── */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => navigation.goBack()}
-        >
-          <FontAwesome5 name="chevron-left" size={16} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Profil Saya</Text>
-        <View style={{ width: 38 }} />
-      </View>
-
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {/* ── Avatar + Nama ──────────────────────────────── */}
         <View style={styles.avatarSection}>
-          {idCard?.foto_url ? (
-            <Image
-              source={{ uri: idCard.foto_url }}
-              style={styles.avatarLarge}
-              resizeMode="cover"
-            />
-          ) : (
-            <LinearGradient
-              colors={["#1a4ff5", "#3671ff"]}
-              style={styles.avatarPlaceholder}
-            >
-              <Text style={styles.avatarInisial}>{inisial}</Text>
-            </LinearGradient>
-          )}
+          <TouchableOpacity
+            onPress={() => navigation.navigate("EditAvatar")}
+            activeOpacity={0.85}
+          >
+            <View style={styles.avatarWrapper}>
+              <AvatarDisplay
+                avatar={profile?.avatar ?? null}
+                name={profileUser?.name}
+                size={96}
+                borderRadius={20}
+                style={styles.avatarBorder}
+              />
+              <View style={styles.editBadge}>
+                <FontAwesome5 name="camera" size={10} color="#fff" solid />
+              </View>
+            </View>
+          </TouchableOpacity>
 
-          <Text style={styles.profileName}>
-            {profileUser?.name ?? "—"}
-          </Text>
-          <Text style={styles.profileEmail}>
-            {profileUser?.email ?? "—"}
-          </Text>
+          <Text style={styles.profileName}>{profileUser?.name ?? "—"}</Text>
+          <Text style={styles.profileEmail}>{profileUser?.email ?? "—"}</Text>
 
           {/* Member ID badge */}
           {idCard?.member_id && (
@@ -103,12 +97,40 @@ export default function ProfileScreen({ navigation }) {
           {profileUser?.role_label && (
             <View style={styles.roleBadge}>
               <View style={styles.roleDot} />
-              <Text style={styles.roleBadgeText}>
-                {profileUser.role_label}
-              </Text>
+              <Text style={styles.roleBadgeText}>{profileUser.role_label}</Text>
             </View>
           )}
         </View>
+
+        {/* ── Edit Foto Button ───────────────────────────── */}
+        <TouchableOpacity
+          style={styles.editAvatarBtn}
+          onPress={() => navigation.navigate("EditAvatar")}
+          activeOpacity={0.85}
+        >
+          <View style={styles.editAvatarBtnLeft}>
+            <View style={styles.editAvatarIconBox}>
+              <FontAwesome5 name="user-edit" size={18} color="#1a4ff5" solid />
+            </View>
+            <Text style={styles.editAvatarBtnText}>Edit Foto Profil</Text>
+          </View>
+          <FontAwesome5 name="chevron-right" size={14} color="#94a3b8" />
+        </TouchableOpacity>
+
+        {/* ── Ubah Password Button ──────────────────────── */}
+        <TouchableOpacity
+          style={styles.editAvatarBtn}
+          onPress={() => navigation.navigate("EditPassword")}
+          activeOpacity={0.85}
+        >
+          <View style={styles.editAvatarBtnLeft}>
+            <View style={[styles.editAvatarIconBox, { backgroundColor: "#fef3c7" }]}>
+              <FontAwesome5 name="lock" size={18} color="#d97706" solid />
+            </View>
+            <Text style={styles.editAvatarBtnText}>Ubah Password</Text>
+          </View>
+          <FontAwesome5 name="chevron-right" size={14} color="#94a3b8" />
+        </TouchableOpacity>
 
         {/* ── ID Card Button ─────────────────────────────── */}
         <TouchableOpacity
@@ -152,10 +174,10 @@ export default function ProfileScreen({ navigation }) {
         ) : error ? (
           <View style={styles.errorBox}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <FontAwesome5 name="exclamation-triangle" size={13} color="#92400e" solid />
-            <Text style={styles.errorSmall}>{error}</Text>
-          </View>
-            <TouchableOpacity onPress={fetchIdCard}>
+              <FontAwesome5 name="exclamation-triangle" size={13} color="#92400e" solid />
+              <Text style={styles.errorSmall}>{error}</Text>
+            </View>
+            <TouchableOpacity onPress={fetchData}>
               <Text style={styles.retrySmall}>Coba Lagi</Text>
             </TouchableOpacity>
           </View>
@@ -191,7 +213,6 @@ export default function ProfileScreen({ navigation }) {
   );
 }
 
-// ── Sub component ───────────────────────────────────────────────
 function BioRow({ iconName, label, value }) {
   return (
     <View style={styles.bioRow}>
@@ -206,84 +227,32 @@ function BioRow({ iconName, label, value }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f0f4ff" },
 
-  // Header
-  header: {
+  scrollContent: { paddingHorizontal: 20, paddingTop: 28 },
+
+  avatarSection: { alignItems: "center", gap: 6, marginBottom: 20 },
+  avatarWrapper: { position: "relative", marginBottom: 8 },
+  avatarBorder: {
+    borderWidth: 4,
+    borderColor: "#1a4ff5",
+  },
+  editBadge: {
+    position: "absolute",
+    bottom: -2,
+    right: -2,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: "#1a4ff5",
-    paddingTop: 60,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-  },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#f0f4ff",
   },
-  backIcon: { color: "#fff", fontSize: 26, fontWeight: "700", marginTop: -3 },
-  headerTitle: {
-    flex: 1,
-    fontSize: 19,
-    fontWeight: "800",
-    color: "#fff",
-    textAlign: "center",
-  },
-
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 28,
-  },
-
-  // Avatar section
-  avatarSection: {
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 24,
-  },
-  avatarLarge: {
-    width: 96,
-    height: 96,
-    borderRadius: 20,
-    borderWidth: 4,
-    borderColor: "#1a4ff5",
-    marginBottom: 8,
-  },
-  avatarPlaceholder: {
-    width: 96,
-    height: 96,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 4,
-    borderColor: "#1a4ff5",
-    marginBottom: 8,
-  },
-  avatarInisial: {
-    fontSize: 36,
-    fontWeight: "800",
-    color: "#fff",
-  },
-  profileName: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#0f172a",
-    textAlign: "center",
-  },
-  profileEmail: {
-    fontSize: 13,
-    color: "#64748b",
-    marginTop: 2,
-  },
+  profileName: { fontSize: 22, fontWeight: "800", color: "#0f172a", textAlign: "center" },
+  profileEmail: { fontSize: 13, color: "#64748b", marginTop: 2 },
   memberIdBadge: {
     backgroundColor: "#1a4ff5",
     paddingHorizontal: 14,
@@ -291,12 +260,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginTop: 6,
   },
-  memberIdText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "800",
-    letterSpacing: 1,
-  },
+  memberIdText: { color: "#fff", fontSize: 12, fontWeight: "800", letterSpacing: 1 },
   roleBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -309,19 +273,35 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginTop: 4,
   },
-  roleDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#22c55e",
-  },
-  roleBadgeText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#15803d",
-  },
+  roleDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#22c55e" },
+  roleBadgeText: { fontSize: 12, fontWeight: "600", color: "#15803d" },
 
-  // ID Card button
+  editAvatarBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1.5,
+    borderColor: "#dbeafe",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    elevation: 2,
+  },
+  editAvatarBtnLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
+  editAvatarIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#eff6ff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  editAvatarBtnText: { fontSize: 15, fontWeight: "700", color: "#1e293b" },
+
   idCardBtn: {
     marginBottom: 24,
     borderRadius: 18,
@@ -338,12 +318,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 18,
   },
-  idCardBtnLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    flex: 1,
-  },
+  idCardBtnLeft: { flexDirection: "row", alignItems: "center", gap: 14, flex: 1 },
   idCardIconBox: {
     width: 48,
     height: 48,
@@ -352,34 +327,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  idCardIcon: { fontSize: 24 },
-  idCardBtnTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#fff",
-  },
-  idCardBtnSub: {
-    fontSize: 11,
-    color: "rgba(255,255,255,0.8)",
-    marginTop: 2,
-  },
-  idCardChevron: {
-    fontSize: 28,
-    color: "rgba(255,255,255,0.6)",
-    fontWeight: "300",
-  },
+  idCardBtnTitle: { fontSize: 16, fontWeight: "800", color: "#fff" },
+  idCardBtnSub: { fontSize: 11, color: "rgba(255,255,255,0.8)", marginTop: 2 },
 
-  // Section header
-  sectionHeader: {
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: "800",
-    color: "#1e293b",
-  },
+  sectionHeader: { marginBottom: 12 },
+  sectionTitle: { fontSize: 15, fontWeight: "800", color: "#1e293b" },
 
-  // Loading / error
   loadingBox: {
     flexDirection: "row",
     alignItems: "center",
@@ -404,7 +357,6 @@ const styles = StyleSheet.create({
   errorSmall: { fontSize: 13, color: "#92400e" },
   retrySmall: { fontSize: 13, fontWeight: "700", color: "#1a4ff5" },
 
-  // Bio card
   bioCard: {
     backgroundColor: "#fff",
     borderRadius: 18,
@@ -432,19 +384,9 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.3,
   },
-  bioValue: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1e293b",
-    marginTop: 2,
-  },
-  bioDivider: {
-    height: 1,
-    backgroundColor: "#f1f5f9",
-    marginHorizontal: 14,
-  },
+  bioValue: { fontSize: 14, fontWeight: "600", color: "#1e293b", marginTop: 2 },
+  bioDivider: { height: 1, backgroundColor: "#f1f5f9", marginHorizontal: 14 },
 
-  // Logout
   btnLogout: {
     backgroundColor: "#fff",
     borderRadius: 14,
@@ -456,9 +398,5 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "#fecaca",
   },
-  btnLogoutText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#ef4444",
-  },
+  btnLogoutText: { fontSize: 15, fontWeight: "600", color: "#ef4444" },
 });

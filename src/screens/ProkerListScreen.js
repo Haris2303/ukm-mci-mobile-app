@@ -80,7 +80,16 @@ export default function ProkerListScreen({ navigation }) {
     <View style={styles.container}>
       {/* ── Header ────────────────────────────────────── */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Program Kerja</Text>
+        <View style={styles.headerTopRow}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => navigation.goBack()}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <FontAwesome5 name="arrow-left" size={18} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Program Kerja</Text>
+        </View>
         <Text style={styles.headerSub}>
           {data.statistik.total} proker · {data.statistik.active} berjalan ·{" "}
           {data.statistik.completed} selesai
@@ -317,11 +326,20 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 28,
     gap: 8,
   },
+  headerTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  backBtn: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 4,
+  },
   headerTitle: {
     fontSize: 22,
     fontWeight: "800",
     color: "#fff",
-    marginBottom: 2,
   },
   headerSub: { fontSize: 13, color: "rgba(255,255,255,0.75)" },
 
