@@ -1,11 +1,5 @@
-// src/context/KasContext.js
-// Menyimpan jumlah tunggakan secara global agar bisa diakses oleh:
-// - HomeScreen (untuk card ringkasan)
-// - Tab "Kas" (untuk badge merah di bottom nav)
-// - KasScreen (sebagai initial data)
-
 import React, { createContext, useCallback, useContext, useState } from "react";
-import { getSaldoTransparansi, getTunggakan } from "../services/kasApi";
+import { getSaldoTransparansi, getTunggakan } from "../api/kasApi";
 
 const KasContext = createContext(null);
 
@@ -15,7 +9,6 @@ export function KasProvider({ children }) {
   const [saldoOrganisasi, setSaldoOrganisasi] = useState(null);
   const [loadingKas, setLoadingKas] = useState(false);
 
-  /** Refresh ringkasan kas — dipanggil di HomeScreen & saat pull-to-refresh */
   const refreshRingkasan = useCallback(async () => {
     setLoadingKas(true);
     try {

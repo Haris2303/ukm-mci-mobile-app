@@ -5,12 +5,11 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  ActivityIndicator,
-  TouchableOpacity,
   RefreshControl,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { getRiwayatPresensi } from "../services/api";
+import { LoadingState, ErrorState, EmptyState, ScreenHeader } from "../shared/components";
 
 export default function RiwayatScreen() {
   const [data, setData] = useState([]);
@@ -117,50 +116,26 @@ export default function RiwayatScreen() {
     </View>
   );
 
-  // ── Render: Loading ──────────────────────────────────────────
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#1a56db" />
-        <Text style={styles.loadingText}>Memuat riwayat...</Text>
-      </View>
-    );
-  }
+  if (loading) return <LoadingState message="Memuat riwayat..." />;
 
-  // ── Render: Error ────────────────────────────────────────────
-  if (error) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorIcon}>😕</Text>
-        <Text style={styles.errorTitle}>Gagal Memuat Data</Text>
-        <Text style={styles.errorDesc}>{error}</Text>
-        <TouchableOpacity style={styles.btnRetry} onPress={() => fetchData()}>
-          <Text style={styles.btnRetryText}>Coba Lagi</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  if (error) return <ErrorState message={error} onRetry={() => fetchData()} />;
 
-  // ── Render: Kosong ───────────────────────────────────────────
   const ListEmpty = () => (
-    <View style={styles.emptyBox}>
-      <FontAwesome5 name="inbox" size={48} color="#94a3b8" style={styles.emptyIconWrap} />
-      <Text style={styles.emptyTitle}>Belum Ada Riwayat</Text>
-      <Text style={styles.emptyDesc}>
-        Riwayat presensi Anda akan muncul di sini setelah Anda berhasil scan QR
-        Code.
-      </Text>
-    </View>
+    <EmptyState
+      iconName="inbox"
+      title="Belum Ada Riwayat"
+      description="Riwayat presensi Anda akan muncul di sini setelah Anda berhasil scan QR Code."
+    />
   );
 
   // ── Render: List ─────────────────────────────────────────────
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Riwayat Presensi</Text>
-        <Text style={styles.headerSub}>{data.length} kehadiran tercatat</Text>
-      </View>
+      <ScreenHeader
+        title="Riwayat Presensi"
+        subtitle={`${data.length} kehadiran tercatat`}
+        backgroundColor="#1a56db"
+      />
 
       <FlatList
         data={data}
@@ -189,34 +164,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f0f4ff",
-  },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 12,
-    padding: 32,
-    backgroundColor: "#f0f4ff",
-  },
-
-  // Header
-  header: {
-    backgroundColor: "#1a56db",
-    paddingTop: 60,
-    paddingBottom: 24,
-    paddingHorizontal: 24,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#fff",
-    marginBottom: 4,
-  },
-  headerSub: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.75)",
   },
 
   // List
@@ -310,44 +257,4 @@ const styles = StyleSheet.create({
   metaIconWrap: { width: 16, alignItems: "center" },
   metaText: { fontSize: 13, color: "#64748b", flex: 1 },
 
-  // Loading
-  loadingText: { fontSize: 14, color: "#94a3b8", marginTop: 8 },
-
-  // Error
-  errorIcon: { fontSize: 48 },
-  errorTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1e293b",
-    textAlign: "center",
-  },
-  errorDesc: {
-    fontSize: 14,
-    color: "#64748b",
-    textAlign: "center",
-    lineHeight: 22,
-  },
-  btnRetry: {
-    backgroundColor: "#1a56db",
-    paddingHorizontal: 28,
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginTop: 8,
-  },
-  btnRetryText: { color: "#fff", fontWeight: "600", fontSize: 15 },
-
-  // Empty
-  emptyBox: {
-    alignItems: "center",
-    padding: 32,
-    gap: 12,
-  },
-  emptyIconWrap: { marginBottom: 8 },
-  emptyTitle: { fontSize: 18, fontWeight: "700", color: "#1e293b" },
-  emptyDesc: {
-    fontSize: 14,
-    color: "#94a3b8",
-    textAlign: "center",
-    lineHeight: 22,
-  },
 });

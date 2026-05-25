@@ -5,7 +5,11 @@ import React from "react";
 import { ActivityIndicator, Image, StyleSheet, Text, View } from "react-native";
 
 const brandImage = require("./assets/brand.png");
-import { useFonts, Inter_300Light, Inter_400Regular } from "@expo-google-fonts/inter";
+import {
+  useFonts,
+  Inter_300Light,
+  Inter_400Regular,
+} from "@expo-google-fonts/inter";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -14,13 +18,13 @@ import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AuthProvider, useAuth } from "./src/context/AuthContext";
-import { KasProvider, useKas } from "./src/context/KasContext";
+import { KasProvider, useKas } from "./src/features/kas/context/KasContext";
 
 import LoginScreen from "./src/screens/LoginScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import ScanScreen from "./src/screens/ScanScreen";
 import RiwayatScreen from "./src/screens/RiwayatScreen";
-import KasScreen from "./src/screens/KasScreen";
+import KasScreen from "./src/features/kas/screens/KasScreen";
 import MateriScreen from "./src/screens/MateriScreen";
 import IdCardScreen from "./src/screens/IdCardScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
@@ -33,7 +37,9 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function TabIcon({ name, color, focused }) {
-  return <FontAwesome5 name={name} size={focused ? 22 : 19} color={color} solid />;
+  return (
+    <FontAwesome5 name={name} size={focused ? 22 : 19} color={color} solid />
+  );
 }
 
 function ProfileTabIcon({ focused, color }) {
@@ -94,28 +100,36 @@ function MainTabs() {
         name="Beranda"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="home" focused={focused} color={color} />,
-        }}
-      />
-      <Tab.Screen
-        name="Scan QR"
-        component={ScanScreen}
-        options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="camera" focused={focused} color={color} />,
+          tabBarIcon: ({ focused, color }) => (
+            <TabIcon name="home" focused={focused} color={color} />
+          ),
         }}
       />
       <Tab.Screen
         name="E-Voting"
         component={VotingNavigator}
         options={{
-          tabBarIcon: ({ focused, color }) => <TabIcon name="vote-yea" focused={focused} color={color} />,
+          tabBarIcon: ({ focused, color }) => (
+            <TabIcon name="vote-yea" focused={focused} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Scan QR"
+        component={ScanScreen}
+        options={{
+          tabBarIcon: ({ focused, color }) => (
+            <TabIcon name="camera" focused={focused} color={color} />
+          ),
         }}
       />
       <Tab.Screen
         name="E-Kas"
         component={KasScreen}
         options={{
-          tabBarIcon: ({ focused, color }) => <KasTabIcon focused={focused} color={color} />,
+          tabBarIcon: ({ focused, color }) => (
+            <KasTabIcon focused={focused} color={color} />
+          ),
         }}
       />
       <Tab.Screen
@@ -129,7 +143,9 @@ function MainTabs() {
           headerTintColor: "#fff",
           headerTitleStyle: { fontWeight: "700", fontSize: 17 },
           tabBarLabel: "Profil",
-          tabBarIcon: ({ focused, color }) => <ProfileTabIcon focused={focused} color={color} />,
+          tabBarIcon: ({ focused, color }) => (
+            <ProfileTabIcon focused={focused} color={color} />
+          ),
         }}
       />
     </Tab.Navigator>
@@ -210,8 +226,16 @@ function RootNavigator() {
 function SplashView() {
   return (
     <View style={splashStyles.container}>
-      <Image source={brandImage} style={splashStyles.logo} resizeMode="contain" />
-      <ActivityIndicator size="small" color="#1a4ff5" style={{ marginTop: 32 }} />
+      <Image
+        source={brandImage}
+        style={splashStyles.logo}
+        resizeMode="contain"
+      />
+      <ActivityIndicator
+        size="small"
+        color="#1a4ff5"
+        style={{ marginTop: 32 }}
+      />
     </View>
   );
 }

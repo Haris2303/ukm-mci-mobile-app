@@ -11,7 +11,7 @@ import {
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
 import AvatarDisplay from "../components/AvatarDisplay";
-import KasRingkasanCard from "../components/KasRingkasanCard";
+import KasRingkasanCard from "../features/kas/components/KasRingkasanCard";
 import MateriRingkasanCard from "../components/MateriRingkaksanCard";
 import ProkerRingkasanCard from "../components/ProkerRingkasanCard";
 

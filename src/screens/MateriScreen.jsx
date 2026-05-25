@@ -1,7 +1,7 @@
 // src/screens/MateriScreen.js
 // Halaman lengkap distribusi materi dengan filter, download, dan cache offline
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -11,16 +11,15 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
-  Linking,
-  Platform,
   Dimensions,
 } from "react-native";
-import * as FileSystem from "expo-file-system/legacy";
-import * as Sharing from "expo-sharing";
-import * as IntentLauncher from "expo-intent-launcher";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { getMateri } from "../services/materiApi";
+import { useAsyncResource } from "../shared/hooks";
+import { LoadingState, ErrorState } from "../shared/components";
+import parseFaIconName from "../core/utils/parseFaIcon";
+import { downloadAndOpen } from "../features/materi/services/materiDownloader";
+import openExternalLink from "../core/utils/openExternalLink";
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -31,14 +30,17 @@ const FILTERS = [
 ];
 
 export default function MateriScreen() {
-  const [data, setData] = useState(null);
   const [activeFilter, setActiveFilter] = useState("semua");
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState(null);
   const [downloadingId, setDownloadingId] = useState(null);
 
   const pageScrollRef = useRef(null);
+
+  const fetchMateri = useCallback(async () => {
+    const res = await getMateri();
+    return res.data;
+  }, []);
+
+  const { data, loading, refreshing, error, refetch, refresh } = useAsyncResource(fetchMateri);
 
   const handleFilterPress = (key) => {
     const idx = FILTERS.findIndex((f) => f.key === key);
@@ -53,53 +55,10 @@ export default function MateriScreen() {
     }
   };
 
-  const fetchData = useCallback(async (isRefresh = false) => {
-    isRefresh ? setRefreshing(true) : setLoading(true);
-    setError(null);
-    try {
-      const res = await getMateri();
-      setData(res.data);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  // ── Download & buka PDF ───────────────────────────────────
-  // Strategi:
-  //   1. Cek cache lokal — kalau sudah pernah download, langsung buka
-  //   2. Kalau belum, download dengan progress indicator
-  //   3. Buka dengan aplikasi PDF sistem (Adobe Reader, Drive, dll.)
   const handleDownloadDanBuka = async (materi) => {
+    setDownloadingId(materi.id);
     try {
-      setDownloadingId(materi.id);
-
-      const safeName = `materi-${materi.id}.pdf`;
-      const localUri = `${FileSystem.documentDirectory}${safeName}`;
-
-      // Cek cache — kalau sudah ada, langsung buka tanpa download ulang
-      const cacheKey = `materi_downloaded_${materi.id}`;
-      const cached = await AsyncStorage.getItem(cacheKey);
-      const fileInfo = await FileSystem.getInfoAsync(localUri);
-
-      if (cached && fileInfo.exists) {
-        await bukaFile(localUri);
-        return;
-      }
-
-      // Download
-      const { uri } = await FileSystem.downloadAsync(materi.file_url, localUri);
-
-      // Tandai sudah ter-download di AsyncStorage
-      await AsyncStorage.setItem(cacheKey, new Date().toISOString());
-
-      await bukaFile(uri);
+      await downloadAndOpen(materi);
     } catch (e) {
       Alert.alert("❌ Gagal Mengunduh", e.message);
     } finally {
@@ -107,63 +66,16 @@ export default function MateriScreen() {
     }
   };
 
-  // Buka file PDF dengan aplikasi sistem
-  const bukaFile = async (uri) => {
-    if (Platform.OS === "android") {
-      // Android: pakai IntentLauncher → user bisa pilih app PDF favoritnya
-      try {
-        const contentUri = await FileSystem.getContentUriAsync(uri);
-        await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
-          data: contentUri,
-          flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
-          type: "application/pdf",
-        });
-      } catch {
-        // Fallback: pakai Sharing kalau tidak ada app PDF
-        await Sharing.shareAsync(uri, { mimeType: "application/pdf" });
-      }
-    } else {
-      // iOS: pakai Sharing — Quick Look akan menampilkan preview PDF
-      await Sharing.shareAsync(uri, { mimeType: "application/pdf" });
-    }
-  };
-
-  // ── Buka link eksternal di browser ────────────────────────
   const handleBukaLink = async (url) => {
-    const supported = await Linking.canOpenURL(url);
-    if (supported) {
-      await Linking.openURL(url);
-    } else {
-      Alert.alert(
-        "❌ Tidak Bisa Membuka",
-        "URL tidak valid atau tidak ada aplikasi yang mendukung.",
-      );
+    try {
+      await openExternalLink(url);
+    } catch (e) {
+      Alert.alert("❌ Tidak Bisa Membuka", e.message);
     }
   };
 
-  // ── Loading state ────────────────────────────────────────
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#1a4ff5" />
-        <Text style={styles.loadingText}>Memuat materi...</Text>
-      </View>
-    );
-  }
-
-  // ── Error state ──────────────────────────────────────────
-  if (error) {
-    return (
-      <View style={styles.center}>
-        <FontAwesome5 name="frown" size={48} color="#94a3b8" style={{ marginBottom: 8 }} />
-        <Text style={styles.errorTitle}>Gagal Memuat Materi</Text>
-        <Text style={styles.errorMsg}>{error}</Text>
-        <TouchableOpacity style={styles.btnRetry} onPress={() => fetchData()}>
-          <Text style={styles.btnRetryText}>Coba Lagi</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  if (loading) return <LoadingState message="Memuat materi..." />;
+  if (error) return <ErrorState message={error} onRetry={refetch} />;
 
   return (
     <View style={styles.container}>
@@ -252,7 +164,7 @@ export default function MateriScreen() {
               refreshControl={
                 <RefreshControl
                   refreshing={refreshing}
-                  onRefresh={() => fetchData(true)}
+                  onRefresh={refresh}
                   colors={["#1a4ff5"]}
                 />
               }
@@ -288,14 +200,6 @@ export default function MateriScreen() {
       </ScrollView>
     </View>
   );
-}
-
-function parseFaIconName(faClass, fallback = "tag") {
-  if (!faClass) return fallback;
-  const m = faClass.match(/fa-(?:solid|regular|brands)\s+fa-([^\s]+)/);
-  if (m) return m[1];
-  const s = faClass.match(/^fa-([^\s]+)/);
-  return s ? s[1] : fallback;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -388,26 +292,6 @@ function MateriCard({ materi, isDownloading, onDownload, onOpenLink }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f0f4ff" },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 32,
-    gap: 14,
-    backgroundColor: "#f0f4ff",
-  },
-  loadingText: { color: "#94a3b8", fontSize: 14 },
-
-  errorTitle: { fontSize: 18, fontWeight: "800", color: "#1e293b" },
-  errorMsg: { fontSize: 14, color: "#64748b", textAlign: "center" },
-  btnRetry: {
-    backgroundColor: "#1a4ff5",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginTop: 8,
-  },
-  btnRetryText: { color: "#fff", fontWeight: "700" },
 
   statsStrip: {
     backgroundColor: "#1a56db",

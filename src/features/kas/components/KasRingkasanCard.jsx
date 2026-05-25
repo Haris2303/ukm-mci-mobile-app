@@ -1,7 +1,3 @@
-// src/components/KasRingkasanCard.js
-// Card ringkasan E-Kas untuk ditampilkan di HomeScreen.
-// Menampilkan saldo organisasi + alert tunggakan pribadi (jika ada).
-
 import React, { useEffect } from "react";
 import {
   View,
@@ -12,7 +8,7 @@ import {
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useKas } from "../context/KasContext";
-import { colors, fontFamily, radius, spacing } from "../theme/theme";
+import { colors, fontFamily, spacing } from "../../../theme/theme";
 
 export default function KasRingkasanCard({ onPress }) {
   const {
@@ -42,7 +38,7 @@ export default function KasRingkasanCard({ onPress }) {
 
         <View style={styles.cardHeader}>
           <View style={styles.iconBox}>
-            <FontAwesome5 name="coins" size={22} color={colors.textOnPrimary} solid />
+            <FontAwesome5 name="coins" size={22} color={colors.labelOnPrimary} solid />
           </View>
           <View style={styles.headerText}>
             <Text style={styles.headerLabel}>Saldo Kas Organisasi</Text>
@@ -52,7 +48,7 @@ export default function KasRingkasanCard({ onPress }) {
 
         {loadingKas && !saldoOrganisasi ? (
           <View style={styles.loadingBox}>
-            <ActivityIndicator color={colors.textOnPrimary} />
+            <ActivityIndicator color={colors.labelOnPrimary} />
           </View>
         ) : (
           <Text style={styles.saldoAngka}>
@@ -78,7 +74,7 @@ export default function KasRingkasanCard({ onPress }) {
           onPress={onPress}
         >
           <View style={styles.alertIconBox}>
-            <FontAwesome5 name="exclamation-triangle" size={20} color="#92400e" solid />
+            <FontAwesome5 name="exclamation-triangle" size={20} color={colors.warningText} solid />
           </View>
           <View style={styles.alertContent}>
             <Text style={styles.alertTitle}>Anda Memiliki Tunggakan</Text>
@@ -90,7 +86,7 @@ export default function KasRingkasanCard({ onPress }) {
             </Text>
           </View>
           <View style={styles.alertChevron}>
-            <FontAwesome5 name="chevron-right" size={14} color="#92400e" />
+            <FontAwesome5 name="chevron-right" size={14} color={colors.warningText} />
           </View>
         </TouchableOpacity>
       )}
@@ -99,7 +95,7 @@ export default function KasRingkasanCard({ onPress }) {
       {!adaTunggakan && saldoOrganisasi && (
         <View style={styles.lunasCard}>
           <View style={styles.lunasIconBox}>
-            <FontAwesome5 name="check-circle" size={20} color={colors.textOnPrimary} solid />
+            <FontAwesome5 name="check-circle" size={20} color={colors.labelOnPrimary} solid />
           </View>
           <View style={styles.alertContent}>
             <Text style={styles.lunasTitle}>Iuran Anda Lunas</Text>
@@ -116,14 +112,14 @@ export default function KasRingkasanCard({ onPress }) {
 const styles = StyleSheet.create({
   wrapper: { gap: spacing[3] },
 
-  // ── Card Saldo ──
   cardSaldo: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.brand,
     borderRadius: 24,
     padding: 22,
     overflow: "hidden",
     position: "relative",
-    shadowColor: colors.primary,
+    // Colored shadow — intentional, tidak pakai shadow preset
+    shadowColor: colors.brand,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 10,
@@ -161,10 +157,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  iconEmoji: { fontSize: 22 },
   headerText: { flex: 1 },
   headerLabel: {
-    color: colors.textOnPrimary,
+    color: colors.labelOnPrimary,
     fontSize: 14,
     fontFamily: fontFamily.regular,
   },
@@ -174,17 +169,14 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.light,
     marginTop: 1,
   },
-
-  loadingBox: { paddingVertical: 12, alignItems: "flex-start" },
-
+  loadingBox: { paddingVertical: spacing[3], alignItems: "flex-start" },
   saldoAngka: {
-    color: colors.textOnPrimary,
+    color: colors.labelOnPrimary,
     fontSize: 30,
     fontFamily: fontFamily.regular,
     letterSpacing: -0.5,
     marginBottom: 14,
   },
-
   metaRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -199,15 +191,13 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: fontFamily.light,
   },
-
-  // ── Alert Tunggakan ──
   alertCard: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing[3],
-    backgroundColor: colors.warningLight,
+    backgroundColor: colors.warningBg,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "#fcd34d",
+    borderColor: colors.warningBorder,
     borderRadius: 16,
     padding: spacing[4],
   },
@@ -215,21 +205,20 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 13,
-    backgroundColor: colors.warning,
+    backgroundColor: colors.warningIcon,
     justifyContent: "center",
     alignItems: "center",
   },
-  alertIcon: { fontSize: 22 },
   alertContent: { flex: 1 },
   alertTitle: {
     fontSize: 14,
     fontFamily: fontFamily.regular,
-    color: "#92400e",
+    color: colors.warningText,
   },
   alertText: {
     fontSize: 12,
     fontFamily: fontFamily.light,
-    color: "#a16207",
+    color: colors.warningMuted,
     marginTop: 2,
   },
   alertNominal: { fontFamily: fontFamily.regular, color: "#7c2d12" },
@@ -241,21 +230,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  chevronText: {
-    color: "#92400e",
-    fontSize: 18,
-    fontFamily: fontFamily.regular,
-    lineHeight: 18,
-  },
-
-  // ── Lunas ──
   lunasCard: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing[3],
-    backgroundColor: colors.successLight,
+    backgroundColor: colors.successBg,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "#86efac",
+    borderColor: colors.successBorder,
     borderRadius: 16,
     padding: 14,
   },
@@ -263,11 +244,10 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: colors.success,
+    backgroundColor: colors.successIconBg,
     justifyContent: "center",
     alignItems: "center",
   },
-  lunasIcon: { fontSize: 20 },
-  lunasTitle: { fontSize: 13, fontFamily: fontFamily.regular, color: "#15803d" },
-  lunasText: { fontSize: 11, fontFamily: fontFamily.light, color: "#16a34a", marginTop: 1 },
+  lunasTitle: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.successText },
+  lunasText: { fontSize: 11, fontFamily: fontFamily.light, color: colors.successMuted, marginTop: 1 },
 });
