@@ -1,4 +1,3 @@
-// src/screens/voting/ElectionDetailScreen.jsx
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,

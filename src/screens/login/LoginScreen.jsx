@@ -15,13 +15,14 @@ import {
 } from 'react-native';
 import Svg, { Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
 
+import { useAuth } from '@context/AuthContext';
+import { login } from '@services/api';
+
 import { colors } from '@theme/colors';
 
 import { FLASH_CONFIG, styles, TITLE_GRADIENT } from './LoginScreen.styles';
-import { useAuth } from '../../context/AuthContext';
-import { login } from '../../services/api';
 
-const logoImage = require('../../../assets/logo.png');
+const logoImage = require('@assets/logo.png');
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
