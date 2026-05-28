@@ -11,13 +11,13 @@
  *     stale jika user menghapus app storage manual.
  */
 
-import * as FileSystem from "expo-file-system/legacy";
-import * as Sharing from "expo-sharing";
-import * as IntentLauncher from "expo-intent-launcher";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Platform } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as IntentLauncher from 'expo-intent-launcher';
+import * as Sharing from 'expo-sharing';
+import { Platform } from 'react-native';
 
-const CACHE_KEY_PREFIX = "materi_downloaded_";
+const CACHE_KEY_PREFIX = 'materi_downloaded_';
 
 function getLocalUri(materiId) {
   return `${FileSystem.documentDirectory}materi-${materiId}.pdf`;
@@ -52,12 +52,7 @@ export async function downloadMateri(materi, onProgress) {
   let resultUri;
   if (onProgress) {
     // Gunakan resumable jika caller ingin progress — API identik, behavior sama
-    const task = FileSystem.createDownloadResumable(
-      materi.file_url,
-      localUri,
-      {},
-      onProgress,
-    );
+    const task = FileSystem.createDownloadResumable(materi.file_url, localUri, {}, onProgress);
     const result = await task.downloadAsync();
     resultUri = result.uri;
   } else {
@@ -66,10 +61,7 @@ export async function downloadMateri(materi, onProgress) {
   }
 
   // Tandai cache setelah download berhasil
-  await AsyncStorage.setItem(
-    `${CACHE_KEY_PREFIX}${materi.id}`,
-    new Date().toISOString(),
-  );
+  await AsyncStorage.setItem(`${CACHE_KEY_PREFIX}${materi.id}`, new Date().toISOString());
 
   return resultUri;
 }
@@ -83,20 +75,20 @@ export async function downloadMateri(materi, onProgress) {
  * @returns {Promise<void>}
  */
 export async function openMateriFile(uri) {
-  if (Platform.OS === "android") {
+  if (Platform.OS === 'android') {
     try {
       const contentUri = await FileSystem.getContentUriAsync(uri);
-      await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
+      await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
         data: contentUri,
         flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
-        type: "application/pdf",
+        type: 'application/pdf',
       });
     } catch {
       // Fallback: tidak ada app PDF terpasang
-      await Sharing.shareAsync(uri, { mimeType: "application/pdf" });
+      await Sharing.shareAsync(uri, { mimeType: 'application/pdf' });
     }
   } else {
-    await Sharing.shareAsync(uri, { mimeType: "application/pdf" });
+    await Sharing.shareAsync(uri, { mimeType: 'application/pdf' });
   }
 }
 

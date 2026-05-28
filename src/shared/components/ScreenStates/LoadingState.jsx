@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
-import { colors, spacing } from '../../../theme/theme';
+
+import { colors, spacing } from '@theme/theme';
 
 export default function LoadingState({ message, style }) {
   return (

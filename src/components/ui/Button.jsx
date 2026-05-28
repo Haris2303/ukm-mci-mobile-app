@@ -1,12 +1,7 @@
 import React from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  ActivityIndicator,
-  StyleSheet,
-  View,
-} from 'react-native';
-import { colors, radius, spacing, size } from '../../theme/theme';
+import { TouchableOpacity, Text, ActivityIndicator, StyleSheet, View } from 'react-native';
+
+import { colors, radius, spacing, size } from '@theme/theme';
 
 /**
  * Button — iOS-style dengan squircle corners.
@@ -39,9 +34,7 @@ export default function Button({
   textStyle,
   ...rest
 }) {
-  const baseColor = variant === 'destructive'
-    ? colors.systemRed
-    : (color ?? colors.primary);
+  const baseColor = variant === 'destructive' ? colors.systemRed : (color ?? colors.primary);
 
   const isDisabled = disabled || loading;
 
@@ -61,9 +54,7 @@ export default function Button({
     textStyle,
   ];
 
-  const indicatorColor = (variant === 'filled' || variant === 'destructive')
-    ? '#fff'
-    : baseColor;
+  const indicatorColor = variant === 'filled' || variant === 'destructive' ? '#fff' : baseColor;
 
   return (
     <TouchableOpacity
@@ -136,11 +127,11 @@ const styles = StyleSheet.create({
   lg: { height: size.buttonHeightLg, paddingHorizontal: spacing[6] },
 
   // ─── Label ────────────────────────────────────────────────────────
-  label:    { fontWeight: '600', letterSpacing: -0.1 },
-  smLabel:  { fontSize: 14 },
-  mdLabel:  { fontSize: 16 },
-  lgLabel:  { fontSize: 17 },
+  label: { fontWeight: '600', letterSpacing: -0.1 },
+  smLabel: { fontSize: 14 },
+  mdLabel: { fontSize: 16 },
+  lgLabel: { fontSize: 17 },
 
-  iconLeft:  { marginRight: spacing[2] },
+  iconLeft: { marginRight: spacing[2] },
   iconRight: { marginLeft: spacing[2] },
 });

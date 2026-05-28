@@ -1,33 +1,40 @@
 // src/components/AvatarDisplay.js
-import React from "react";
-import { Image, Text, View } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { STORAGE_URL } from "../services/profileApi";
+import { LinearGradient } from 'expo-linear-gradient';
+import React from 'react';
+import { Image, Text, View } from 'react-native';
+
+import { colors } from '@theme/colors';
+
+import { STORAGE_URL } from '../services/profileApi';
 
 export function resolveAvatarUrl(avatar) {
   if (!avatar) return null;
-  if (avatar.startsWith("emoji:")) return null;
-  if (avatar.startsWith("http://") || avatar.startsWith("https://") || avatar.startsWith("file://")) {
+  if (avatar.startsWith('emoji:')) return null;
+  if (
+    avatar.startsWith('http://') ||
+    avatar.startsWith('https://') ||
+    avatar.startsWith('file://')
+  ) {
     return avatar;
   }
   return `${STORAGE_URL}/${avatar}`;
 }
 
 export function parseAvatar(avatar) {
-  if (!avatar) return { type: "initials" };
-  if (avatar.startsWith("emoji:")) {
-    const parts = avatar.split(":");
-    return { type: "emoji", emoji: parts[1] ?? "😊", bg: parts[2] ?? "1a56db" };
+  if (!avatar) return { type: 'initials' };
+  if (avatar.startsWith('emoji:')) {
+    const parts = avatar.split(':');
+    return { type: 'emoji', emoji: parts[1] ?? '😊', bg: parts[2] ?? '1a56db' };
   }
-  return { type: "photo", url: resolveAvatarUrl(avatar) };
+  return { type: 'photo', url: resolveAvatarUrl(avatar) };
 }
 
 export default function AvatarDisplay({ avatar, name, size = 64, borderRadius, style }) {
   const radius = borderRadius ?? size / 2;
   const parsed = parseAvatar(avatar);
-  const inisial = (name ?? "A")[0].toUpperCase();
+  const inisial = (name ?? 'A')[0].toUpperCase();
 
-  if (parsed.type === "photo") {
+  if (parsed.type === 'photo') {
     return (
       <Image
         source={{ uri: parsed.url }}
@@ -37,7 +44,7 @@ export default function AvatarDisplay({ avatar, name, size = 64, borderRadius, s
     );
   }
 
-  if (parsed.type === "emoji") {
+  if (parsed.type === 'emoji') {
     return (
       <View
         style={[
@@ -46,8 +53,8 @@ export default function AvatarDisplay({ avatar, name, size = 64, borderRadius, s
             height: size,
             borderRadius: radius,
             backgroundColor: `#${parsed.bg}`,
-            justifyContent: "center",
-            alignItems: "center",
+            justifyContent: 'center',
+            alignItems: 'center',
           },
           style,
         ]}
@@ -60,10 +67,21 @@ export default function AvatarDisplay({ avatar, name, size = 64, borderRadius, s
   // initials fallback
   return (
     <LinearGradient
-      colors={["#1a4ff5", "#3671ff"]}
-      style={[{ width: size, height: size, borderRadius: radius, justifyContent: "center", alignItems: "center" }, style]}
+      colors={[colors.brand, colors.brandLight]}
+      style={[
+        {
+          width: size,
+          height: size,
+          borderRadius: radius,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        style,
+      ]}
     >
-      <Text style={{ fontSize: size * 0.38, fontWeight: "800", color: "#fff" }}>{inisial}</Text>
+      <Text style={{ fontSize: size * 0.38, fontWeight: '800', color: colors.labelOnPrimary }}>
+        {inisial}
+      </Text>
     </LinearGradient>
   );
 }

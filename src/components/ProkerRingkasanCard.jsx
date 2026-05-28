@@ -1,38 +1,21 @@
-// src/components/ProkerRingkasanCard.js
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
-import { FontAwesome5 } from "@expo/vector-icons";
-import { getProker } from "../services/prokerApi";
-import { shadow } from "../theme/theme";
+// src/components/ProkerRingkasanCard.jsx
+// Card preview program kerja untuk ditampilkan di HomeScreen.
+// Menggunakan useProker() — shared cache dengan ProkerListScreen →
+// satu cache entry, tidak ada duplikasi request.
 
-const PURPLE = "#7c3aed";
+import React, { memo } from 'react';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 
-export default function ProkerRingkasanCard({ onPress }) {
-  const [data, setData]       = useState(null);
-  const [loading, setLoading] = useState(true);
+import { useProker } from '@features/proker/hooks/useProker';
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const res = await getProker();
-        if (mounted) setData(res.data);
-      } catch {
-        // silent fail
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    })();
-    return () => { mounted = false; };
-  }, []);
+import { PURPLE, styles, SYSTEM_COLOR } from './styles/ProkerRingkasanCard.styles';
+import AppIcon from './ui/Icon';
 
-  if (loading) {
+function ProkerRingkasanCard({ onPress }) {
+  const { data, isLoading } = useProker();
+
+  // ── Loading skeleton — hanya tampil saat cache kosong (fetch pertama) ────
+  if (isLoading) {
     return (
       <View style={[styles.card, styles.loadingCard]}>
         <ActivityIndicator color={PURPLE} />
@@ -40,6 +23,7 @@ export default function ProkerRingkasanCard({ onPress }) {
     );
   }
 
+  // ── Kosong ────────────────────────────────────────────────────────────────
   if (!data || data.statistik.total === 0) {
     return (
       <TouchableOpacity
@@ -48,12 +32,12 @@ export default function ProkerRingkasanCard({ onPress }) {
         activeOpacity={0.88}
         experimental_continuousCorners={true}
       >
-        <FontAwesome5 name="clipboard-list" size={24} color={PURPLE} solid />
+        <AppIcon name="clipboard-list" size={24} color="violet600" />
         <View style={{ flex: 1 }}>
           <Text style={styles.emptyTitle}>Belum Ada Proker</Text>
           <Text style={styles.emptyDesc}>Program kerja akan muncul di sini.</Text>
         </View>
-        <FontAwesome5 name="chevron-right" size={13} color="#C6C6C8" />
+        <AppIcon name="chevron-right" size={13} color="separatorOpaque" />
       </TouchableOpacity>
     );
   }
@@ -62,18 +46,11 @@ export default function ProkerRingkasanCard({ onPress }) {
   const preview = proker.slice(0, 2);
 
   return (
-    <View
-      style={styles.card}
-      experimental_continuousCorners={true}
-    >
+    <View style={styles.card} experimental_continuousCorners={true}>
       {/* ── Header ─────────────────────────────────────── */}
-      <TouchableOpacity
-        style={styles.header}
-        onPress={onPress}
-        activeOpacity={0.88}
-      >
+      <TouchableOpacity style={styles.header} onPress={onPress} activeOpacity={0.88}>
         <View style={styles.headerIconBox}>
-          <FontAwesome5 name="tasks" size={16} color="#fff" solid />
+          <AppIcon name="tasks" size={16} color="labelOnPrimary" solid />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>Program Kerja</Text>
@@ -87,16 +64,16 @@ export default function ProkerRingkasanCard({ onPress }) {
 
       {/* ── Stat row ───────────────────────────────────── */}
       <View style={styles.statRow}>
-        <StatPill iconName="clipboard-list" label="Planning"  value={statistik.planning}  />
+        <StatPill iconName="clipboard-list" label="Planning" value={statistik.planning} />
         <View style={styles.statSep} />
-        <StatPill iconName="rocket"         label="Berjalan"  value={statistik.active}    />
+        <StatPill iconName="rocket" label="Berjalan" value={statistik.active} />
         <View style={styles.statSep} />
-        <StatPill iconName="check-circle"   label="Selesai"   value={statistik.completed} />
+        <StatPill iconName="check-circle" label="Selesai" value={statistik.completed} />
       </View>
 
       {statistik.terlambat > 0 && (
         <View style={styles.lateBar}>
-          <FontAwesome5 name="exclamation-triangle" size={10} color="#FF3B30" solid />
+          <AppIcon name="exclamation-triangle" size={10} color="error" />
           <Text style={styles.lateText}>{statistik.terlambat} proker terlambat</Text>
         </View>
       )}
@@ -115,7 +92,6 @@ export default function ProkerRingkasanCard({ onPress }) {
           />
         ))}
       </View>
-
     </View>
   );
 }
@@ -124,7 +100,7 @@ export default function ProkerRingkasanCard({ onPress }) {
 function StatPill({ iconName, label, value }) {
   return (
     <View style={styles.statPill}>
-      <FontAwesome5 name={iconName} size={11} color="rgba(255,255,255,0.75)" solid />
+      <AppIcon name={iconName} size={11} color="whiteAlpha75" />
       <Text style={styles.statNum}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
@@ -134,10 +110,13 @@ function StatPill({ iconName, label, value }) {
 // ─── ProkerRow ────────────────────────────────────────────────────────────────
 function ProkerRow({ proker, onPress, showSep }) {
   const progressColor =
-    proker.warna_progress === "success" ? "#34C759" :
-    proker.warna_progress === "danger"  ? "#FF3B30" :
-    proker.warna_progress === "warning" ? "#FF9500" :
-    PURPLE;
+    proker.warna_progress === 'success'
+      ? SYSTEM_COLOR.success
+      : proker.warna_progress === 'danger'
+        ? SYSTEM_COLOR.danger
+        : proker.warna_progress === 'warning'
+          ? SYSTEM_COLOR.warning
+          : PURPLE;
 
   return (
     <TouchableOpacity
@@ -151,10 +130,10 @@ function ProkerRow({ proker, onPress, showSep }) {
       <View style={styles.rowBody}>
         {/* Name + % */}
         <View style={styles.rowTop}>
-          <Text style={styles.rowName} numberOfLines={1}>{proker.nama_proker}</Text>
-          <Text style={[styles.rowPct, { color: progressColor }]}>
-            {proker.progress_persen}%
+          <Text style={styles.rowName} numberOfLines={1}>
+            {proker.nama_proker}
           </Text>
+          <Text style={[styles.rowPct, { color: progressColor }]}>{proker.progress_persen}%</Text>
         </View>
 
         {/* Progress bar */}
@@ -170,11 +149,11 @@ function ProkerRow({ proker, onPress, showSep }) {
         {/* Meta */}
         <View style={styles.rowMeta}>
           <Text style={styles.rowJenis}>
-            {proker.is_umum ? "Proker Umum" : (proker.divisi?.nama ?? "Divisi")}
+            {proker.is_umum ? 'Proker Umum' : (proker.divisi?.nama ?? 'Divisi')}
           </Text>
           {proker.is_terlambat ? (
             <View style={styles.lateChip}>
-              <FontAwesome5 name="exclamation-triangle" size={8} color="#FF3B30" solid />
+              <AppIcon name="exclamation-triangle" size={8} color="error" />
               <Text style={styles.lateChipText}>Terlambat</Text>
             </View>
           ) : (
@@ -186,145 +165,4 @@ function ProkerRow({ proker, onPress, showSep }) {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(0,0,0,0.08)",
-    overflow: "hidden",
-    ...shadow.sm,
-  },
-
-  loadingCard: {
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 120,
-  },
-
-  // ── Empty ──
-  emptyCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    padding: 18,
-  },
-  emptyTitle: { fontSize: 14, fontWeight: "600", color: "#000", marginBottom: 2 },
-  emptyDesc:  { fontSize: 12, color: "#8E8E93" },
-
-  // ── Header ──
-  header: {
-    backgroundColor: PURPLE,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    padding: 16,
-  },
-  headerIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerTitle: { fontSize: 15, fontWeight: "700", color: "#fff" },
-  headerSub:   { fontSize: 11, color: "rgba(255,255,255,0.7)", marginTop: 1 },
-  totalBadge: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    alignItems: "center",
-  },
-  totalNum:   { fontSize: 17, fontWeight: "700", color: "#fff" },
-  totalLabel: { fontSize: 9, color: "rgba(255,255,255,0.75)", marginTop: 1 },
-
-  // ── Stat row ──
-  statRow: {
-    flexDirection: "row",
-    backgroundColor: "#6d28d9",
-    paddingHorizontal: 16,
-    paddingBottom: 14,
-    paddingTop: 2,
-    gap: 0,
-  },
-  statPill: { flex: 1, alignItems: "center", gap: 2, paddingVertical: 6 },
-  statSep:  { width: StyleSheet.hairlineWidth, backgroundColor: "rgba(255,255,255,0.2)", marginVertical: 6 },
-  statNum:  { fontSize: 16, fontWeight: "700", color: "#fff" },
-  statLabel:{ fontSize: 9, color: "rgba(255,255,255,0.75)" },
-
-  // ── Late bar ──
-  lateBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(255,59,48,0.1)",
-    marginHorizontal: 12,
-    marginBottom: 2,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 8,
-  },
-  lateText: { fontSize: 12, color: "#FF3B30", fontWeight: "600" },
-
-  // ── Divider ──
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: "#E5E5EA",
-    marginTop: 8,
-  },
-
-  // ── List ──
-  listWrap: { paddingHorizontal: 14, paddingTop: 4 },
-
-  row: {
-    flexDirection: "row",
-    alignItems: "stretch",
-    paddingVertical: 12,
-    gap: 12,
-  },
-  rowSep: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#E5E5EA",
-  },
-  rowAccent: { width: 3, borderRadius: 2 },
-  rowBody: { flex: 1, gap: 5 },
-
-  rowTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  rowName: { fontSize: 14, fontWeight: "600", color: "#000", flex: 1 },
-  rowPct:  { fontSize: 13, fontWeight: "700", marginLeft: 8 },
-
-  progressBg: {
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: "#F2F2F7",
-    overflow: "hidden",
-  },
-  progressFill: { height: "100%", borderRadius: 3 },
-
-  rowMeta: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  rowJenis: { fontSize: 11, color: "#8E8E93" },
-  rowSisa:  { fontSize: 11, color: "#8E8E93" },
-
-  lateChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    backgroundColor: "rgba(255,59,48,0.1)",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  lateChipText: { fontSize: 10, color: "#FF3B30", fontWeight: "600" },
-
-});
+export default memo(ProkerRingkasanCard);

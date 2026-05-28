@@ -1,38 +1,26 @@
-import React, { useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
-import { FontAwesome5 } from "@expo/vector-icons";
-import { useKas } from "../context/KasContext";
-import { colors, fontFamily, spacing } from "../../../theme/theme";
+import { FontAwesome5 } from '@expo/vector-icons';
+import React, { memo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 
-export default function KasRingkasanCard({ onPress }) {
-  const {
-    tunggakanCount,
-    tunggakanTotal,
-    saldoOrganisasi,
-    loadingKas,
-    refreshRingkasan,
-  } = useKas();
+import { colors, fontFamily, spacing } from '@theme/theme';
 
-  useEffect(() => {
-    refreshRingkasan();
-  }, []);
+import { useKasTunggakan, useKasSaldo } from '../hooks/useKasQueries';
+
+function KasRingkasanCard({ onPress }) {
+  const tunggakanQuery = useKasTunggakan();
+  const saldoQuery = useKasSaldo();
+
+  const tunggakanCount = tunggakanQuery.data?.jumlah_tunggakan ?? 0;
+  const tunggakanTotal = tunggakanQuery.data?.total_nominal ?? 0;
+  const saldoOrganisasi = saldoQuery.data ?? null;
+  const isLoading = saldoQuery.isLoading;
 
   const adaTunggakan = tunggakanCount > 0;
 
   return (
     <View style={styles.wrapper}>
       {/* ── Card utama: Saldo Organisasi ───────────────────── */}
-      <TouchableOpacity
-        style={styles.cardSaldo}
-        activeOpacity={0.92}
-        onPress={onPress}
-      >
+      <TouchableOpacity style={styles.cardSaldo} activeOpacity={0.92} onPress={onPress}>
         <View style={styles.circle1} />
         <View style={styles.circle2} />
 
@@ -46,43 +34,33 @@ export default function KasRingkasanCard({ onPress }) {
           </View>
         </View>
 
-        {loadingKas && !saldoOrganisasi ? (
+        {isLoading ? (
           <View style={styles.loadingBox}>
             <ActivityIndicator color={colors.labelOnPrimary} />
           </View>
         ) : (
-          <Text style={styles.saldoAngka}>
-            {saldoOrganisasi?.total_saldo_format ?? "Rp —"}
-          </Text>
+          <Text style={styles.saldoAngka}>{saldoOrganisasi?.total_saldo_format ?? 'Rp —'}</Text>
         )}
 
         <View style={styles.metaRow}>
           <View style={styles.metaLeft}>
-            <FontAwesome5 name="clock" size={11} color="rgba(255,255,255,0.7)" />
-            <Text style={styles.metaText}>
-              {saldoOrganisasi?.diperbarui_pada ?? "Memuat..."}
-            </Text>
+            <FontAwesome5 name="clock" size={11} color={colors.whiteAlpha70} />
+            <Text style={styles.metaText}>{saldoOrganisasi?.diperbarui_pada ?? 'Memuat...'}</Text>
           </View>
         </View>
       </TouchableOpacity>
 
       {/* ── Alert tunggakan (hanya jika ada) ─────────────── */}
       {adaTunggakan && (
-        <TouchableOpacity
-          style={styles.alertCard}
-          activeOpacity={0.92}
-          onPress={onPress}
-        >
+        <TouchableOpacity style={styles.alertCard} activeOpacity={0.92} onPress={onPress}>
           <View style={styles.alertIconBox}>
             <FontAwesome5 name="exclamation-triangle" size={20} color={colors.warningText} solid />
           </View>
           <View style={styles.alertContent}>
             <Text style={styles.alertTitle}>Anda Memiliki Tunggakan</Text>
             <Text style={styles.alertText}>
-              {tunggakanCount} bulan belum dibayar · Total{" "}
-              <Text style={styles.alertNominal}>
-                Rp {tunggakanTotal.toLocaleString("id-ID")}
-              </Text>
+              {tunggakanCount} bulan belum dibayar · Total{' '}
+              <Text style={styles.alertNominal}>Rp {tunggakanTotal.toLocaleString('id-ID')}</Text>
             </Text>
           </View>
           <View style={styles.alertChevron}>
@@ -99,9 +77,7 @@ export default function KasRingkasanCard({ onPress }) {
           </View>
           <View style={styles.alertContent}>
             <Text style={styles.lunasTitle}>Iuran Anda Lunas</Text>
-            <Text style={styles.lunasText}>
-              Terima kasih atas ketertiban Anda 🎉
-            </Text>
+            <Text style={styles.lunasText}>Terima kasih atas ketertiban Anda 🎉</Text>
           </View>
         </View>
       )}
@@ -116,8 +92,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.brand,
     borderRadius: 24,
     padding: 22,
-    overflow: "hidden",
-    position: "relative",
+    overflow: 'hidden',
+    position: 'relative',
     // Colored shadow — intentional, tidak pakai shadow preset
     shadowColor: colors.brand,
     shadowOffset: { width: 0, height: 4 },
@@ -126,26 +102,26 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   circle1: {
-    position: "absolute",
+    position: 'absolute',
     top: -40,
     right: -40,
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: colors.whiteAlpha8,
   },
   circle2: {
-    position: "absolute",
+    position: 'absolute',
     bottom: -30,
     left: -20,
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: "rgba(15,244,198,0.1)",
+    backgroundColor: colors.tealAlpha10,
   },
   cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing[3],
     marginBottom: spacing[4],
   },
@@ -153,9 +129,9 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: "rgba(255,255,255,0.18)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: colors.whiteAlpha18,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerText: { flex: 1 },
   headerLabel: {
@@ -164,12 +140,12 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.regular,
   },
   headerSub: {
-    color: "rgba(255,255,255,0.7)",
+    color: colors.whiteAlpha70,
     fontSize: 11,
     fontFamily: fontFamily.light,
     marginTop: 1,
   },
-  loadingBox: { paddingVertical: spacing[3], alignItems: "flex-start" },
+  loadingBox: { paddingVertical: spacing[3], alignItems: 'flex-start' },
   saldoAngka: {
     color: colors.labelOnPrimary,
     fontSize: 30,
@@ -178,22 +154,22 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   metaRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingTop: spacing[3],
     borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.15)",
+    borderTopColor: colors.whiteAlpha15,
   },
-  metaLeft: { flexDirection: "row", alignItems: "center", gap: 5 },
+  metaLeft: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   metaText: {
-    color: "rgba(255,255,255,0.7)",
+    color: colors.whiteAlpha70,
     fontSize: 11,
     fontFamily: fontFamily.light,
   },
   alertCard: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing[3],
     backgroundColor: colors.warningBg,
     borderWidth: StyleSheet.hairlineWidth,
@@ -206,8 +182,8 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 13,
     backgroundColor: colors.warningIcon,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   alertContent: { flex: 1 },
   alertTitle: {
@@ -221,18 +197,18 @@ const styles = StyleSheet.create({
     color: colors.warningMuted,
     marginTop: 2,
   },
-  alertNominal: { fontFamily: fontFamily.regular, color: "#7c2d12" },
+  alertNominal: { fontFamily: fontFamily.regular, color: colors.orange900 },
   alertChevron: {
     width: 28,
     height: 28,
     borderRadius: 9,
-    backgroundColor: "rgba(217,119,6,0.15)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: colors.amberAlpha15,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   lunasCard: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing[3],
     backgroundColor: colors.successBg,
     borderWidth: StyleSheet.hairlineWidth,
@@ -245,9 +221,16 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 12,
     backgroundColor: colors.successIconBg,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   lunasTitle: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.successText },
-  lunasText: { fontSize: 11, fontFamily: fontFamily.light, color: colors.successMuted, marginTop: 1 },
+  lunasText: {
+    fontSize: 11,
+    fontFamily: fontFamily.light,
+    color: colors.successMuted,
+    marginTop: 1,
+  },
 });
+
+export default memo(KasRingkasanCard);

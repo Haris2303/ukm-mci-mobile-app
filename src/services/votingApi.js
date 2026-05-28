@@ -1,16 +1,16 @@
 // src/services/votingApi.js
 // Semua komunikasi e-voting dengan server Laravel
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { BASE_URL } from "../config/apiConfig";
-import { handleResponse } from "./apiClient";
+import { handleResponse } from './apiClient';
+import { BASE_URL } from '../config/apiConfig';
 
 const authHeaders = async () => {
-  const token = await AsyncStorage.getItem("auth_token");
+  const token = await AsyncStorage.getItem('auth_token');
   return {
-    "Content-Type": "application/json",
-    Accept: "application/json",
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
     Authorization: `Bearer ${token}`,
   };
 };
@@ -33,7 +33,7 @@ export const getElectionDetail = async (id) => {
 export const kirimSuara = async (electionId, candidateId) => {
   const headers = await authHeaders();
   const res = await fetch(`${BASE_URL}/elections/${electionId}/vote`, {
-    method: "POST",
+    method: 'POST',
     headers,
     body: JSON.stringify({ candidate_id: candidateId }),
   });

@@ -1,59 +1,34 @@
-// src/screens/voting/HasilVotingScreen.js
-import React, { useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  TouchableOpacity,
-  Animated,
-} from "react-native";
-import { FontAwesome5 } from "@expo/vector-icons";
-import { getHasil } from "../../services/votingApi";
+// src/screens/voting/HasilVotingScreen.jsx
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Animated } from 'react-native';
 
-const COLORS = ["#1a56db", "#059669", "#d97706", "#7c3aed", "#dc2626"];
+import { LoadingState } from '@shared/components';
+import AppIcon from 'src/components/ui/Icon';
+
+import { useHasil } from '@features/voting/hooks/useVoting';
+
+import { styles, COLORS } from './HasilVotingScreen.styles';
 
 export default function HasilVotingScreen({ route, navigation }) {
   const { id } = route.params;
-  const [hasil, setHasil] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await getHasil(id);
-        setHasil(res.data);
-      } catch (e) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [id]);
+  // ── Server state ──────────────────────────────────────────────────────────
+  const { data: hasil, isLoading, isError, error } = useHasil(id);
 
-  if (loading) {
+  // ── Guard states ──────────────────────────────────────────────────────────
+  if (isLoading) return <LoadingState message="Memuat hasil pemilihan..." />;
+
+  // Error HasilVoting punya UX domain-spesifik: "Hasil Belum Tersedia" +
+  // icon lock + tombol "Kembali" (bukan "Coba Lagi") → render custom.
+  if (isError) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#1a56db" />
-        <Text style={styles.loadingText}>Memuat hasil pemilihan...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.center}>
-        <FontAwesome5 name="lock" size={44} color="#94a3b8" solid style={{ marginBottom: 8 }} />
+        <AppIcon name="lock" size={44} color="slate400" style={{ marginBottom: 8 }} />
         <Text style={styles.errorTitle}>Hasil Belum Tersedia</Text>
-        <Text style={styles.errorMsg}>{error}</Text>
-        <TouchableOpacity
-          style={styles.btnBack}
-          onPress={() => navigation.goBack()}
-        >
+        <Text style={styles.errorMsg}>{error?.message}</Text>
+        <TouchableOpacity style={styles.btnBack} onPress={() => navigation.goBack()}>
           <View style={styles.btnBackRow}>
-            <FontAwesome5 name="arrow-left" size={13} color="#fff" solid />
+            <AppIcon name="arrow-left" size={13} color="labelOnPrimary" />
             <Text style={styles.btnBackText}>Kembali</Text>
           </View>
         </TouchableOpacity>
@@ -63,7 +38,7 @@ export default function HasilVotingScreen({ route, navigation }) {
 
   const pemenang = hasil.pemenang;
   const kandidat = hasil.kandidat ?? [];
-  const isSelesai = hasil.election.status === "selesai";
+  const isSelesai = hasil.election.status === 'selesai';
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -71,20 +46,15 @@ export default function HasilVotingScreen({ route, navigation }) {
       <View style={styles.header}>
         <Text style={styles.headerLabel}>{hasil.election.posisi}</Text>
         <Text style={styles.headerTitle}>{hasil.election.judul}</Text>
-        <View
-          style={[
-            styles.statusBadge,
-            isSelesai ? styles.badgeSelesai : styles.badgeAktif,
-          ]}
-        >
+        <View style={[styles.statusBadge, isSelesai ? styles.badgeSelesai : styles.badgeAktif]}>
           <View style={styles.statusBadgeRow}>
             {isSelesai ? (
-              <FontAwesome5 name="flag-checkered" size={11} color="#fff" solid />
+              <AppIcon name="flag-checkered" size={11} color="labelOnPrimary" />
             ) : (
-              <FontAwesome5 name="circle" size={10} color="#4ade80" solid />
+              <AppIcon name="circle" size={10} color="green400" />
             )}
             <Text style={styles.statusText}>
-              {isSelesai ? "Pemilihan Selesai" : "Sedang Berlangsung"}
+              {isSelesai ? 'Pemilihan Selesai' : 'Sedang Berlangsung'}
             </Text>
           </View>
         </View>
@@ -114,7 +84,7 @@ export default function HasilVotingScreen({ route, navigation }) {
       {/* Bar Chart Semua Kandidat */}
       <View style={styles.section}>
         <View style={styles.sectionTitleRow}>
-          <FontAwesome5 name="chart-bar" size={15} color="#1e293b" solid />
+          <AppIcon name="chart-bar" size={15} color="slate800" />
           <Text style={styles.sectionTitle}>Perolehan Suara</Text>
         </View>
         {kandidat.map((k, idx) => (
@@ -129,19 +99,16 @@ export default function HasilVotingScreen({ route, navigation }) {
 
       {/* Keterangan Anonimitas */}
       <View style={styles.anonBox}>
-        <FontAwesome5 name="lock" size={18} color="#64748b" solid />
+        <AppIcon name="lock" size={18} color="slate500" />
         <Text style={styles.anonText}>
-          Identitas pemilih dirahasiakan. Hasil ini hanya menampilkan jumlah
-          suara tanpa informasi siapa yang memilih siapa.
+          Identitas pemilih dirahasiakan. Hasil ini hanya menampilkan jumlah suara tanpa informasi
+          siapa yang memilih siapa.
         </Text>
       </View>
 
-      <TouchableOpacity
-        style={styles.btnBack2}
-        onPress={() => navigation.goBack()}
-      >
+      <TouchableOpacity style={styles.btnBack2} onPress={() => navigation.goBack()}>
         <View style={styles.btnBack2Row}>
-          <FontAwesome5 name="arrow-left" size={13} color="#475569" solid />
+          <AppIcon name="arrow-left" size={13} color="slate600" />
           <Text style={styles.btnBack2Text}>Kembali ke Daftar Pemilihan</Text>
         </View>
       </TouchableOpacity>
@@ -153,7 +120,7 @@ export default function HasilVotingScreen({ route, navigation }) {
 
 // Bar animasi per kandidat — 🏆 intentionally kept as emoji for winner
 function BarRow({ kandidat, color, isPemenang }) {
-  const widthAnim = useRef(new Animated.Value(0)).current;
+  const [widthAnim] = useState(() => new Animated.Value(0));
   const persen = kandidat.persentase ?? 0;
 
   useEffect(() => {
@@ -163,7 +130,7 @@ function BarRow({ kandidat, color, isPemenang }) {
       delay: kandidat.peringkat * 100,
       useNativeDriver: false,
     }).start();
-  }, []);
+  }, [widthAnim, persen, kandidat.peringkat]);
 
   return (
     <View style={[styles.barRow, isPemenang && styles.barRowWinner]}>
@@ -180,7 +147,7 @@ function BarRow({ kandidat, color, isPemenang }) {
               {
                 width: widthAnim.interpolate({
                   inputRange: [0, 1],
-                  outputRange: ["0%", "100%"],
+                  outputRange: ['0%', '100%'],
                 }),
               },
             ]}
@@ -203,197 +170,3 @@ function StatBox({ nilai, label }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f0f4ff" },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 14,
-    padding: 32,
-    backgroundColor: "#f0f4ff",
-  },
-  loadingText: { color: "#94a3b8", fontSize: 14 },
-  errorTitle: { fontSize: 18, fontWeight: "700", color: "#1e293b" },
-  errorMsg: { fontSize: 14, color: "#64748b", textAlign: "center" },
-  btnBack: {
-    backgroundColor: "#1a56db",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginTop: 8,
-  },
-  btnBackRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  btnBackText: { color: "#fff", fontWeight: "600" },
-
-  header: {
-    backgroundColor: "#1a56db",
-    paddingTop: 60,
-    paddingBottom: 28,
-    paddingHorizontal: 24,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    gap: 6,
-  },
-  headerLabel: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "rgba(255,255,255,0.65)",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  headerTitle: { fontSize: 20, fontWeight: "800", color: "#fff" },
-  statusBadge: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 20,
-    marginTop: 4,
-  },
-  badgeSelesai: { backgroundColor: "rgba(255,255,255,0.2)" },
-  badgeAktif: { backgroundColor: "rgba(74,222,128,0.25)" },
-  statusBadgeRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  statusText: { fontSize: 12, fontWeight: "700", color: "#fff" },
-
-  totalBox: {
-    alignItems: "center",
-    paddingVertical: 24,
-    backgroundColor: "#fff",
-    margin: 20,
-    borderRadius: 20,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(0,0,0,0.08)",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.07,
-    elevation: 2,
-  },
-  totalAngka: { fontSize: 48, fontWeight: "900", color: "#1a56db" },
-  totalLabel: {
-    fontSize: 14,
-    color: "#94a3b8",
-    fontWeight: "600",
-    marginTop: 2,
-  },
-
-  // Pemenang
-  pemenangCard: {
-    margin: 20,
-    marginTop: 0,
-    backgroundColor: "#fff",
-    borderRadius: 24,
-    padding: 28,
-    alignItems: "center",
-    gap: 6,
-    borderWidth: 2,
-    borderColor: "#fbbf24",
-    shadowColor: "#f59e0b",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.11,
-    elevation: 4,
-  },
-  pemenangMahkota: { fontSize: 44, marginBottom: 4 },
-  pemenangLabel: {
-    fontSize: 11,
-    fontWeight: "800",
-    color: "#f59e0b",
-    letterSpacing: 2,
-  },
-  pemenangNama: {
-    fontSize: 26,
-    fontWeight: "900",
-    color: "#1e293b",
-    textAlign: "center",
-  },
-  pemenangPosisi: { fontSize: 13, color: "#64748b" },
-  pemenangStats: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 12,
-    gap: 20,
-  },
-  statDivider: { width: 1, height: 36, backgroundColor: "#e2e8f0" },
-  statBox: { alignItems: "center", gap: 2 },
-  statNilai: { fontSize: 22, fontWeight: "800", color: "#1a56db" },
-  statLabel: { fontSize: 11, color: "#94a3b8", fontWeight: "600" },
-
-  // Chart
-  section: { paddingHorizontal: 20, paddingBottom: 0 },
-  sectionTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#1e293b",
-  },
-
-  barRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(0,0,0,0.08)",
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    elevation: 1,
-  },
-  barRowWinner: {
-    borderWidth: 2,
-    borderColor: "#fbbf24",
-    backgroundColor: "#fffbeb",
-  },
-  barLeft: { flex: 1, gap: 8 },
-  barHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  barNama: { fontSize: 15, fontWeight: "700", color: "#1e293b", flex: 1 },
-  winnerTag: { fontSize: 11, fontWeight: "700", color: "#d97706" },
-  barTrack: {
-    height: 10,
-    backgroundColor: "#f1f5f9",
-    borderRadius: 5,
-    overflow: "hidden",
-  },
-  barFill: { height: "100%", borderRadius: 5 },
-  barRight: { alignItems: "flex-end", gap: 2, minWidth: 60 },
-  barPersen: { fontSize: 18, fontWeight: "800" },
-  barSuara: { fontSize: 11, color: "#94a3b8" },
-
-  // Anonimitas
-  anonBox: {
-    margin: 20,
-    backgroundColor: "#f8fafc",
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: "row",
-    gap: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(0,0,0,0.08)",
-    alignItems: "flex-start",
-  },
-  anonText: { flex: 1, fontSize: 12, color: "#64748b", lineHeight: 18 },
-
-  btnBack2: {
-    marginHorizontal: 20,
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    padding: 16,
-    alignItems: "center",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(0,0,0,0.08)",
-  },
-  btnBack2Row: { flexDirection: "row", alignItems: "center", gap: 8 },
-  btnBack2Text: { color: "#475569", fontWeight: "600", fontSize: 14 },
-});

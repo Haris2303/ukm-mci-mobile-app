@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing } from '../../theme/theme';
+
+import { colors, spacing } from '@theme/theme';
 
 export default function ScreenHeader({ title, subtitle, backgroundColor, children, style }) {
   return (
@@ -29,6 +30,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 13,
-    color: 'rgba(255,255,255,0.75)',
+    color: colors.whiteAlpha75,
   },
 });

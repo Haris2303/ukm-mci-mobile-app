@@ -1,7 +1,8 @@
+import { FontAwesome5 } from '@expo/vector-icons';
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { FontAwesome5 } from '@expo/vector-icons';
-import { colors, spacing } from '../../../theme/theme';
+
+import { colors, spacing } from '@theme/theme';
 
 export default function EmptyState({ iconName, title, description, style }) {
   return (

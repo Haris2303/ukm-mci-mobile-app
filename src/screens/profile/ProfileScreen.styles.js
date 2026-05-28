@@ -1,0 +1,198 @@
+import { StyleSheet } from 'react-native';
+
+import { colors } from '@theme/colors';
+
+export const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.appBackground },
+
+  scrollContent: { paddingHorizontal: 20, paddingTop: 28 },
+
+  // ── Avatar section ───────────────────────────────────────────────
+  avatarSection: { alignItems: 'center', gap: 6, marginBottom: 20 },
+  avatarWrapper: { position: 'relative', marginBottom: 8 },
+  avatarBorder: {
+    borderWidth: 4,
+    borderColor: colors.primary,
+  },
+  editBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: colors.appBackground,
+  },
+  profileName: { fontSize: 22, fontWeight: '800', color: colors.infoText, textAlign: 'center' },
+  profileEmail: { fontSize: 13, color: colors.slate500, marginTop: 2 },
+  memberIdBadge: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    borderRadius: 20,
+    marginTop: 6,
+  },
+  memberIdText: { color: colors.labelOnPrimary, fontSize: 12, fontWeight: '800', letterSpacing: 1 },
+  roleBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: colors.successBg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.successBorder,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
+    marginTop: 4,
+  },
+  roleDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.successIconBg },
+  roleBadgeText: { fontSize: 12, fontWeight: '600', color: colors.successText },
+
+  // ── Action buttons ────────────────────────────────────────────────
+  editAvatarBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    elevation: 2,
+  },
+  editAvatarBtnLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  editAvatarIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.infoBg,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  editPasswordIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.warningBg,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  editAvatarBtnText: { fontSize: 15, fontWeight: '700', color: colors.slate800 },
+
+  // ── ID Card button ────────────────────────────────────────────────
+  idCardBtn: {
+    marginBottom: 24,
+    borderRadius: 18,
+    overflow: 'hidden',
+    shadowColor: colors.brand,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.11,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  idCardBtnGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 18,
+  },
+  idCardBtnLeft: { flexDirection: 'row', alignItems: 'center', gap: 14, flex: 1 },
+  idCardIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: colors.whiteAlpha20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  idCardBtnTitle: { fontSize: 16, fontWeight: '800', color: colors.labelOnPrimary },
+  idCardBtnSub: { fontSize: 11, color: colors.whiteAlpha80, marginTop: 2 },
+
+  // ── Section header ────────────────────────────────────────────────
+  sectionHeader: { marginBottom: 12 },
+  sectionTitle: { fontSize: 15, fontWeight: '800', color: colors.slate800 },
+
+  // ── Loading / error ───────────────────────────────────────────────
+  loadingBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: colors.surface,
+    borderRadius: 14,
+    padding: 20,
+    marginBottom: 20,
+  },
+  loadingSmall: { fontSize: 13, color: colors.slate400 },
+  errorBox: {
+    backgroundColor: colors.warningBg,
+    borderRadius: 14,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.warningBorder,
+  },
+  errorSmall: { fontSize: 13, color: colors.warningText },
+  retrySmall: { fontSize: 13, fontWeight: '700', color: colors.brand },
+
+  // ── Biodata card ──────────────────────────────────────────────────
+  bioCard: {
+    backgroundColor: colors.surface,
+    borderRadius: 18,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+    padding: 6,
+    marginBottom: 20,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.07,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  bioRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
+  bioIconBox: { width: 28, alignItems: 'center', justifyContent: 'center' },
+  bioContent: { flex: 1 },
+  bioLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.slate400,
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+  },
+  bioValue: { fontSize: 14, fontWeight: '600', color: colors.slate800, marginTop: 2 },
+  bioDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.neutral200,
+    marginHorizontal: 14,
+  },
+
+  // ── Logout ────────────────────────────────────────────────────────
+  btnLogout: {
+    backgroundColor: colors.surface,
+    borderRadius: 14,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.red200,
+  },
+  btnLogoutText: { fontSize: 15, fontWeight: '600', color: colors.errorAccent },
+});

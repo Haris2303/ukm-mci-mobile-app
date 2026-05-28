@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, radius, shadow, spacing } from '../../theme/theme';
+
+import { colors, radius, shadow, spacing } from '@theme/theme';
 
 /**
  * ListSection — iOS Settings-style grouped list.
@@ -20,20 +21,13 @@ import { colors, radius, shadow, spacing } from '../../theme/theme';
 export default function ListSection({ header, footer, style, children }) {
   return (
     <View style={styles.wrapper}>
-      {header ? (
-        <Text style={styles.header}>{header.toUpperCase()}</Text>
-      ) : null}
+      {header ? <Text style={styles.header}>{header.toUpperCase()}</Text> : null}
 
-      <View
-        style={[styles.card, style]}
-        experimental_continuousCorners={true}
-      >
+      <View style={[styles.card, style]} experimental_continuousCorners={true}>
         {children}
       </View>
 
-      {footer ? (
-        <Text style={styles.footer}>{footer}</Text>
-      ) : null}
+      {footer ? <Text style={styles.footer}>{footer}</Text> : null}
     </View>
   );
 }

@@ -1,7 +1,8 @@
+import { FontAwesome5 } from '@expo/vector-icons';
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { FontAwesome5 } from '@expo/vector-icons';
-import { colors, spacing } from '../../theme/theme';
+
+import { colors, spacing } from '@theme/theme';
 
 /**
  * ListItem — iOS Settings-style list row.
@@ -31,9 +32,7 @@ export default function ListItem({
   disabled = false,
 }) {
   const Wrapper = onPress ? TouchableOpacity : View;
-  const wrapperProps = onPress
-    ? { onPress, activeOpacity: 0.6, disabled }
-    : {};
+  const wrapperProps = onPress ? { onPress, activeOpacity: 0.6, disabled } : {};
 
   return (
     <Wrapper style={styles.row} {...wrapperProps}>
@@ -70,15 +69,13 @@ export default function ListItem({
         {/* ── Right side ─────────────────── */}
         <View style={styles.right}>
           {value ? (
-            <Text style={styles.value} numberOfLines={1}>{value}</Text>
+            <Text style={styles.value} numberOfLines={1}>
+              {value}
+            </Text>
           ) : null}
           {rightElement ?? null}
           {onPress && !rightElement ? (
-            <FontAwesome5
-              name="chevron-right"
-              size={11}
-              color={colors.labelTertiary}
-            />
+            <FontAwesome5 name="chevron-right" size={11} color={colors.labelTertiary} />
           ) : null}
         </View>
       </View>
@@ -130,7 +127,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.1,
   },
   titleDangerous: { color: colors.systemRed },
-  titleDisabled:  { color: colors.labelSecondary },
+  titleDisabled: { color: colors.labelSecondary },
   subtitle: {
     fontSize: 13,
     color: colors.labelSecondary,

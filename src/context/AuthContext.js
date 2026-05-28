@@ -1,17 +1,8 @@
 // src/context/AuthContext.js
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-import {
-  getStoredUser,
-  isLoggedIn,
-  logout as apiLogout,
-} from "../services/api";
-import { setSignOutHandler } from "../services/apiClient";
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+
+import { getStoredUser, isLoggedIn, logout as apiLogout } from '../services/api';
+import { setSignOutHandler } from '../services/apiClient';
 
 const AuthContext = createContext(null);
 

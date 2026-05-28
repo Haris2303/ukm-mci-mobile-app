@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { colors, spacing } from '../../theme/theme';
+
+import { colors } from '@theme/theme';
 
 /**
  * Divider — iOS-style separator tipis.
@@ -10,9 +11,7 @@ import { colors, spacing } from '../../theme/theme';
  *   style   ViewStyle override
  */
 export default function Divider({ inset = 0, style }) {
-  return (
-    <View style={[styles.line, { marginLeft: inset }, style]} />
-  );
+  return <View style={[styles.line, { marginLeft: inset }, style]} />;
 }
 
 const styles = StyleSheet.create({

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, radius, shadow, spacing } from '../../theme/theme';
+
+import { colors, radius, shadow, spacing } from '@theme/theme';
 
 /**
  * Card — iOS-style surface dengan squircle corners & shadow minimalis.
@@ -26,12 +27,7 @@ function Card({
   borderRadius = radius.md,
   children,
 }) {
-  const cardStyle = [
-    styles.card,
-    { borderRadius },
-    shadow[shadowLevel] ?? shadow.sm,
-    style,
-  ];
+  const cardStyle = [styles.card, { borderRadius }, shadow[shadowLevel] ?? shadow.sm, style];
 
   if (onPress) {
     return (
@@ -47,10 +43,7 @@ function Card({
   }
 
   return (
-    <View
-      style={cardStyle}
-      experimental_continuousCorners={true}
-    >
+    <View style={cardStyle} experimental_continuousCorners={true}>
       <View style={[styles.content, contentStyle]}>{children}</View>
     </View>
   );
@@ -79,9 +72,9 @@ function CardBadge({ color, bgColor, style, children }) {
 }
 
 Card.Header = CardHeader;
-Card.Body   = CardBody;
+Card.Body = CardBody;
 Card.Footer = CardFooter;
-Card.Badge  = CardBadge;
+Card.Badge = CardBadge;
 
 export default Card;
 

@@ -1,19 +1,87 @@
+import { FontAwesome5 } from '@expo/vector-icons';
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { FontAwesome5 } from '@expo/vector-icons';
-import { colors, spacing, radius } from '../../../theme/theme';
 
-export default function ErrorState({ title = 'Gagal Memuat Data', message, onRetry, style }) {
+import { colors, spacing, radius } from '@theme/theme';
+
+import { useNetworkStatus } from '../../hooks/useNetworkStatus';
+
+// ── Konfigurasi per tipe error ────────────────────────────────────────────────
+const ERROR_CONFIG = {
+  'no-internet': {
+    icon: 'plug',
+    iconColor: colors.slate400,
+    title: 'Tidak Ada Koneksi',
+    message: 'Periksa koneksi internet Anda dan coba lagi.',
+  },
+  'server-error': {
+    icon: 'server',
+    iconColor: colors.errorAccent,
+    title: 'Server Bermasalah',
+    message: 'Server sedang mengalami gangguan. Coba beberapa saat lagi.',
+  },
+  'not-found': {
+    icon: 'ghost',
+    iconColor: colors.slate400,
+    title: 'Tidak Ditemukan',
+    message: 'Halaman ini tidak ada atau telah dipindahkan.',
+  },
+  generic: {
+    icon: 'frown',
+    iconColor: colors.labelSecondary,
+    title: 'Gagal Memuat Data',
+    message: null,
+  },
+};
+
+// ── Utility: klasifikasi error dari objek error ───────────────────────────────
+export function classifyError(error, isOffline = false) {
+  if (isOffline) return 'no-internet';
+  if (!error) return 'generic';
+  const msg = (error.message ?? '').toLowerCase();
+  if (msg.includes('network request failed') || msg.includes('failed to fetch')) {
+    return 'no-internet';
+  }
+  if (error.status === 404) return 'not-found';
+  if (error.status >= 500 || msg.includes('server error')) return 'server-error';
+  return 'generic';
+}
+
+// ── Komponen ──────────────────────────────────────────────────────────────────
+/**
+ * Props:
+ *   error?   Error  — objek error untuk auto-detect tipe (gunakan ini)
+ *   type?    'no-internet' | 'server-error' | 'not-found' | 'generic'
+ *   title?   string — override judul default
+ *   message? string — override pesan default
+ *   onRetry? () => void
+ *   style?   ViewStyle
+ */
+export default function ErrorState({ title, message, onRetry, style, error, type }) {
+  const { isOffline } = useNetworkStatus();
+
+  const resolvedType = type ?? classifyError(error, isOffline);
+  const config = ERROR_CONFIG[resolvedType] ?? ERROR_CONFIG.generic;
+
+  const displayTitle = title ?? config.title;
+  const displayMessage = message ?? config.message;
+
   return (
     <View style={[styles.container, style]}>
-      <FontAwesome5 name="frown" size={48} color={colors.labelSecondary} style={styles.icon} />
-      <Text style={styles.title}>{title}</Text>
-      {message && <Text style={styles.message}>{message}</Text>}
-      {onRetry && (
+      <FontAwesome5
+        name={config.icon}
+        size={48}
+        color={config.iconColor}
+        style={styles.icon}
+        solid
+      />
+      <Text style={styles.title}>{displayTitle}</Text>
+      {displayMessage ? <Text style={styles.message}>{displayMessage}</Text> : null}
+      {onRetry ? (
         <TouchableOpacity style={styles.btnRetry} onPress={onRetry} activeOpacity={0.8}>
           <Text style={styles.btnRetryText}>Coba Lagi</Text>
         </TouchableOpacity>
-      )}
+      ) : null}
     </View>
   );
 }

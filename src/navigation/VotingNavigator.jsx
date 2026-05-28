@@ -1,8 +1,9 @@
-import React from "react";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import ElectionListScreen from "../screens/voting/ElectionListScreen";
-import ElectionDetailScreen from "../screens/voting/ElectionDetailScreen";
-import HasilVotingScreen from "../screens/voting/HasilVotingScreen";
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React from 'react';
+
+import ElectionDetailScreen from '../screens/voting/ElectionDetailScreen';
+import ElectionListScreen from '../screens/voting/ElectionListScreen';
+import HasilVotingScreen from '../screens/voting/HasilVotingScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -12,14 +13,14 @@ export default function VotingNavigator() {
       screenOptions={{
         headerShown: true,
         headerStyle: {
-          backgroundColor: "#1a56db",
+          backgroundColor: '#1a56db',
         },
         headerShadowVisible: false,
-        headerTintColor: "#fff",
-        headerTitleStyle: { fontWeight: "700", fontSize: 17 },
-        headerBackTitle: "",
+        headerTintColor: '#fff',
+        headerTitleStyle: { fontWeight: '700', fontSize: 17 },
+        headerBackTitle: '',
         headerBackTitleVisible: false,
-        headerBackButtonDisplayMode: "minimal",
+        headerBackButtonDisplayMode: 'minimal',
       }}
     >
       <Stack.Screen
@@ -31,14 +32,14 @@ export default function VotingNavigator() {
         name="ElectionDetail"
         component={ElectionDetailScreen}
         options={({ route }) => ({
-          title: route.params?.judul ?? "Detail Pemilihan",
+          title: route.params?.judul ?? 'Detail Pemilihan',
           headerShown: true,
         })}
       />
       <Stack.Screen
         name="HasilVoting"
         component={HasilVotingScreen}
-        options={{ title: "Hasil Pemilihan" }}
+        options={{ title: 'Hasil Pemilihan' }}
       />
     </Stack.Navigator>
   );

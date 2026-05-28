@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, StyleSheet } from 'react-native';
-import { colors, spacing } from '../../theme/theme';
+
+import { colors, spacing } from '@theme/theme';
 
 /**
  * SectionLabel — iOS-style section header label.
