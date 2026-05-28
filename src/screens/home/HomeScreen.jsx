@@ -77,6 +77,13 @@ export default function HomeScreen({ navigation }) {
             onNavigate={handleNavigate}
           />
           <MenuItem
+            iconName="clipboard-list"
+            label="Riwayat"
+            color={MENU_ICON_COLORS.riwayat}
+            route="Riwayat"
+            onNavigate={handleNavigate}
+          />
+          <MenuItem
             iconName="coins"
             label="E-Kas"
             color={MENU_ICON_COLORS.kas}
@@ -109,13 +116,6 @@ export default function HomeScreen({ navigation }) {
             label="ID Card"
             color={MENU_ICON_COLORS.idcard}
             route="IdCard"
-            onNavigate={handleNavigate}
-          />
-          <MenuItem
-            iconName="clipboard-list"
-            label="Riwayat"
-            color={MENU_ICON_COLORS.riwayat}
-            route="Riwayat"
             onNavigate={handleNavigate}
           />
           <MenuItem
@@ -155,14 +155,6 @@ export default function HomeScreen({ navigation }) {
             </Text>
           </View>
         </View>
-      </View>
-
-      {/* ── Logout ───────────────────────────────────────── */}
-      <View style={styles.section}>
-        <TouchableOpacity style={styles.btnLogout} onPress={handleLogout}>
-          <FontAwesome5 name="sign-out-alt" size={15} color={colors.errorAccent} />
-          <Text style={styles.btnLogoutText}>Keluar dari Akun</Text>
-        </TouchableOpacity>
       </View>
 
       <View style={{ height: 30 }} />
