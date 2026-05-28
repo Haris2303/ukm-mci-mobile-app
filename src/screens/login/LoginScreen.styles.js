@@ -9,6 +9,22 @@ export const TITLE_GRADIENT = {
   end: colors.sky300, // #38bdf8
 };
 
+/** Konfigurasi warna & ikon per tipe flash */
+export const FLASH_CONFIG = {
+  error: {
+    icon: 'exclamation-circle',
+    color: colors.errorStrong,
+    bg: colors.errorBg,
+    border: colors.errorBorder,
+  },
+  warning: {
+    icon: 'exclamation-triangle',
+    color: colors.warningText,
+    bg: colors.warningBg,
+    border: colors.warningBorder,
+  },
+};
+
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -129,6 +145,24 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.5,
+  },
+
+  // ── Flash Banner ────────────────────────────────────────────────
+  flashBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    marginBottom: 20,
+  },
+  flashText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '500',
+    lineHeight: 18,
   },
 
   // ── Footer ──────────────────────────────────────────────────────
