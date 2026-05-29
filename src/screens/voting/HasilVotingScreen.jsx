@@ -1,6 +1,6 @@
 // src/screens/voting/HasilVotingScreen.jsx
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Animated, RefreshControl } from 'react-native';
 
 import { LoadingState } from '@shared/components';
 import AppIcon from 'src/components/ui/Icon';
@@ -13,7 +13,14 @@ export default function HasilVotingScreen({ route, navigation }) {
   const { id } = route.params;
 
   // ── Server state ──────────────────────────────────────────────────────────
-  const { data: hasil, isLoading, isError, error } = useHasil(id);
+  const [refreshing, setRefreshing] = useState(false);
+  const { data: hasil, isLoading, isError, error, refetch } = useHasil(id);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   // ── Guard states ──────────────────────────────────────────────────────────
   if (isLoading) return <LoadingState message="Memuat hasil pemilihan..." />;
@@ -36,26 +43,54 @@ export default function HasilVotingScreen({ route, navigation }) {
     );
   }
 
+  const isTie = hasil.is_tie;
+  const catatan = hasil.catatan;
   const pemenang = hasil.pemenang;
   const kandidat = hasil.kandidat ?? [];
   const isSelesai = hasil.election.status === 'selesai';
+  const isAktif = !isSelesai && !isTie;
+  // Tie sudah diselesaikan via musyawarah: pemenang di-set manual oleh admin
+  const isTieResolved = isTie && !!pemenang;
+
+  // Suara tertinggi saat ini — dipakai untuk highlight terdepan/seri aktif dan seri formal
+  const maxSuara = kandidat.length > 0 ? Math.max(...kandidat.map((k) => k.jumlah_suara ?? 0)) : 0;
+
+  // Berapa kandidat yang berbagi posisi teratas saat aktif
+  const leadingCount =
+    isAktif && maxSuara > 0 ? kandidat.filter((k) => (k.jumlah_suara ?? 0) === maxSuara).length : 0;
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS[0]]} />
+      }
+    >
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerLabel}>{hasil.election.posisi}</Text>
         <Text style={styles.headerTitle}>{hasil.election.judul}</Text>
-        <View style={[styles.statusBadge, isSelesai ? styles.badgeSelesai : styles.badgeAktif]}>
+        <View
+          style={[
+            styles.statusBadge,
+            isTie ? styles.badgeTie : isSelesai ? styles.badgeSelesai : styles.badgeAktif,
+          ]}
+        >
           <View style={styles.statusBadgeRow}>
-            {isSelesai ? (
-              <AppIcon name="flag-checkered" size={11} color="labelOnPrimary" />
+            {isTie ? (
+              <Text style={styles.statusText}>⚖️ Seri</Text>
+            ) : isSelesai ? (
+              <>
+                <AppIcon name="flag-checkered" size={11} color="labelOnPrimary" />
+                <Text style={styles.statusText}>Pemilihan Selesai</Text>
+              </>
             ) : (
-              <AppIcon name="circle" size={10} color="green400" />
+              <>
+                <AppIcon name="circle" size={10} color="green400" />
+                <Text style={styles.statusText}>Sedang Berlangsung</Text>
+              </>
             )}
-            <Text style={styles.statusText}>
-              {isSelesai ? 'Pemilihan Selesai' : 'Sedang Berlangsung'}
-            </Text>
           </View>
         </View>
       </View>
@@ -66,8 +101,8 @@ export default function HasilVotingScreen({ route, navigation }) {
         <Text style={styles.totalLabel}>Total Suara Sah</Text>
       </View>
 
-      {/* Pemenang (jika selesai) — 👑 intentionally kept as emoji */}
-      {isSelesai && pemenang && (
+      {/* Pemenang: normal selesai ATAU tie yang sudah resolved via musyawarah — 👑 intentionally kept as emoji */}
+      {(isSelesai || isTieResolved) && pemenang && (
         <View style={styles.pemenangCard}>
           <Text style={styles.pemenangMahkota}>👑</Text>
           <Text style={styles.pemenangLabel}>TERPILIH</Text>
@@ -78,6 +113,31 @@ export default function HasilVotingScreen({ route, navigation }) {
             <View style={styles.statDivider} />
             <StatBox nilai={`${pemenang.persentase}%`} label="Perolehan" />
           </View>
+        </View>
+      )}
+
+      {/* Banner voting masih berlangsung */}
+      {!isSelesai && !isTie && (
+        <View style={styles.bannerAktif}>
+          <AppIcon name="clock" size={18} color="blue700" />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.bannerAktifTitle}>Pemilihan Masih Berlangsung</Text>
+            <Text style={styles.bannerAktifSub}>
+              Angka di bawah adalah perolehan sementara. Pemenang baru ditetapkan setelah voting
+              ditutup.
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {/* Banner hasil sementara (hanya saat tie belum ada resolusi) */}
+      {isTie && !pemenang && (
+        <View style={styles.bannerTie}>
+          <Text style={styles.bannerTieTitle}>⚠️ Hasil Sementara</Text>
+          <Text style={styles.bannerTieSub}>
+            Pemilihan ini berakhir seri. Hasil di bawah bersifat sementara hingga ada keputusan
+            akhir dari Presidium.
+          </Text>
         </View>
       )}
 
@@ -92,10 +152,21 @@ export default function HasilVotingScreen({ route, navigation }) {
             key={k.id ?? `bar-${idx}`}
             kandidat={k}
             color={COLORS[idx % COLORS.length]}
-            isPemenang={isSelesai && idx === 0}
+            isPemenang={(isSelesai || isTieResolved) && !!pemenang && k.id === pemenang.id}
+            isTiedTop={isTie && !pemenang && (k.jumlah_suara ?? 0) === maxSuara && maxSuara > 0}
+            isLeading={isAktif && leadingCount === 1 && (k.jumlah_suara ?? 0) === maxSuara}
+            isAktifSeri={isAktif && leadingCount > 1 && (k.jumlah_suara ?? 0) === maxSuara}
           />
         ))}
       </View>
+
+      {/* Catatan dari admin (tie, musyawarah, atau keterangan lainnya) */}
+      {catatan ? (
+        <View style={styles.catatanBox}>
+          <AppIcon name="info-circle" size={16} color="amber500" />
+          <Text style={styles.catatanText}>{catatan}</Text>
+        </View>
+      ) : null}
 
       {/* Keterangan Anonimitas */}
       <View style={styles.anonBox}>
@@ -119,9 +190,16 @@ export default function HasilVotingScreen({ route, navigation }) {
 }
 
 // Bar animasi per kandidat — 🏆 intentionally kept as emoji for winner
-function BarRow({ kandidat, color, isPemenang }) {
+function BarRow({ kandidat, color, isPemenang, isTiedTop, isLeading, isAktifSeri }) {
   const [widthAnim] = useState(() => new Animated.Value(0));
   const persen = kandidat.persentase ?? 0;
+
+  const rowStyle =
+    isPemenang || isTiedTop || isAktifSeri
+      ? styles.barRowWinner
+      : isLeading
+        ? styles.barRowLeading
+        : null;
 
   useEffect(() => {
     Animated.timing(widthAnim, {
@@ -133,11 +211,13 @@ function BarRow({ kandidat, color, isPemenang }) {
   }, [widthAnim, persen, kandidat.peringkat]);
 
   return (
-    <View style={[styles.barRow, isPemenang && styles.barRowWinner]}>
+    <View style={[styles.barRow, rowStyle]}>
       <View style={styles.barLeft}>
         <View style={styles.barHeader}>
           <Text style={styles.barNama}>{kandidat.nama}</Text>
           {isPemenang && <Text style={styles.winnerTag}>🏆 Terpilih</Text>}
+          {(isTiedTop || isAktifSeri) && <Text style={styles.tieTag}>⚖️ Seri</Text>}
+          {isLeading && <Text style={styles.leadingTag}>Terdepan</Text>}
         </View>
         <View style={styles.barTrack}>
           <Animated.View

@@ -50,6 +50,20 @@ export const styles = StyleSheet.create({
   bannerSub: { fontSize: 12, color: colors.successMuted, marginTop: 2 },
   bannerDitutup: { borderColor: colors.blue300, backgroundColor: colors.infoBg },
 
+  // Tie banner
+  bannerTie: {
+    margin: 20,
+    marginBottom: 0,
+    backgroundColor: colors.warningBg,
+    borderRadius: 16,
+    padding: 16,
+    gap: 6,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.warningBorder,
+  },
+  bannerTieTitle: { fontSize: 16, fontWeight: '800', color: colors.warningText },
+  bannerTieSub: { fontSize: 13, color: colors.warningMuted, lineHeight: 19 },
+
   // Section
   section: { padding: 20, paddingBottom: 0 },
   sectionTitleRow: {

@@ -92,8 +92,9 @@ export default function ElectionDetailScreen({ route, navigation }) {
   if (isError) return <ErrorState error={error} onRetry={refetch} />;
 
   const isAktif = election.status === 'aktif';
+  const isTie = election.is_tie;
   const sudahVote = election.sudah_vote;
-  const canVote = isAktif && !sudahVote;
+  const canVote = isAktif && !sudahVote && !isTie;
 
   const selectedCandidate = election.kandidat?.find((c) => c.id === selected);
 
@@ -126,7 +127,16 @@ export default function ElectionDetailScreen({ route, navigation }) {
           </View>
         )}
 
-        {!isAktif && !sudahVote && (
+        {isTie && (
+          <View style={styles.bannerTie}>
+            <Text style={styles.bannerTieTitle}>⚖️ Hasil Pemilihan: SERI</Text>
+            {election.tie_status_label ? (
+              <Text style={styles.bannerTieSub}>{election.tie_status_label}</Text>
+            ) : null}
+          </View>
+        )}
+
+        {!isAktif && !sudahVote && !isTie && (
           <View style={[styles.bannerSudahVote, styles.bannerDitutup]}>
             <AppIcon name="flag-checkered" size={24} color="blue700" />
             <Text style={[styles.bannerTitle, styles.iconPrimary]}>Voting Telah Ditutup</Text>

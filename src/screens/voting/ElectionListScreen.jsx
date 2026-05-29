@@ -34,7 +34,9 @@ export default function ElectionListScreen({ navigation }) {
   // ── Stable renderItem ─────────────────────────────────────────────────────
   const renderItem = useCallback(
     ({ item }) => {
-      const cfg = STATUS_CONFIG[item.status] ?? STATUS_CONFIG.draft;
+      const cfg = item.is_tie
+        ? STATUS_CONFIG.tie
+        : (STATUS_CONFIG[item.status] ?? STATUS_CONFIG.draft);
       const isAktif = item.status === 'aktif';
 
       return (
@@ -85,7 +87,9 @@ export default function ElectionListScreen({ navigation }) {
                     ? 'Lihat Hasil →'
                     : isAktif
                       ? 'Pilih Sekarang →'
-                      : 'Lihat Detail →'}
+                      : item.is_tie
+                        ? 'Lihat Seri →'
+                        : 'Lihat Detail →'}
                 </Text>
               </View>
             </View>

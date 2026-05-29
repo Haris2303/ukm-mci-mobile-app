@@ -8,6 +8,7 @@ export const STATUS_CONFIG = {
   aktif: { label: 'Berlangsung', color: colors.successMuted, bg: colors.green100 },
   selesai: { label: 'Selesai', color: colors.blue700, bg: colors.blue100 },
   draft: { label: 'Akan Datang', color: colors.warningText, bg: colors.warningBg },
+  tie: { label: '⚖️ Seri', color: colors.amber600, bg: colors.warningBg },
 };
 
 export const styles = StyleSheet.create({
