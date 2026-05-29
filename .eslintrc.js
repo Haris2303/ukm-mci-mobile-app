@@ -39,6 +39,12 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'prettier',
   ],
+  overrides: [
+    {
+      files: ['**/__tests__/**/*.{js,jsx}', '**/*.test.{js,jsx}'],
+      env: { jest: true },
+    },
+  ],
   rules: {
     // ─── Vars ────────────────────────────────────────────────────────────────
     'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
