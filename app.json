@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "ukm-mci-app",
+    "name": "UKM MCI App",
     "slug": "ukm-mci-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/brand.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -21,20 +21,21 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/brand.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.READ_EXTERNAL_STORAGE"
-      ]
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.haris_expo.ukmmciapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-barcode-scanner",
       [
         "expo-camera",
         {
@@ -50,6 +51,11 @@
         }
       ],
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f6919cd5-f25f-4660-b78d-6d6abd5cc89b"
+      }
+    }
   }
 }
