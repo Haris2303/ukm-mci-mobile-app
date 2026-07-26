@@ -126,66 +126,82 @@ export default function EditAvatarScreen({ navigation }) {
 
   // ── Pick from gallery ─────────────────────────────────────────────────────
   const pickFromGallery = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Izin Diperlukan', 'Izin galeri diperlukan untuk memilih foto.');
-      return;
-    }
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Izin Diperlukan', 'Izin galeri diperlukan untuk memilih foto.');
+        return;
+      }
 
-    if (!profile?.can_upload_photo) {
-      const date = profile?.cooldown_selesai
-        ? new Date(profile.cooldown_selesai).toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-          })
-        : '14 hari dari upload terakhir';
-      Alert.alert('Cooldown Aktif', `Foto baru dapat diunggah mulai ${date}.`);
-      return;
-    }
+      if (!profile?.can_upload_photo) {
+        const date = profile?.cooldown_selesai
+          ? new Date(profile.cooldown_selesai).toLocaleDateString('id-ID', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })
+          : '14 hari dari upload terakhir';
+        Alert.alert('Cooldown Aktif', `Foto baru dapat diunggah mulai ${date}.`);
+        return;
+      }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.85,
-    });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.85,
+      });
 
-    if (!result.canceled && result.assets?.[0]) {
-      const asset = result.assets[0];
-      setPendingAvatar({ type: 'photo', uri: asset.uri, mimeType: asset.mimeType ?? 'image/jpeg' });
+      if (!result.canceled && result.assets?.[0]) {
+        const asset = result.assets[0];
+        setPendingAvatar({
+          type: 'photo',
+          uri: asset.uri,
+          mimeType: asset.mimeType ?? 'image/jpeg',
+        });
+      }
+    } catch (err) {
+      Alert.alert('Gagal Membuka Galeri', err?.message ?? 'Terjadi kesalahan saat membuka galeri.');
     }
   };
 
   // ── Pick from camera ──────────────────────────────────────────────────────
   const pickFromCamera = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Izin Diperlukan', 'Izin kamera diperlukan untuk mengambil foto.');
-      return;
-    }
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Izin Diperlukan', 'Izin kamera diperlukan untuk mengambil foto.');
+        return;
+      }
 
-    if (!profile?.can_upload_photo) {
-      const date = profile?.cooldown_selesai
-        ? new Date(profile.cooldown_selesai).toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-          })
-        : '14 hari dari upload terakhir';
-      Alert.alert('Cooldown Aktif', `Foto baru dapat diunggah mulai ${date}.`);
-      return;
-    }
+      if (!profile?.can_upload_photo) {
+        const date = profile?.cooldown_selesai
+          ? new Date(profile.cooldown_selesai).toLocaleDateString('id-ID', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })
+          : '14 hari dari upload terakhir';
+        Alert.alert('Cooldown Aktif', `Foto baru dapat diunggah mulai ${date}.`);
+        return;
+      }
 
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.85,
-    });
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.85,
+      });
 
-    if (!result.canceled && result.assets?.[0]) {
-      const asset = result.assets[0];
-      setPendingAvatar({ type: 'photo', uri: asset.uri, mimeType: asset.mimeType ?? 'image/jpeg' });
+      if (!result.canceled && result.assets?.[0]) {
+        const asset = result.assets[0];
+        setPendingAvatar({
+          type: 'photo',
+          uri: asset.uri,
+          mimeType: asset.mimeType ?? 'image/jpeg',
+        });
+      }
+    } catch (err) {
+      Alert.alert('Gagal Membuka Kamera', err?.message ?? 'Terjadi kesalahan saat membuka kamera.');
     }
   };
 
