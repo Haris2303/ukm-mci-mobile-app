@@ -4,4 +4,4 @@
 // Cek dengan perintah "ipconfig" di CMD
 // Contoh: 'http://192.168.1.5:8000/api'
 // export const BASE_URL = 'https://ukm-mci-digitalisasi.test/api';
-export const BASE_URL = 'https://ari-macroptic-fissiparously.ngrok-free.dev/api';
+export const BASE_URL = 'https://ukm-mci.cloud/api';
