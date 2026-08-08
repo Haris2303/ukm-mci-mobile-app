@@ -6,6 +6,8 @@
  *   - signIn menyimpan avatar bila userData.avatar ada
  *   - signOut menghapus user dan avatar dari state
  *   - signOut memanggil apiLogout
+ *   - signOut membersihkan cache React Query (agar data user lama tidak
+ *     nyangkut saat user lain login di sesi yang sama)
  *   - Saat mount: load user dari storage jika sudah login
  *   - Saat mount: tidak set user jika belum login
  */
@@ -29,6 +31,11 @@ jest.mock('@services/api', () => ({
 jest.mock('@core/api/handleResponse', () => ({
   handleResponse: jest.fn(),
   setSignOutHandler: jest.fn(),
+}));
+
+const mockQueryClientClear = jest.fn();
+jest.mock('@core/query/queryClient', () => ({
+  queryClient: { clear: (...args) => mockQueryClientClear(...args) },
 }));
 
 // ── Helper wrapper ─────────────────────────────────────────────────────────
@@ -112,6 +119,19 @@ describe('AuthContext', () => {
       });
 
       expect(mockApiLogout).toHaveBeenCalledTimes(1);
+    });
+
+    it('membersihkan cache React Query supaya data user lama tidak nyangkut', async () => {
+      const { result } = renderHook(() => useAuth(), { wrapper });
+
+      await act(async () => {
+        result.current.signIn(mockUser);
+      });
+      await act(async () => {
+        await result.current.signOut();
+      });
+
+      expect(mockQueryClientClear).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -5,6 +5,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { View, Text, ScrollView, RefreshControl } from 'react-native';
 
+import parseFaIconName from '@core/utils/parseFaIcon';
+
 import { LoadingState, ErrorState } from '@shared/components';
 import AppIcon from 'src/components/ui/Icon';
 
@@ -13,14 +15,6 @@ import { useProkerDetail, prokerKeys } from '@features/proker/hooks/useProker';
 import { colors } from '@theme/colors';
 
 import { styles } from './ProkerDetailScreen.styles';
-
-function parseFaIconName(faClass, fallback = 'tag') {
-  if (!faClass) return fallback;
-  const m = faClass.match(/fa-(?:solid|regular|brands)\s+fa-([^\s]+)/);
-  if (m) return m[1];
-  const s = faClass.match(/^fa-([^\s]+)/);
-  return s ? s[1] : fallback;
-}
 
 export default function ProkerDetailScreen({ route, navigation }) {
   const { id } = route.params;

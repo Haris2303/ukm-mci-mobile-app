@@ -73,12 +73,6 @@ export default function ProfileScreen({ navigation }) {
           <Text style={styles.profileName}>{profileUser?.name ?? '—'}</Text>
           <Text style={styles.profileEmail}>{profileUser?.email ?? '—'}</Text>
 
-          {idCard?.member_id && (
-            <View style={styles.memberIdBadge}>
-              <Text style={styles.memberIdText}>{idCard.member_id}</Text>
-            </View>
-          )}
-
           {profileUser?.role_label && (
             <View style={styles.roleBadge}>
               <View style={styles.roleDot} />
@@ -135,11 +129,7 @@ export default function ProfileScreen({ navigation }) {
               </View>
               <View>
                 <Text style={styles.idCardBtnTitle}>ID Card Saya</Text>
-                <Text style={styles.idCardBtnSub}>
-                  {idCard?.member_id
-                    ? `Lihat kartu anggota · ${idCard.member_id}`
-                    : 'Lihat kartu anggota digital'}
-                </Text>
+                <Text style={styles.idCardBtnSub}>{'Lihat kartu anggota digital'}</Text>
               </View>
             </View>
             <FontAwesome5 name="chevron-right" size={18} color={colors.whiteAlpha60} />
@@ -186,12 +176,6 @@ export default function ProfileScreen({ navigation }) {
               label="Role"
               value={profileUser?.role_label ?? profileUser?.role}
             />
-            {idCard?.member_id && (
-              <>
-                <View style={styles.bioDivider} />
-                <BioRow iconName="id-badge" label="Member ID" value={idCard.member_id} />
-              </>
-            )}
           </View>
         )}
 

@@ -1,6 +1,8 @@
 import React, { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, FlatList, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 
+import parseFaIconName from '@core/utils/parseFaIcon';
+
 import { LoadingState, ErrorState } from '@shared/components';
 import AppIcon from 'src/components/ui/Icon';
 
@@ -170,14 +172,6 @@ function EmptyPage({ filter }) {
       </Text>
     </View>
   );
-}
-
-function parseFaIconName(faClass, fallback = 'tag') {
-  if (!faClass) return fallback;
-  const m = faClass.match(/fa-(?:solid|regular|brands)\s+fa-([^\s]+)/);
-  if (m) return m[1];
-  const s = faClass.match(/^fa-([^\s]+)/);
-  return s ? s[1] : fallback;
 }
 
 // ── ProkerCard (memo — re-render hanya saat data proker-nya berubah) ──────────

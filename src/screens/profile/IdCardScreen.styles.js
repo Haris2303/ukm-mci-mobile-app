@@ -6,8 +6,6 @@ export const CARD_WIDTH = 300;
 
 /** Gradient header ID Card saat ada background image (mode gelap) */
 export const CARD_GRADIENT_BG = [colors.blackAlpha45, colors.border];
-/** Gradient header ID Card default (mode biru) */
-export const CARD_GRADIENT_BLUE = [colors.brand, colors.brandLight];
 /** Gradient foto inisial */
 export const PHOTO_GRADIENT = [colors.brand, colors.brandLight];
 

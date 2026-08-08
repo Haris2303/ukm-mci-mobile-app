@@ -1,8 +1,9 @@
 // src/screens/IdCardScreen.jsx
 import { FontAwesome5 } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Sharing from 'expo-sharing';
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -14,30 +15,46 @@ import {
   Linking,
   Platform,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import ViewShot from 'react-native-view-shot';
 
 import { parseAvatar } from '@components/AvatarDisplay';
+import { DEFAULT_TEMPLATE_COLORS } from '@services/idCardApi';
 import { LoadingState, ErrorState } from '@shared/components';
 
 import { useIdCard } from '@features/profile/hooks/useProfile';
 
 import { colors } from '@theme/colors';
 
-import {
-  styles,
-  CARD_GRADIENT_BG,
-  CARD_GRADIENT_BLUE,
-  PHOTO_GRADIENT,
-} from './IdCardScreen.styles';
+import { styles, CARD_GRADIENT_BG, PHOTO_GRADIENT } from './IdCardScreen.styles';
 
 export default function IdCardScreen({ navigation }) {
   const [sharing, setSharing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const cardRef = useRef();
 
   // ── Server state ──────────────────────────────────────────────────────────
   const { data, isLoading, isError, error, refetch } = useIdCard();
+
+  // ── Focus refetch — supaya template warna langsung update begitu superadmin
+  // ganti template di backend dan user buka/kembali ke layar ini, tanpa harus
+  // pull-to-refresh manual. staleTime idCard (30 menit) sengaja diabaikan di sini.
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
+
+  // ── Pull-to-refresh ───────────────────────────────────────────────────────
+  // refetch() mengganti data query apa adanya (termasuk `template`) — tidak ada
+  // memoization tambahan di sisi client yang bisa membuat warna template lama nyangkut.
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   // ── Share ─────────────────────────────────────────────────────────────────
   // Tidak dibungkus useCallback — React Compiler menangani memoization otomatis.
@@ -99,7 +116,13 @@ export default function IdCardScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brand} />
+        }
+      >
         {/* Card */}
         <View style={styles.cardShadow}>
           <ViewShot ref={cardRef} options={{ format: 'png', quality: 1 }}>
@@ -140,17 +163,21 @@ export default function IdCardScreen({ navigation }) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// ID CARD — Mode A: background image | Mode B: gradient biru
+// ID CARD — Mode A: background image | Mode B: template warna aktif
 // ═══════════════════════════════════════════════════════════
 function IdCard({ data, inisial, tahun }) {
   const { user, avatar, background_image_url: bgUrl, profile_url: profileUrl } = data;
   const hb = !!bgUrl;
   const parsed = parseAvatar(avatar);
 
+  // Warna template dari backend — fallback ke biru-klasik hanya jika
+  // response tidak menyertakan `template` sama sekali.
+  const tpl = data.template?.colors ?? DEFAULT_TEMPLATE_COLORS;
+
   // ── Header ────────────────────────────────────────────────
   const header = (
     <LinearGradient
-      colors={hb ? CARD_GRADIENT_BG : CARD_GRADIENT_BLUE}
+      colors={hb ? CARD_GRADIENT_BG : tpl.header_gradient}
       start={{ x: 0, y: 0 }}
       end={hb ? { x: 0, y: 1 } : { x: 1, y: 0 }}
       style={styles.cardHeader}
@@ -160,13 +187,13 @@ function IdCard({ data, inisial, tahun }) {
       </View>
       <View style={{ flex: 1 }}>
         <Text style={styles.orgLabel}>Unit Kegiatan Mahasiswa</Text>
-        <Text style={styles.orgTitle}>MCI — Mahasiswa Creative &amp; Innovation</Text>
+        <Text style={styles.orgTitle}>MCI — Media Creative Informations</Text>
       </View>
     </LinearGradient>
   );
 
   // ── Photo ─────────────────────────────────────────────────
-  const photoStyle = [styles.photo, hb && styles.photoBg];
+  const photoStyle = [styles.photo, hb ? styles.photoBg : { borderColor: tpl.accent }];
   let photoEl;
   if (parsed.type === 'photo') {
     photoEl = <Image source={{ uri: parsed.url }} style={photoStyle} resizeMode="cover" />;
@@ -178,7 +205,7 @@ function IdCard({ data, inisial, tahun }) {
     );
   } else {
     photoEl = (
-      <LinearGradient colors={PHOTO_GRADIENT} style={photoStyle}>
+      <LinearGradient colors={hb ? PHOTO_GRADIENT : tpl.header_gradient} style={photoStyle}>
         <Text style={styles.inisial}>{inisial}</Text>
       </LinearGradient>
     );
@@ -192,31 +219,51 @@ function IdCard({ data, inisial, tahun }) {
       </View>
 
       <View style={styles.infoSection}>
-        <Text style={[styles.cardName, hb && styles.cardNameBg]} numberOfLines={2}>
+        <Text
+          style={[styles.cardName, hb ? styles.cardNameBg : { color: tpl.text_color }]}
+          numberOfLines={2}
+        >
           {user?.name ?? '—'}
         </Text>
 
-        <View style={[styles.rolePill, hb && styles.rolePillBg]}>
-          <Text style={[styles.rolePillText, hb && styles.rolePillTextBg]}>
+        <View
+          testID="id-card-badge"
+          style={[
+            styles.rolePill,
+            hb
+              ? styles.rolePillBg
+              : { backgroundColor: tpl.badge_background, borderColor: tpl.badge_border },
+          ]}
+        >
+          <Text
+            style={[styles.rolePillText, hb ? styles.rolePillTextBg : { color: tpl.badge_text }]}
+          >
             {user?.role_label ?? user?.role ?? 'Anggota'}
           </Text>
         </View>
 
         <View style={[styles.divisiRow, hb && styles.divisiRowBg]}>
           <Text style={[styles.divisiLabel, hb && styles.divisiLabelBg]}>Divisi</Text>
-          <Text style={[styles.divisiValue, hb && styles.divisiValueBg]}>
+          <Text style={[styles.divisiValue, hb ? styles.divisiValueBg : { color: tpl.text_color }]}>
             {user?.divisi ?? '—'}
           </Text>
         </View>
       </View>
 
-      <View style={[styles.cardDivider, hb && styles.cardDividerBg]} />
+      <View
+        style={[styles.cardDivider, hb ? styles.cardDividerBg : { backgroundColor: tpl.divider }]}
+      />
 
       <View style={styles.qrWrap}>
         <Text style={[styles.scanLabel, hb && styles.scanLabelBg]}>Scan untuk verifikasi</Text>
         <View style={[styles.qrBox, hb && styles.qrBoxBg]}>
           {profileUrl ? (
-            <QRCode value={profileUrl} size={110} backgroundColor="white" color={colors.slate800} />
+            <QRCode
+              value={profileUrl}
+              size={110}
+              backgroundColor="white"
+              color={hb ? colors.slate800 : tpl.accent}
+            />
           ) : (
             <View style={styles.qrEmpty}>
               <Text style={styles.qrEmptyText}>QR</Text>
@@ -237,6 +284,7 @@ function IdCard({ data, inisial, tahun }) {
   if (hb) {
     return (
       <ImageBackground
+        testID="id-card"
         source={{ uri: bgUrl }}
         style={styles.card}
         resizeMode="cover"
@@ -248,9 +296,15 @@ function IdCard({ data, inisial, tahun }) {
     );
   }
 
-  // ── Mode B: gradient template ──────────────────────────────
+  // ── Mode B: template warna aktif dari backend ────────────────
   return (
-    <View style={styles.card}>
+    <View
+      testID="id-card"
+      style={[
+        styles.card,
+        { backgroundColor: tpl.card_background, borderColor: tpl.border, borderWidth: 1 },
+      ]}
+    >
       {header}
       {body}
     </View>

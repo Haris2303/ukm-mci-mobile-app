@@ -1,6 +1,8 @@
 // src/context/AuthContext.js
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
+import { queryClient } from '@core/query/queryClient';
+
 import { getStoredUser, isLoggedIn, logout as apiLogout } from '../services/api';
 import { setSignOutHandler } from '../services/apiClient';
 
@@ -36,6 +38,10 @@ export function AuthProvider({ children }) {
     await apiLogout();
     setUser(null);
     setAvatar(null);
+    // Buang semua cache React Query — tanpa ini, layar yang belum unmount
+    // (atau di-mount lagi sebelum staleTime habis) bisa sempat menampilkan
+    // data user sebelumnya begitu user lain login di sesi yang sama.
+    queryClient.clear();
   }, []);
 
   // Daftarkan signOut ke central handler agar 401 bisa auto-redirect ke login
